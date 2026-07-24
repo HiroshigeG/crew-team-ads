@@ -1,0 +1,5 @@
+# Crew Team Ads — dependencies
+crewai[anthropic,google-genai]>=0.80.0
+python-dotenv>=1.0.0
+# Grok (xAI) is reached through litellm, which CrewAI already bundles.
+# Set XAI_API_KEY in your .env.
