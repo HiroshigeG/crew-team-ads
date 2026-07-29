@@ -116,3 +116,46 @@ def test_roster_llm_cache_and_invalidation():
     cd_llm = r.llm("cd")
     assert isinstance(cd_llm, core.ClaudeLLM)
     assert cd_llm.model == "claude-opus-5"
+
+
+# ─────── Task 3: prompt builder + head_speak ────────────────────────────
+
+def _mk_head(creativity=5):
+    return core.Head(key="cd", name="Creative Director", avatar="🎨",
+                     color="#ff8700", model_id="anthropic/claude-opus-5",
+                     persona=core.ROLE_PERSONAS["cd"], creativity=creativity)
+
+
+def test_build_turn_prompt_neutral_has_no_creativity_block():
+    p = core.build_turn_prompt(_mk_head(5), "T", "go")
+    assert "CREATIVE RISK SETTING" not in p
+    assert core.ROOM_RULES in p and "Speak as Creative Director" in p
+
+
+def test_build_turn_prompt_max_has_block_and_private_preamble():
+    p = core.build_turn_prompt(_mk_head(10), "T", "go", private=True)
+    assert "CREATIVE RISK SETTING" in p and "MAX" in p
+    assert core.PRIVATE_PREAMBLE in p
+
+
+def test_build_turn_prompt_truncates_context():
+    p = core.build_turn_prompt(_mk_head(), "x" * 20000, "go")
+    assert len(p) < 12000   # il transcript entra tagliato a 8000, come oggi
+
+
+def test_head_speak_uses_roster_llm(monkeypatch):
+    r = core.Roster.default()
+
+    class FakeLLM:
+        def call(self, prompt):
+            assert "Speak as Creative Director" in prompt
+            return "  ciao  "
+    monkeypatch.setitem(r._llms, "cd", FakeLLM())
+    assert core.head_speak(r, "cd", "T", "go") == "ciao"
+
+
+def test_build_after_search_prompt_denied_vs_approved():
+    d = core.build_after_search_prompt(_mk_head(), "T", "why")
+    a = core.build_after_search_prompt(_mk_head(), "T", "why",
+                                       query="q", results="r")
+    assert "DENIED" in d and "APPROVED" in a and "RESULTS:" in a

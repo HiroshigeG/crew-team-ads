@@ -455,3 +455,67 @@ class Roster:
             raise ValueError("la stanza non può restare senza teste")
         self.heads.pop(key)
         self._llms.pop(key, None)
+
+
+PRIVATE_PREAMBLE = (
+    "PRIVATE SIDEBAR — this is a one-to-one conversation with the Director. "
+    "The rest of the room cannot see it and never will. Speak freely and "
+    "candidly; this exchange will not appear in the room transcript."
+)
+
+
+def build_turn_prompt(head: Head, context: str, instruction: str,
+                      private: bool = False) -> str:
+    """Il prompt di un turno, ricomposto dal roster: ROOM_RULES centralizzate,
+    creatività iniettata solo fuori dalla fascia neutra (T1), preambolo se
+    la conversazione è privata. Puro: testabile senza API."""
+    parts = [ROOM_RULES + head.persona]
+    block = creativity_block(head.creativity)
+    if block:
+        parts.append(block)
+    if private:
+        parts.append(PRIVATE_PREAMBLE)
+    parts.append(f"ROOM TRANSCRIPT (latest last):\n{context[-8000:]}")
+    parts.append(f"The floor is yours now. Your brief for this turn: "
+                 f"{instruction}\nSpeak as {head.name}:")
+    return "\n\n".join(parts)
+
+
+def build_after_search_prompt(head: Head, context: str, why: str,
+                              query: str = None, results: str = None,
+                              private: bool = False) -> str:
+    """Secondo turno dopo il verdetto del Director sul SEARCH_REQUEST."""
+    if results is None:
+        outcome = ("The Director DENIED your search request. Answer now "
+                   "without it: be explicit about what you cannot verify, "
+                   "and do not invent it.")
+    else:
+        outcome = (f"The Director APPROVED your search. Query: {query}\n"
+                   f"RESULTS:\n{results}\n\n"
+                   f"Use these results now. Cite only what the results "
+                   f"actually say; if they don't answer the question, say so "
+                   f"plainly.")
+    parts = [ROOM_RULES + head.persona]
+    if private:
+        parts.append(PRIVATE_PREAMBLE)
+    parts.append(f"ROOM TRANSCRIPT (latest last):\n{context[-8000:]}")
+    parts.append(f"You had asked to search the web because: {why}\n{outcome}\n"
+                 f"Now give your turn in full, as {head.name} "
+                 f"(no SEARCH_REQUEST line this time):")
+    return "\n\n".join(parts)
+
+
+def head_speak(roster: Roster, key: str, context: str, instruction: str,
+               private: bool = False) -> str:
+    head = roster.heads[key]
+    prompt = build_turn_prompt(head, context, instruction, private)
+    return str(roster.llm(key).call(prompt)).strip()
+
+
+def head_speak_after_search(roster: Roster, key: str, context: str, why: str,
+                            query: str = None, results: str = None,
+                            private: bool = False) -> str:
+    head = roster.heads[key]
+    prompt = build_after_search_prompt(head, context, why, query, results,
+                                       private)
+    return str(roster.llm(key).call(prompt)).strip()
