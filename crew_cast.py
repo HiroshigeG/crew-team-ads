@@ -61,8 +61,11 @@ class ClaudeLLM:
 
     def _via_cli(self, prompt: str) -> str:
         env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
-        # No API key in the environment => the CLI cannot silently bill the API.
+        # No API key/token/endpoint override in the environment => la CLI
+        # non deve poter fatturare né deviare endpoint (bug hunt, item 15).
         env.pop("ANTHROPIC_API_KEY", None)
+        env.pop("ANTHROPIC_AUTH_TOKEN", None)
+        env.pop("ANTHROPIC_BASE_URL", None)
         r = subprocess.run(
             [CLAUDE_CLI, "-p", "--output-format", "text", "--model", self.model],
             input=prompt, capture_output=True, text=True,
@@ -366,6 +369,13 @@ class Head:
 
 ROSTER_PATH = os.path.join(_HERE, "roster.json")
 
+# Bug hunt item 14: una chiave di testa deve avere questa forma — minuscola,
+# comincia per lettera, solo [a-z0-9_], max 32 caratteri (il limite di
+# `head{N}` più margine per chiavi scelte a mano). Un roster.json editato a
+# mano (o corrotto) con una chiave fuori formato non deve buttare giù
+# l'intero roster: si scarta solo quella testa.
+_HEAD_KEY_RE = re.compile(r"^[a-z][a-z0-9_]{0,31}$")
+
 # Colori Textual per le teste di default (equivalenti dei vecchi ANSI di CAST).
 _DEFAULT_HEAD_META = {
     "producer":   ("#d7af00",),
@@ -428,7 +438,15 @@ class Roster:
         try:
             with open(path, encoding="utf-8") as f:
                 data = json.load(f)
-            heads = {d["key"]: Head.from_dict(d) for d in data["heads"]}
+            heads = {}
+            for d in data["heads"]:
+                key = str(d.get("key", "")).lower()
+                if not _HEAD_KEY_RE.match(key):
+                    # Bug 14: chiave fuori formato — si scarta SOLO questa
+                    # testa, le altre restano (nessun motivo di perdere un
+                    # intero roster editato a mano per una voce sbagliata).
+                    continue
+                heads[key] = Head.from_dict({**d, "key": key})
             if not heads:
                 raise ValueError("roster vuoto")
             return cls(heads)
@@ -442,9 +460,15 @@ class Roster:
 
     def save(self, path: str = None):
         path = path or ROSTER_PATH
-        with open(path, "w", encoding="utf-8") as f:
+        # Bug 13: scrittura atomica — un crash/kill a metà `json.dump` non
+        # deve lasciare un roster.json troncato e illeggibile. Si scrive su
+        # un file temporaneo e si sostituisce con `os.replace` (atomico sullo
+        # stesso filesystem).
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
             json.dump({"heads": [h.to_dict() for h in self.heads.values()]},
                       f, ensure_ascii=False, indent=2)
+        os.replace(tmp, path)
 
     def keys(self):
         return self.heads.keys()
@@ -544,7 +568,18 @@ class RoomSession:
         self.brief = brief
         self.base_dir = base_dir or os.path.join(_HERE, "transcripts")
         os.makedirs(self.base_dir, exist_ok=True)
-        self.stamp = stamp or datetime.now().strftime("%Y%m%d-%H%M")
+        # Bug 5: uno stamp al minuto (o due sessioni con lo stesso stamp
+        # esplicito) faceva sovrascrivere in `_flush_room` il transcript
+        # della sessione precedente aperta nello stesso minuto. Granularità
+        # al secondo + uniquificazione sullo STAMP (non solo sul path):
+        # `private_path` riusa `self.stamp`, quindi i canali privati
+        # ereditano l'unicità senza toccare altro.
+        base_stamp = stamp or datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.stamp = base_stamp
+        n = 2
+        while os.path.exists(os.path.join(self.base_dir, f"room-{self.stamp}.md")):
+            self.stamp = f"{base_stamp}-{n}"
+            n += 1
         self.room_text = ""
         self._private = {}                       # key -> str
         self.room_path = os.path.join(self.base_dir, f"room-{self.stamp}.md")
@@ -628,6 +663,11 @@ def parse_wave_plan(raw: str, valid_keys) -> list:
             to = s.get("to", "director")
             if to not in valid_keys and to != "director":
                 to = "director"
+            if to == s["speaker"]:
+                # Bug 12: il router a volte indirizza una testa a se stessa
+                # (cross-talk auto-diretto senza senso) — si normalizza al
+                # Director, come un "to" mancante o invalido.
+                to = "director"
             steps.append({"speaker": s["speaker"],
                           "instruction": str(s.get("instruction", "")),
                           "to": to})
@@ -662,17 +702,40 @@ def route_plan(roster: Roster, transcript: str, msg: str) -> list:
 
 # ── collab mode (R6): trigger in linguaggio naturale ───────────────────────
 AUTO_DEFAULT_CAP = 20      # l'hard-stop se il Director non dà un numero
+# Bug hunt item 7a: anche un N esplicito ha un tetto — "per 500 giri" non
+# deve far girare la stanza 500 volte senza controllo.
+AUTO_MAX_ROUNDS = 50
 
 _AUTO_RE = re.compile(
-    r"\b(discutete|parlatene|parlate|confrontatevi)\b.{0,30}?\b(fra|tra)\s+(di\s+)?voi",
+    r"\b(discutete(?:ne)?|parlate(?:ne)?|parlarne|confrontatevi)\b"
+    r".{0,30}?\b(fra|tra)\s+(di\s+)?voi",
     re.IGNORECASE)
 _GIRI_RE = re.compile(r"(\d+)\s*gir[oi]", re.IGNORECASE)
+# Bug 7b: "non parlate fra di voi" / "senza parlare fra di voi" chiedono
+# l'OPPOSTO della collab — non è un trigger. Il guard guarda solo i pochi
+# caratteri SUBITO prima del verbo: una subordinata come "quando parlate
+# fra di voi" non ha "non"/"senza" lì davanti e resta un trigger valido.
+_NEGATION_RE = re.compile(r"\b(non|senza)\s*$", re.IGNORECASE)
 
 
 def parse_auto_request(msg: str):
-    """«discutete fra voi per 5 giri» -> 5; senza numero -> AUTO_DEFAULT_CAP;
-    non è una richiesta di collab -> None."""
-    if not _AUTO_RE.search(msg):
+    """«discutete fra voi per 5 giri» -> 5 (tetto AUTO_MAX_ROUNDS); senza
+    numero -> AUTO_DEFAULT_CAP; negato appena prima del verbo, o non è una
+    richiesta di collab -> None."""
+    m = _AUTO_RE.search(msg)
+    if not m:
         return None
+    if _NEGATION_RE.search(msg[:m.start()][-12:]):
+        return None
+    giri = _GIRI_RE.search(msg)
+    if not giri:
+        return AUTO_DEFAULT_CAP
+    return min(int(giri.group(1)), AUTO_MAX_ROUNDS)
+
+
+def requested_rounds(msg: str):
+    """Il numero di giri richiesto testualmente, PRIMA del tetto
+    AUTO_MAX_ROUNDS — usato dal front-end solo per segnalare quando
+    `parse_auto_request` (o l'input diretto di `/auto N`) lo ha tagliato."""
     m = _GIRI_RE.search(msg)
-    return int(m.group(1)) if m else AUTO_DEFAULT_CAP
+    return int(m.group(1)) if m else None

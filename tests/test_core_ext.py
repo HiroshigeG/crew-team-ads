@@ -1,4 +1,7 @@
 """Test offline del core esteso — nessuna chiamata API."""
+import json
+import os
+
 import crew_cast as core
 
 
@@ -232,3 +235,117 @@ def test_parse_auto_request():
     assert core.parse_auto_request("confrontatevi tra voi per 3 giri") == 3
     assert core.parse_auto_request("cd: parlami del tema") is None
     assert core.parse_auto_request("bella idea, andiamo avanti") is None
+
+
+# ─────── Bug hunt item 7: cap, negazione, verbi mancanti ─────────────────
+
+def test_parse_auto_request_explicit_n_is_capped():
+    # bug 7a: "per 500 giri" non deve far girare la stanza 500 volte.
+    assert core.parse_auto_request("discutete fra voi per 500 giri") == 50
+    assert core.parse_auto_request("discutete fra voi per 500 giri") == \
+        core.AUTO_MAX_ROUNDS
+    # "0 giri" resta falsy (trattato come messaggio normale a valle) — il
+    # tetto non deve alterare questo caso limite.
+    assert core.parse_auto_request("discutete fra voi per 0 giri") == 0
+
+
+def test_parse_auto_request_negation_guard():
+    # bug 7b: negazione appena prima del verbo -> NON è un trigger.
+    assert core.parse_auto_request(
+        "non parlate fra di voi, aspettate il mio brief") is None
+    assert core.parse_auto_request(
+        "senza parlare fra di voi, aspettate") is None
+    # una subordinata (nessuna negazione appena prima del verbo) resta un
+    # trigger valido — il guard non deve overmatchare.
+    assert core.parse_auto_request(
+        "quando parlate fra di voi restate concreti") == core.AUTO_DEFAULT_CAP
+
+
+def test_parse_auto_request_extended_verb_forms():
+    # bug 7c: forme prima non riconosciute (falsi negativi).
+    assert core.parse_auto_request("discutetene fra voi") == \
+        core.AUTO_DEFAULT_CAP
+    assert core.parse_auto_request("potete parlarne fra di voi") == \
+        core.AUTO_DEFAULT_CAP
+
+
+def test_requested_rounds_exposes_raw_number():
+    assert core.requested_rounds("discutete fra voi per 500 giri") == 500
+    assert core.requested_rounds("parlatene fra di voi") is None
+
+
+# ─────── Bug hunt item 12: parse_wave_plan normalizza to == speaker ──────
+
+def test_parse_wave_plan_normalizes_self_addressed_to_director():
+    raw = '[[{"speaker":"cd","instruction":"x","to":"cd"}]]'
+    waves = core.parse_wave_plan(raw, {"cd"})
+    assert waves[0][0]["to"] == "director"
+
+
+# ─────── Bug hunt item 5: RoomSession, stamp in collisione ───────────────
+
+def test_stamp_collision_creates_distinct_files_and_keeps_first_intact(tmp_path):
+    s1 = core.RoomSession("BRIEF1", base_dir=str(tmp_path), stamp="20260729-1200")
+    s1.append_room("Director", "contenuto prezioso")
+    s2 = core.RoomSession("BRIEF2", base_dir=str(tmp_path), stamp="20260729-1200")
+    assert s1.room_path != s2.room_path
+    on_disk_1 = open(s1.room_path, encoding="utf-8").read()
+    assert "contenuto prezioso" in on_disk_1
+    on_disk_2 = open(s2.room_path, encoding="utf-8").read()
+    assert "BRIEF2" in on_disk_2 and "contenuto prezioso" not in on_disk_2
+    # i privati condividono lo stamp uniquificato (nessun altro punto da
+    # toccare per il fix, com da nota implementatore).
+    assert s1.private_path("cd") != s2.private_path("cd")
+
+
+# ─────── Bug hunt item 13/14/15: fix "sospetti ma solidi" ────────────────
+
+def test_roster_save_is_atomic_no_tmp_left_behind(tmp_path):
+    p = str(tmp_path / "roster.json")
+    core.Roster.default().save(p)
+    assert os.path.exists(p)
+    assert not os.path.exists(p + ".tmp")
+
+
+def test_roster_load_skips_invalid_key_keeps_others(tmp_path):
+    p = tmp_path / "roster.json"
+    good = core.Head(key="cd", name="CD", avatar="🎨", color="#ff8700",
+                     model_id="anthropic/claude-opus-5", persona="p")
+    bad = good.to_dict() | {"key": "Not Valid!"}
+    p.write_text(json.dumps({"heads": [good.to_dict(), bad]}), encoding="utf-8")
+    r = core.Roster.load(str(p))
+    assert list(r.keys()) == ["cd"]        # solo la testa valida sopravvive
+
+
+def test_roster_load_all_keys_invalid_falls_back_to_default(tmp_path):
+    p = tmp_path / "roster.json"
+    good = core.Head(key="cd", name="CD", avatar="🎨", color="#ff8700",
+                     model_id="anthropic/claude-opus-5", persona="p")
+    bad = good.to_dict() | {"key": "Not Valid!"}
+    p.write_text(json.dumps({"heads": [bad]}), encoding="utf-8")
+    r = core.Roster.load(str(p))
+    assert list(r.keys()) == ["producer", "strategist", "cd", "social"]
+    assert (tmp_path / "roster.json.bad").exists()
+
+
+def test_claude_cli_env_scrubs_billing_and_endpoint_vars(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "x")
+    monkeypatch.setenv("ANTHROPIC_AUTH_TOKEN", "y")
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://evil.example")
+    seen = {}
+
+    def fake_run(cmd, input, capture_output, text, env, timeout):
+        seen.update(env)
+        class R:
+            returncode = 0
+            stdout = "ok"
+            stderr = ""
+        return R()
+
+    monkeypatch.setattr(core.subprocess, "run", fake_run)
+    monkeypatch.setattr(core, "CLAUDE_CLI", "/usr/bin/claude")
+    llm = core.ClaudeLLM("claude-opus-5")
+    llm._via_cli("hello")
+    assert "ANTHROPIC_API_KEY" not in seen
+    assert "ANTHROPIC_AUTH_TOKEN" not in seen
+    assert "ANTHROPIC_BASE_URL" not in seen
