@@ -13,6 +13,7 @@ Requisiti R1–R7 e trappole T1–T6 sono definiti lì; questo documento fissa i
 | Collab mode | Linguaggio naturale («discutete fra voi per 5 giri») **e** comando `/auto N`; Esc interrompe; contatore visibile |
 | Tasti/lingua | Chrome UI in italiano, agenti in inglese; F2 Roster · F3 Creatività · F4 Collab · Esc Interrompi · Ctrl+Q Esci |
 | Architettura | **A** — `room_tui.py` nuovo + estensioni additive a `crew_cast.py`; `CAST` intatto |
+| Chat private | Canale 1:1 per testa, **stagno** (la stanza non vede il privato, la testa in stanza non lo ricorda); ingresso: click sulla card o `/privato <testa>`, Esc torna in stanza |
 
 ## 1. File e responsabilità
 
@@ -21,7 +22,8 @@ Requisiti R1–R7 e trappole T1–T6 sono definiti lì; questo documento fissa i
   helper di creatività. `CAST`, `route()`, `speak()` ecc. restano intatti:
   `app.py` e `room.py` continuano a importare e girare (R7, §5.3 del brief).
 - `roster.json` — persistenza del roster, accanto al progetto (R4).
-- `transcripts/room-AAAAMMGG-HHMM.md` — transcript, salvato a ogni turno.
+- `transcripts/room-AAAAMMGG-HHMM.md` — transcript di stanza, salvato a ogni
+  turno; `transcripts/private-<testa>-<sessione>.md` — chat private 1:1.
 - `launcher.sh` — aggiornato: doppio click su `CrewRoom.app` → finestra Terminal
   con la TUI (via `osascript`; un .app da Finder non ha terminale).
 
@@ -124,6 +126,34 @@ Comportamento identico a oggi, presentazione nuova:
 - Esc vale anche fuori dalla collab mode: annulla le ondate non ancora partite
   del piano corrente (i turni in volo si completano — le chiamate LLM bloccanti
   non sono cancellabili a metà senza perdere il turno).
+- Esc è contestuale: in vista privata torna in stanza; in stanza interrompe
+  collab/ondate. La priorità è sempre «un Esc ti riporta al controllo».
+
+## 7-bis. Chat private 1:1
+
+Ogni testa ha un canale privato col Director, invisibile al resto della stanza.
+
+- **Ingresso/uscita:** click sulla card della testa oppure `/privato <testa>`
+  (alias delle key: `cd`, `strategist`, …). La colonna transcript diventa la
+  chat privata — banner `🔒 PRIVATO — <nome>`, bordo dedicato, prompt `🔒 >`.
+  Esc torna in stanza. Il router è bypassato: si parla solo con quella testa.
+- **Stagno, in entrambe le direzioni che contano:** il contenuto privato non
+  entra mai nel transcript condiviso né nel contesto dei turni in stanza —
+  nei turni pubblici la testa **non ricorda** le chat private (garanzia dura:
+  il contesto pubblico semplicemente non le contiene). Le altre teste non le
+  vedono mai.
+- **Contesto in privato:** la testa vede il transcript della stanza (per non
+  parlare nel vuoto) + la storia privata col Director, con un preambolo
+  esplicito: «This is a private sidebar with the Director. The rest of the
+  room cannot see this conversation.»
+- **Gate di ricerca attivo anche in privato** (stesso modal); i risultati
+  restano nel canale privato.
+- **Persistenza:** `transcripts/private-<testa>-<sessione>.md`, salvata a ogni
+  turno come la stanza. La chat privata sopravvive dentro la sessione; a nuova
+  sessione riparte pulita (come il transcript di stanza).
+- Mentre sei in privato, i turni di stanza già in volo continuano e le card
+  restano vive; l'input di stanza riprende quando torni con Esc. La creatività
+  della testa (slider) vale anche in privato.
 
 ## 8. Errori
 
