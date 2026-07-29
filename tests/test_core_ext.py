@@ -47,6 +47,8 @@ def test_roster_default_matches_cast():
     assert list(r.keys()) == ["producer", "strategist", "cd", "social"]
     assert r.heads["cd"].model_id == "anthropic/claude-opus-5"
     assert r.heads["social"].model_id == "xai/grok-4.5"
+    assert r.heads["strategist"].model_id == "gemini/gemini-3.1-pro-preview"
+    assert r.heads["producer"].model_id == "anthropic/claude-opus-5"
     assert r.heads["cd"].persona == core.ROLE_PERSONAS["cd"]
     assert all(h.creativity == 5 for h in r.heads.values())
 

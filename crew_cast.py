@@ -398,11 +398,24 @@ class Roster:
     def default(cls) -> "Roster":
         heads = {}
         for key, c in CAST.items():
+            if isinstance(c["llm"], ClaudeLLM):
+                model_id = f"anthropic/{c['llm'].model}"
+            else:
+                m = c["llm"].model
+                if "/" not in m:
+                    # crewai normalizza il prefisso provider in modo asimmetrico:
+                    # per Gemini usa una classe di completion dedicata che
+                    # spacchetta "provider/model" e lascia in .model SOLO il nome
+                    # nudo, mentre per xai resta sulla LLM generica (litellm) e
+                    # .model mantiene il prefisso per intero. Senza riattaccarlo,
+                    # make_llm() non riconosce il provider e litellm ricade su
+                    # OpenAI di default (bug trovato dallo smoke live, T6).
+                    m = next((v for v in VERIFIED_MODELS if v.endswith("/" + m)), m)
+                model_id = m
             heads[key] = Head(
                 key=key, name=c["name"], avatar=c["avatar"],
                 color=_DEFAULT_HEAD_META[key][0],
-                model_id=(f"anthropic/{c['llm'].model}"
-                          if isinstance(c["llm"], ClaudeLLM) else c["llm"].model),
+                model_id=model_id,
                 persona=ROLE_PERSONAS[key],
             )
         return cls(heads)
