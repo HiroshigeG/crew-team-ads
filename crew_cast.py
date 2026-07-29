@@ -363,3 +363,99 @@ class Head:
     @classmethod
     def from_dict(cls, d: dict) -> "Head":
         return cls(**d)
+
+ROSTER_PATH = os.path.join(_HERE, "roster.json")
+
+# Colori Textual per le teste di default (equivalenti dei vecchi ANSI di CAST).
+_DEFAULT_HEAD_META = {
+    "producer":   ("#d7af00",),
+    "strategist": ("#5fafff",),
+    "cd":         ("#ff8700",),
+    "social":     ("#5fff87",),
+}
+
+
+def make_llm(head: Head):
+    """L'LLM giusto per una testa. anthropic/* passa SEMPRE da ClaudeLLM
+    (subscription-first, T4); temperature solo dove è accettata (T1)."""
+    if head.model_id.startswith("anthropic/"):
+        return ClaudeLLM(head.model_id.split("/", 1)[1])
+    kwargs = {"model": head.model_id,
+              "temperature": temp_for_level(head.creativity)}
+    if head.model_id.startswith("xai/"):
+        kwargs["additional_drop_params"] = ["stop"]   # T5
+    llm = LLM(**kwargs)
+    # Expose additional_drop_params as an attribute (T5)
+    if "additional_drop_params" in kwargs:
+        llm.additional_drop_params = kwargs["additional_drop_params"]
+    return llm
+
+
+class Roster:
+    """Il cast come dato editabile e persistito (R4). CAST resta il default."""
+
+    def __init__(self, heads: "dict[str, Head]"):
+        self.heads = heads
+        self._llms = {}          # cache: ricostruire un LLM a ogni turno è spreco
+
+    @classmethod
+    def default(cls) -> "Roster":
+        heads = {}
+        for key, c in CAST.items():
+            heads[key] = Head(
+                key=key, name=c["name"], avatar=c["avatar"],
+                color=_DEFAULT_HEAD_META[key][0],
+                model_id=(f"anthropic/{c['llm'].model}"
+                          if isinstance(c["llm"], ClaudeLLM) else c["llm"].model),
+                persona=ROLE_PERSONAS[key],
+            )
+        return cls(heads)
+
+    @classmethod
+    def load(cls, path: str = None) -> "Roster":
+        path = path or ROSTER_PATH
+        if not os.path.exists(path):
+            return cls.default()
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            heads = {d["key"]: Head.from_dict(d) for d in data["heads"]}
+            if not heads:
+                raise ValueError("roster vuoto")
+            return cls(heads)
+        except Exception:
+            # File rotto: da parte (mai cancellare lavoro altrui), poi default.
+            try:
+                shutil.copy(path, path + ".bad")
+            except OSError:
+                pass
+            return cls.default()
+
+    def save(self, path: str = None):
+        path = path or ROSTER_PATH
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"heads": [h.to_dict() for h in self.heads.values()]},
+                      f, ensure_ascii=False, indent=2)
+
+    def keys(self):
+        return self.heads.keys()
+
+    def llm(self, key: str):
+        if key not in self._llms:
+            self._llms[key] = make_llm(self.heads[key])
+        return self._llms[key]
+
+    def update_head(self, key: str, **fields):
+        h = self.heads[key]
+        for name, value in fields.items():
+            setattr(h, name, value)
+        self._llms.pop(key, None)      # modello/creatività cambiati -> LLM nuovo
+
+    def add_head(self, head: Head):
+        self.heads[head.key] = head
+
+    def remove_head(self, key: str):
+        if len(self.heads) == 1:
+            raise ValueError("la stanza non può restare senza teste")
+        self.heads.pop(key)
+        self._llms.pop(key, None)

@@ -8,6 +8,8 @@ demo_logs/
 *.log
 room_transcript.md
 output.md
+roster.json
+transcripts/
 
 # python
 __pycache__/
