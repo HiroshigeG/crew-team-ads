@@ -564,3 +564,102 @@ class RoomSession:
         self._private[key] = self._private.get(key, "") + f"{label}: {text}\n"
         with open(self.private_path(key), "w", encoding="utf-8") as f:
             f.write(f"# Private — {key}\n\n{self._private[key]}")
+
+
+# ── Task 5: router a ondate (R1/R3) + trigger collab (R6) ────────────────────
+
+PLAN_PROMPT = """You are the routing brain of a writers' room. The cast right now:
+{cast_lines}
+
+Given the transcript and the Director's message, output ONLY a JSON array of WAVES
+(no prose). A wave is a list of steps that can run IN PARALLEL because they don't
+depend on each other; waves run one after another. 1-4 steps total.
+Each step: {{"speaker": "<cast key>", "instruction": "<one line>", "to": "<who they
+answer: 'director' or a cast key>"}}
+
+Rules:
+- Director addresses someone -> that person speaks (first wave).
+- "X, ask Y ..." (consult) -> waves: [[X poses the question (to Y)]], [[Y answers (to X)]], [[X reacts (to director)]]. Consults are NEVER parallel.
+- Independent takes on the same prompt -> ONE wave with those speakers (to director).
+- If the Director says someone should wait/hold, do NOT include them.
+- Generic prompts: the 1-2 most relevant specialists.
+
+TRANSCRIPT (latest last):
+{transcript}
+
+DIRECTOR'S MESSAGE: {msg}
+
+JSON:"""
+
+
+def parse_wave_plan(raw: str, valid_keys) -> list:
+    """Estrae e valida le ondate dall'output del router. Puro e paranoico:
+    qualunque cosa non torni -> [] (il chiamante ha il fallback)."""
+    m = re.search(r"\[\s*\[.*\]\s*\]", str(raw), re.DOTALL)
+    if not m:
+        return []
+    try:
+        data = json.loads(m.group(0))
+    except json.JSONDecodeError:
+        return []
+    waves, total = [], 0
+    for wave in data:
+        if not isinstance(wave, list):
+            return []
+        steps = []
+        for s in wave:
+            if not (isinstance(s, dict) and s.get("speaker") in valid_keys):
+                continue
+            if total >= 4:
+                break
+            to = s.get("to", "director")
+            if to not in valid_keys and to != "director":
+                to = "director"
+            steps.append({"speaker": s["speaker"],
+                          "instruction": str(s.get("instruction", "")),
+                          "to": to})
+            total += 1
+        if steps:
+            waves.append(steps)
+    return waves
+
+
+def route_plan(roster: Roster, transcript: str, msg: str) -> list:
+    """Chi parla, in che ordine, in parallelo dove si può (R1) e rivolto a chi
+    (R3). Il prompt elenca il roster CORRENTE: una testa aggiunta a runtime è
+    instradabile subito. Fallback: la catena di oggi, seriale."""
+    cast_lines = "\n".join(
+        f"- {h.key}: {h.name} — {h.persona.strip()[:90]}"
+        for h in roster.heads.values())
+    try:
+        raw = llm_claude_router.call(PLAN_PROMPT.format(
+            cast_lines=cast_lines, transcript=transcript[-6000:], msg=msg))
+        waves = parse_wave_plan(raw, set(roster.keys()))
+        if waves:
+            return waves
+    except Exception:
+        pass
+    # Fallback: il router v1 (o keyword/producer) in ondate da un passo l'una.
+    steps = [s for s in route(transcript, msg) if s["speaker"] in roster.keys()]
+    if not steps:
+        first = next(iter(roster.keys()))
+        steps = [{"speaker": first, "instruction": msg}]
+    return [[{**s, "to": "director"}] for s in steps]
+
+
+# ── collab mode (R6): trigger in linguaggio naturale ───────────────────────
+AUTO_DEFAULT_CAP = 20      # l'hard-stop se il Director non dà un numero
+
+_AUTO_RE = re.compile(
+    r"\b(discutete|parlatene|parlate|confrontatevi)\b.{0,30}?\b(fra|tra)\s+(di\s+)?voi",
+    re.IGNORECASE)
+_GIRI_RE = re.compile(r"(\d+)\s*gir[oi]", re.IGNORECASE)
+
+
+def parse_auto_request(msg: str):
+    """«discutete fra voi per 5 giri» -> 5; senza numero -> AUTO_DEFAULT_CAP;
+    non è una richiesta di collab -> None."""
+    if not _AUTO_RE.search(msg):
+        return None
+    m = _GIRI_RE.search(msg)
+    return int(m.group(1)) if m else AUTO_DEFAULT_CAP

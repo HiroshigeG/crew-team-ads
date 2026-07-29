@@ -190,3 +190,43 @@ def test_session_private_file_separate(tmp_path):
     s.append_private("cd", "Director", "segreto")
     assert "segreto" in open(s.private_path("cd"), encoding="utf-8").read()
     assert "segreto" not in open(s.room_path, encoding="utf-8").read()
+
+
+# ─────── Task 5: router a ondate + trigger collab ────────────────────────
+
+def test_parse_wave_plan_valid():
+    raw = ('bla [[{"speaker":"strategist","instruction":"a","to":"director"},'
+           '{"speaker":"social","instruction":"b","to":"director"}],'
+           '[{"speaker":"cd","instruction":"c","to":"social"}]] bla')
+    waves = core.parse_wave_plan(raw, {"strategist", "social", "cd"})
+    assert len(waves) == 2 and len(waves[0]) == 2
+    assert waves[1][0]["to"] == "social"
+
+
+def test_parse_wave_plan_drops_unknown_and_defaults_to():
+    raw = '[[{"speaker":"ghost","instruction":"x"},{"speaker":"cd","instruction":"y"}]]'
+    waves = core.parse_wave_plan(raw, {"cd"})
+    assert waves == [[{"speaker": "cd", "instruction": "y", "to": "director"}]]
+
+
+def test_parse_wave_plan_garbage_is_empty():
+    assert core.parse_wave_plan("no json here", {"cd"}) == []
+    assert core.parse_wave_plan('[{"speaker":"cd"}]', {"cd"}) == []  # non a ondate
+
+
+def test_route_plan_falls_back_to_sequential(monkeypatch):
+    r = core.Roster.default()
+    monkeypatch.setattr(core.llm_claude_router, "call",
+                        lambda p: (_ for _ in ()).throw(RuntimeError("giù")))
+    waves = core.route_plan(r, "T", "cd: dammi un'idea")
+    # fallback = la catena di oggi (route -> keyword -> producer), seriale
+    assert waves == [[{"speaker": "cd", "instruction": "cd: dammi un'idea",
+                       "to": "director"}]]
+
+
+def test_parse_auto_request():
+    assert core.parse_auto_request("discutete fra voi per 5 giri") == 5
+    assert core.parse_auto_request("parlatene fra di voi") == core.AUTO_DEFAULT_CAP
+    assert core.parse_auto_request("confrontatevi tra voi per 3 giri") == 3
+    assert core.parse_auto_request("cd: parlami del tema") is None
+    assert core.parse_auto_request("bella idea, andiamo avanti") is None
