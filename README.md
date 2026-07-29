@@ -71,3 +71,25 @@ The default brief is a **fictional example** (an invented maison, "AURELIA") so 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## La stanza in terminale (room_tui.py)
+
+Avvio: doppio click su `CrewRoom.app`, oppure
+`.venv/bin/python3 room_tui.py`. (La vecchia app browser resta:
+`.venv/bin/chainlit run app.py`.)
+
+- **Brief**: 4 domande all'avvio, poi la stanza è tua. Parla a tutti o a
+  qualcuno (`cd: …`, `cd, chiedi a social …`).
+- **Ondate**: le teste indipendenti rispondono in parallelo; i consulti
+  (X→Y→X) restano in sequenza, con la freccia `→` nel transcript.
+- **F2 Roster**: rinomina, cambia persona/modello, aggiungi o togli teste.
+  Persistito in `roster.json` — riapri e ritrovi la tua stanza.
+- **F3 Creatività**: 0–10 per testa. Gemini/Grok: `temperature` reale;
+  Claude 5 la rifiuta, quindi la manopola inietta istruzioni nel prompt —
+  il badge dice sempre quale meccanismo è attivo.
+- **F4 / «discutete fra voi per N giri» / `/auto N`**: collab mode — le
+  teste discutono da sole, contatore a video, Esc ferma, tetto 20 giri.
+- **Click su una card / `/privato cd`**: chat privata 1:1, stagna — la
+  stanza non la vede e la testa non la ricorda nei turni pubblici.
+- **🔍**: ogni ricerca web resta dietro il tuo permesso (query + perché).
+- Transcript in `transcripts/`, salvato a ogni turno.
