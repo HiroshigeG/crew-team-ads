@@ -519,3 +519,48 @@ def head_speak_after_search(roster: Roster, key: str, context: str, why: str,
     prompt = build_after_search_prompt(head, context, why, query, results,
                                        private)
     return str(roster.llm(key).call(prompt)).strip()
+
+
+class RoomSession:
+    """Transcript di stanza + canali privati, scritti su disco A OGNI turno:
+    un crash non perde la sessione. Il privato è stagno per costruzione — i
+    contesti pubblici semplicemente non lo contengono (spec §7-bis)."""
+
+    def __init__(self, brief: str, base_dir: str = None, stamp: str = None):
+        from datetime import datetime
+        self.brief = brief
+        self.base_dir = base_dir or os.path.join(_HERE, "transcripts")
+        os.makedirs(self.base_dir, exist_ok=True)
+        self.stamp = stamp or datetime.now().strftime("%Y%m%d-%H%M")
+        self.room_text = ""
+        self._private = {}                       # key -> str
+        self.room_path = os.path.join(self.base_dir, f"room-{self.stamp}.md")
+        self._flush_room()
+
+    # — stanza —
+    def room_context(self) -> str:
+        return f"BRIEF:\n{self.brief}\n\n{self.room_text}"
+
+    def append_room(self, label: str, text: str):
+        self.room_text += f"{label}: {text}\n"
+        self._flush_room()
+
+    def _flush_room(self):
+        with open(self.room_path, "w", encoding="utf-8") as f:
+            f.write("# Writers' Room transcript\n\n"
+                    f"BRIEF:\n{self.brief}\n\n{self.room_text}")
+
+    # — privato (stagno) —
+    def private_path(self, key: str) -> str:
+        return os.path.join(self.base_dir, f"private-{key}-{self.stamp}.md")
+
+    def private_context(self, key: str) -> str:
+        # La testa in privato vede la stanza (per contesto) + il SUO privato.
+        return (f"BRIEF:\n{self.brief}\n\n{self.room_text}\n"
+                f"--- PRIVATE SIDEBAR (only you and the Director) ---\n"
+                f"{self._private.get(key, '')}")
+
+    def append_private(self, key: str, label: str, text: str):
+        self._private[key] = self._private.get(key, "") + f"{label}: {text}\n"
+        with open(self.private_path(key), "w", encoding="utf-8") as f:
+            f.write(f"# Private — {key}\n\n{self._private[key]}")

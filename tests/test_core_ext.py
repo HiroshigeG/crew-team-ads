@@ -159,3 +159,34 @@ def test_build_after_search_prompt_denied_vs_approved():
     a = core.build_after_search_prompt(_mk_head(), "T", "why",
                                        query="q", results="r")
     assert "DENIED" in d and "APPROVED" in a and "RESULTS:" in a
+
+
+# ─────── Task 4: RoomSession ────────────────────────────────────────────────
+
+def test_session_room_appends_and_persists(tmp_path):
+    s = core.RoomSession("BRIEFTEXT", base_dir=str(tmp_path), stamp="test")
+    s.append_room("Director", "ciao stanza")
+    s.append_room("Creative Director", "risposta")
+    assert "Director: ciao stanza" in s.room_text
+    on_disk = open(s.room_path, encoding="utf-8").read()
+    assert "risposta" in on_disk and "BRIEFTEXT" in on_disk
+
+
+def test_session_private_is_watertight(tmp_path):
+    # La garanzia dura della spec §7-bis: il privato non entra MAI nel
+    # contesto di stanza; il contesto privato vede la stanza.
+    s = core.RoomSession("B", base_dir=str(tmp_path), stamp="test")
+    s.append_room("Director", "pubblico")
+    s.append_private("cd", "Director", "segreto")
+    assert "segreto" not in s.room_context()
+    assert "segreto" not in s.room_text
+    assert "pubblico" in s.private_context("cd")
+    assert "segreto" in s.private_context("cd")
+    assert "segreto" not in s.private_context("social")   # privati separati fra teste
+
+
+def test_session_private_file_separate(tmp_path):
+    s = core.RoomSession("B", base_dir=str(tmp_path), stamp="test")
+    s.append_private("cd", "Director", "segreto")
+    assert "segreto" in open(s.private_path("cd"), encoding="utf-8").read()
+    assert "segreto" not in open(s.room_path, encoding="utf-8").read()
