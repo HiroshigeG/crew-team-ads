@@ -384,11 +384,7 @@ def make_llm(head: Head):
               "temperature": temp_for_level(head.creativity)}
     if head.model_id.startswith("xai/"):
         kwargs["additional_drop_params"] = ["stop"]   # T5
-    llm = LLM(**kwargs)
-    # Expose additional_drop_params as an attribute (T5)
-    if "additional_drop_params" in kwargs:
-        llm.additional_drop_params = kwargs["additional_drop_params"]
-    return llm
+    return LLM(**kwargs)
 
 
 class Roster:

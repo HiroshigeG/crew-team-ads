@@ -98,4 +98,21 @@ def test_make_llm_families():
                                    creativity=10))
     assert grok.model == "xai/grok-4.5"
     assert grok.temperature == 1.2
-    assert grok.additional_drop_params == ["stop"]  # T5
+    assert grok.additional_params.get("additional_drop_params") == ["stop"]  # T5: litellm droppa "stop" 
+
+
+def test_roster_llm_cache_and_invalidation():
+    r = core.Roster.default()
+    # Cache hit: second call returns same object
+    first = r.llm("social")
+    assert r.llm("social") is first
+    # Cache invalidation: update clears cache and creates new LLM
+    r.update_head("social", creativity=10)
+    fresh = r.llm("social")
+    assert fresh is not first
+    assert fresh.temperature == 1.2  # 0.1 + 0.11*10 = 1.2
+    # Anthropic models still routed via ClaudeLLM after update
+    r.update_head("cd", creativity=9)
+    cd_llm = r.llm("cd")
+    assert isinstance(cd_llm, core.ClaudeLLM)
+    assert cd_llm.model == "claude-opus-5"
