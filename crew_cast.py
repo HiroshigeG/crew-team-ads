@@ -1,10 +1,11 @@
 """
 Crew Team Ads — the shared core.
 ================================
-Everything both front-ends need: the cast (persona + model per head), the
-routing brain, and the gated web search. The terminal room (`room.py`) and the
-desktop app (`app.py`) both import from here, so a persona or a model is only
-ever defined ONCE.
+The desktop app (`app.py`) imports from here for cast (persona + model per head),
+routing brain, and gated web search. The legacy terminal room (`room.py`) predates
+this module and keeps its own inline copy of these until it is replaced by the new
+terminal UI (`room_tui.py`). So personas and models are defined once per active
+front-end.
 
 Nothing in this module prints or draws — the front-end owns all I/O.
 """
