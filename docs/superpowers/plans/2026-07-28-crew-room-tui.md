@@ -52,7 +52,7 @@
 - [ ] **Step 1: Installa pytest nel venv**
 
 ```bash
-cd "~/Desktop/AI stuff/crew-team-ads"
+cd "$HOME/Desktop/AI stuff/crew-team-ads"
 .venv/bin/pip install pytest pytest-asyncio
 .venv/bin/pytest --version
 ```
@@ -1139,7 +1139,7 @@ Expected: 2 PASS (aggiusta con la nota sopra se serve)
 
 - [ ] **Step 4: Avvio reale a occhio**
 
-Run: `cd "~/Desktop/AI stuff/crew-team-ads" && .venv/bin/python3 room_tui.py`
+Run: `cd "$HOME/Desktop/AI stuff/crew-team-ads" && .venv/bin/python3 room_tui.py`
 Expected: layout completo (feed + 4 card + input + footer con F-keys), intake
 partito. Ctrl+Q esce pulito. (Lancialo in un terminale vero, non in pipe.)
 
@@ -2010,7 +2010,7 @@ Terminal.app con la TUI (un .app da Finder non ha terminale):
 # Terminal.app via osascript. Percorsi assoluti: un .app dal Finder
 # non eredita il PATH della shell.
 
-PROJECT_DIR="~/Desktop/AI stuff/crew-team-ads"
+PROJECT_DIR="$HOME/Desktop/AI stuff/crew-team-ads"
 OSA=/usr/bin/osascript
 
 alert() { "$OSA" -e "display alert \"Crew Room\" message \"$1\"" >/dev/null 2>&1; }
@@ -2022,7 +2022,7 @@ cd "$PROJECT_DIR" || { alert "Cartella del progetto non trovata."; exit 1; }
 "$OSA" <<'APPLESCRIPT'
 tell application "Terminal"
     activate
-    do script "cd '~/Desktop/AI stuff/crew-team-ads' && .venv/bin/python3 room_tui.py"
+    do script "cd "$HOME/Desktop/AI stuff/crew-team-ads" && .venv/bin/python3 room_tui.py"
 end tell
 APPLESCRIPT
 ```
