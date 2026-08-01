@@ -2010,7 +2010,7 @@ Terminal.app con la TUI (un .app da Finder non ha terminale):
 # Terminal.app via osascript. Percorsi assoluti: un .app dal Finder
 # non eredita il PATH della shell.
 
-PROJECT_DIR="$HOME/Desktop/AI stuff/crew-team-ads"
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 OSA=/usr/bin/osascript
 
 alert() { "$OSA" -e "display alert \"Crew Room\" message \"$1\"" >/dev/null 2>&1; }
@@ -2019,10 +2019,10 @@ cd "$PROJECT_DIR" || { alert "Cartella del progetto non trovata."; exit 1; }
 [ -x ".venv/bin/python3" ] || { alert "Ambiente mancante. Nel terminale: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt"; exit 1; }
 [ -f ".env" ] || { alert "Manca il file .env con le chiavi API."; exit 1; }
 
-"$OSA" <<'APPLESCRIPT'
+"$OSA" <<APPLESCRIPT
 tell application "Terminal"
     activate
-    do script "cd "$HOME/Desktop/AI stuff/crew-team-ads" && .venv/bin/python3 room_tui.py"
+    do script "cd '$PROJECT_DIR' && .venv/bin/python3 room_tui.py"
 end tell
 APPLESCRIPT
 ```
