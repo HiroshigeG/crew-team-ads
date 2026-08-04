@@ -2,6 +2,8 @@
 import json
 import os
 
+import pytest
+
 import crew_cast as core
 
 
@@ -22,11 +24,17 @@ def test_temp_for_level_endpoints():
 
 
 def test_creativity_block_bands():
-    assert core.creativity_block(1)          # 0-2: presente
-    assert core.creativity_block(4) == ""    # 3-5: neutro, nessuna iniezione
-    assert core.creativity_block(7)          # 6-8: presente
-    assert core.creativity_block(10)         # 9-10: presente
-    assert core.creativity_block(7) != core.creativity_block(10)
+    # D8: scala ancorata punto-per-punto — ogni gradino 0-10 tranne il 5
+    # inietta una regola distinta e dichiara il proprio numero.
+    for lvl in range(11):
+        block = core.creativity_block(lvl)
+        if lvl == 5:
+            assert block == ""               # 5: neutro, nessuna iniezione
+        else:
+            assert f"dial {lvl}/10" in block
+    texts = [core.creativity_block(l) for l in range(11) if l != 5]
+    assert len(set(texts)) == 10             # nessun gradino uguale a un altro
+    assert core.creativity_block(-1) == "" and core.creativity_block(99) == ""
 
 
 def test_head_mechanism_label():
@@ -103,7 +111,38 @@ def test_make_llm_families():
                                    creativity=10))
     assert grok.model == "xai/grok-4.5"
     assert grok.temperature == 1.2
-    assert grok.additional_params.get("additional_drop_params") == ["stop"]  # T5: litellm droppa "stop" 
+    assert grok.additional_params.get("additional_drop_params") == ["stop"]  # T5: litellm droppa "stop"
+
+
+def test_make_llm_grok_live_search_opt_in(monkeypatch):
+    """D23: Grok Live Search entra come extra_body SOLO col flag env acceso."""
+    h = core.Head(key="social", name="Social", avatar="a", color="c",
+                  model_id="xai/grok-4.5", persona="p", creativity=5)
+    monkeypatch.delenv("CREW_GROK_LIVE_SEARCH", raising=False)
+    assert "extra_body" not in core.make_llm(h).additional_params
+    monkeypatch.setenv("CREW_GROK_LIVE_SEARCH", "1")
+    sp = core.make_llm(h).additional_params["extra_body"]["search_parameters"]
+    assert sp["mode"] == "auto"
+    assert {"type": "x"} in sp["sources"]
+
+
+def test_parse_social_request():
+    """D23: la riga SOCIAL_INTEL si estrae come il SEARCH_REQUEST."""
+    clean, q, why = core.parse_social_request(
+        "Serve un dato.\nSOCIAL_INTEL: nike tiktok || numeri reali di engagement")
+    assert clean == "Serve un dato."
+    assert q == "nike tiktok" and why == "numeri reali di engagement"
+    assert core.parse_social_request("nessuna richiesta") == (
+        "nessuna richiesta", None, None)
+
+
+def test_social_intel_not_configured_and_command(monkeypatch):
+    """D23: senza CREW_SOCIAL_TOOL_CMD -> sentinella; con un comando -> digest,
+    e la query arriva come ULTIMO argomento."""
+    monkeypatch.delenv("CREW_SOCIAL_TOOL_CMD", raising=False)
+    assert core.social_intel("nike") == "[social tool not configured]"
+    monkeypatch.setenv("CREW_SOCIAL_TOOL_CMD", "/bin/echo digest:")
+    assert core.social_intel("nike tiktok") == "digest: nike tiktok"
 
 
 def test_roster_llm_cache_and_invalidation():
@@ -139,13 +178,23 @@ def test_build_turn_prompt_neutral_has_no_creativity_block():
 
 def test_build_turn_prompt_max_has_block_and_private_preamble():
     p = core.build_turn_prompt(_mk_head(10), "T", "go", private=True)
-    assert "CREATIVE RISK SETTING" in p and "MAX" in p
+    assert "CREATIVE RISK SETTING" in p and "dial 10/10" in p
     assert core.PRIVATE_PREAMBLE in p
 
 
 def test_build_turn_prompt_truncates_context():
-    p = core.build_turn_prompt(_mk_head(), "x" * 20000, "go")
-    assert len(p) < 12000   # il transcript entra tagliato a 8000, come oggi
+    # D18: budget condiviso ampio (default 60k car). Un transcript enorme entra
+    # tagliato al budget, ma NON al vecchio 8000; sotto il budget passa intero.
+    big = core.build_turn_prompt(_mk_head(), "x" * 200000, "go")
+    assert core._context_chars() <= len(big) < core._context_chars() + 3000
+    small = core.build_turn_prompt(_mk_head(), "y" * 5000, "go")
+    assert "y" * 5000 in small          # sotto il budget: contesto intero
+
+
+def test_context_chars_env_override(monkeypatch):
+    monkeypatch.setenv("CREW_CONTEXT_CHARS", "1000")
+    p = core.build_turn_prompt(_mk_head(), "z" * 50000, "go")
+    assert p.count("z") == 1000          # rispetta il budget da env
 
 
 def test_head_speak_uses_roster_llm(monkeypatch):
@@ -349,3 +398,203 @@ def test_claude_cli_env_scrubs_billing_and_endpoint_vars(monkeypatch):
     assert "ANTHROPIC_API_KEY" not in seen
     assert "ANTHROPIC_AUTH_TOKEN" not in seen
     assert "ANTHROPIC_BASE_URL" not in seen
+
+
+# ─────── D5/D6 (03/08): timeout configurabile senza fallback silenzioso;
+#         blocco creatività solo dove la temperatura non esiste ─────────────
+
+def test_cli_timeout_env_override(monkeypatch):
+    monkeypatch.setenv("CREW_CLAUDE_TIMEOUT", "3600")
+    seen = {}
+
+    def fake_run(cmd, input, capture_output, text, env, timeout):
+        seen["timeout"] = timeout
+        class R:
+            returncode = 0
+            stdout = "ok"
+            stderr = ""
+        return R()
+
+    monkeypatch.setattr(core.subprocess, "run", fake_run)
+    monkeypatch.setattr(core, "CLAUDE_CLI", "/usr/bin/claude")
+    core.ClaudeLLM("claude-opus-5")._via_cli("hello")
+    assert seen["timeout"] == 3600.0
+
+
+def test_cli_timeout_does_not_fall_back_to_api(monkeypatch):
+    def fake_run(cmd, input, capture_output, text, env, timeout):
+        raise core.subprocess.TimeoutExpired(cmd, timeout,
+                                             output="bozza già scritta")
+
+    monkeypatch.setattr(core.subprocess, "run", fake_run)
+    monkeypatch.setattr(core, "CLAUDE_CLI", "/usr/bin/claude")
+    llm = core.ClaudeLLM("claude-opus-5")
+
+    class Boom:
+        def call(self, prompt):
+            raise AssertionError("il timeout NON deve ricadere sull'API")
+
+    llm._api = Boom()
+    before = len(core._route_log)
+    with pytest.raises(core.ClaudeTimeoutError,
+                       match="nessun fallback automatico") as exc:
+        llm.call("hello")
+    assert len(core._route_log) == before    # nessuna rotta registrata
+    assert exc.value.partial == "bozza già scritta"   # il lavoro non si butta
+
+
+def test_build_turn_prompt_block_only_for_anthropic():
+    g = core.Head(key="mr", name="Market Researcher", avatar="🔎",
+                  color="#00afd7", model_id="gemini/gemini-3.1-pro-preview",
+                  persona=" p", creativity=10)
+    assert "CREATIVE RISK SETTING" not in core.build_turn_prompt(g, "T", "go")
+    a = core.Head(key="cd", name="CD", avatar="🎨", color="#ff8700",
+                  model_id="anthropic/claude-opus-5", persona=" p",
+                  creativity=10)
+    assert "CREATIVE RISK SETTING" in core.build_turn_prompt(a, "T", "go")
+
+
+# ─────── Fase 3: agganci per il contratto web (D4/D10, §7.2, §7.3) ─────────
+
+def test_cli_effort_flag_in_argv(monkeypatch):
+    seen = {}
+
+    def fake_run(cmd, input, capture_output, text, env, timeout):
+        seen["cmd"] = cmd
+        class R:
+            returncode = 0
+            stdout = "ok"
+            stderr = ""
+        return R()
+
+    monkeypatch.setattr(core.subprocess, "run", fake_run)
+    monkeypatch.setattr(core, "CLAUDE_CLI", "/usr/bin/claude")
+    core.ClaudeLLM("claude-opus-5", effort="high")._via_cli("x")
+    assert "--effort" in seen["cmd"]
+    assert seen["cmd"][seen["cmd"].index("--effort") + 1] == "high"
+    core.ClaudeLLM("claude-opus-5")._via_cli("x")     # default: nessun flag
+    assert "--effort" not in seen["cmd"]
+
+
+def test_claude_last_route_is_per_instance(monkeypatch):
+    def fake_run(cmd, input, capture_output, text, env, timeout):
+        class R:
+            returncode = 0
+            stdout = "ok"
+            stderr = ""
+        return R()
+
+    monkeypatch.setattr(core.subprocess, "run", fake_run)
+    monkeypatch.setattr(core, "CLAUDE_CLI", "/usr/bin/claude")
+    a = core.ClaudeLLM("claude-opus-5")
+    b = core.ClaudeLLM("claude-opus-5")
+    a.call("hello")
+    assert a.last_route == "subscription"
+    assert b.last_route == "?"                 # l'altra istanza non è toccata
+
+    monkeypatch.setattr(core, "CLAUDE_CLI", None)   # niente CLI → diretti in API
+
+    class FakeAPI:
+        def call(self, prompt):
+            return "via api"
+
+    b._api = FakeAPI()
+    b.call("hello")
+    assert b.last_route == "api"
+
+
+def test_last_plan_route_waves_vs_fallback(monkeypatch):
+    r = core.Roster.default()
+
+    class GoodRouter:
+        def call(self, prompt):
+            return '[[{"speaker": "cd", "instruction": "a", "to": "director"}]]'
+
+    monkeypatch.setattr(core, "llm_claude_router", GoodRouter())
+    core.route_plan(r, "T", "cd: un'idea")
+    assert core.last_plan_route() == "waves"
+
+    class DeadRouter:
+        def call(self, prompt):
+            raise RuntimeError("router giù")
+
+    monkeypatch.setattr(core, "llm_claude_router", DeadRouter())
+    core.route_plan(r, "T", "cd: un'idea")
+    assert core.last_plan_route() == "fallback"
+
+
+def test_head_effort_field_and_adv_roster():
+    h = core.Head(key="cd", name="CD", avatar="🎨", color="#ff8700",
+                  model_id="anthropic/claude-opus-5", persona="p",
+                  effort="high")
+    assert core.Head.from_dict(h.to_dict()) == h
+    llm = core.make_llm(h)
+    assert isinstance(llm, core.ClaudeLLM) and llm.effort == "high"
+    # Il roster ADV porta gli effort decisi in D4; le teste non-anthropic no.
+    adv = core.Roster.load(os.path.join(os.path.dirname(core.__file__),
+                                        "roster.adv.json"))
+    assert adv.heads["creative_strategist"].effort == "high"
+    assert adv.heads["producer"].effort == "low"
+    assert adv.heads["market_researcher"].effort == ""
+
+
+# ─────── D5-bis: fallback API trasparente (mai più errori inghiottiti) ──────
+
+def test_cli_failure_falls_back_to_api_transparently(monkeypatch):
+    def fake_run(cmd, input, capture_output, text, env, timeout):
+        raise OSError("cli esplosa")
+
+    monkeypatch.setattr(core.subprocess, "run", fake_run)
+    monkeypatch.setattr(core, "CLAUDE_CLI", "/usr/bin/claude")
+    llm = core.ClaudeLLM("claude-opus-5")
+
+    class FakeAPI:
+        def call(self, prompt):
+            return "salvato dall'api"
+
+    llm._api = FakeAPI()
+    assert llm.call("hello") == "salvato dall'api"
+    assert llm.last_route == "api"
+    assert "OSError" in llm.last_cli_error       # il motivo non sparisce più
+
+
+def test_both_channels_down_raises_the_whole_truth(monkeypatch):
+    def fake_run(cmd, input, capture_output, text, env, timeout):
+        raise OSError("cli esplosa")
+
+    monkeypatch.setattr(core.subprocess, "run", fake_run)
+    monkeypatch.setattr(core, "CLAUDE_CLI", "/usr/bin/claude")
+    llm = core.ClaudeLLM("claude-opus-5")
+
+    class BrokeAPI:
+        def call(self, prompt):
+            raise ValueError("credito esaurito")
+
+    llm._api = BrokeAPI()
+    with pytest.raises(RuntimeError) as exc:
+        llm.call("hello")
+    msg = str(exc.value)
+    assert "CLI:" in msg and "OSError" in msg     # metà CLI
+    assert "API:" in msg and "credito esaurito" in msg   # metà API
+
+
+# ─────── D14: modelli open (Featherless / Ollama) ammessi nel roster ───────
+
+def test_model_allowed_whitelist_and_open_prefixes():
+    assert core.model_allowed("anthropic/claude-opus-5")
+    assert core.model_allowed("featherless_ai/huihui-ai/Qwen2.5-14B-Instruct-abliterated-v2")
+    assert core.model_allowed("openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition")
+    assert core.model_allowed("ollama/qwen3.5:27b")
+    assert not core.model_allowed("openai/gpt-5")
+    assert not core.model_allowed("random-string")
+
+
+def test_make_llm_open_model_via_litellm():
+    h = core.Head(key="wild", name="Wild", avatar="🔥", color="#f55",
+                  model_id="featherless_ai/huihui-ai/Huihui-Qwen3.5-27B-abliterated",
+                  persona="p", creativity=9)
+    llm = core.make_llm(h)
+    # non-anthropic => LLM di crewai/litellm con temperatura dalla creatività
+    assert not isinstance(llm, core.ClaudeLLM)
+    assert llm.model == "featherless_ai/huihui-ai/Huihui-Qwen3.5-27B-abliterated"
+    assert llm.temperature == core.temp_for_level(9)

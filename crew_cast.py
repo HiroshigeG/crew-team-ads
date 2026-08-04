@@ -26,6 +26,12 @@ except ImportError:
 
 from crewai import LLM
 
+# Niente eccezioni ingoiate (Fase 4): tutto ciò che prima moriva in un
+# `pass` ora lascia almeno una riga di log — è il difetto che ha reso
+# non diagnosticabile il guasto del 03/08.
+import logging
+log = logging.getLogger("crew_cast")
+
 REQUIRED_KEYS = ("ANTHROPIC_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY")
 
 
@@ -41,12 +47,54 @@ def missing_keys() -> list:
 # only fall back to the paid API when the CLI is missing or fails.
 
 CLAUDE_CLI = shutil.which("claude")
-CLAUDE_TIMEOUT = 240
+# Rete di sicurezza contro processi appesi, non un guinzaglio (D5): i turni
+# veri — ricerca, script, effort alto — possono legittimamente durare minuti.
+# CREW_CLAUDE_TIMEOUT nell'ambiente lo cambia senza toccare il codice.
+CLAUDE_TIMEOUT = 1800
+
+
+def _cli_timeout() -> float:
+    return float(os.getenv("CREW_CLAUDE_TIMEOUT", CLAUDE_TIMEOUT))
+
+
+# Contesto di stanza condiviso (D18). Prima erano 8000 CARATTERI (~2000 token):
+# le teste erano quasi cieche sulla storia. Ora un budget unico e ampio, UGUALE
+# per tutte le teste. Tetto: le teste Featherless (magnum, EVA) hanno finestra
+# 32.768 TOKEN totali (contesto+risposta), quindi il budget resta ben sotto per
+# lasciare spazio a persona, istruzione e a un turno lungo. Chi vuole spingere:
+# CREW_CONTEXT_CHARS (ma oltre ~90k caratteri le teste 72B sforano i 32k token).
+CONTEXT_CHARS = 60000        # ~16k token: enorme vs prima, sicuro sotto i 32k
+ROUTER_CONTEXT_CHARS = 12000  # il router classifica: gli basta il recente
+
+
+def _context_chars() -> int:
+    return int(os.getenv("CREW_CONTEXT_CHARS", CONTEXT_CHARS))
+
+
 _route_log = []          # ["subscription"|"api", …] — front-ends may show this
 
 
 def last_claude_route() -> str:
     return _route_log[-1] if _route_log else "?"
+
+
+# Aggancio additivo per il contratto web (EVENT-CONTRACT §7.2): il fallback
+# del router non deve più essere silenzioso — lezione del 03/08.
+_plan_route_log = []     # ["waves"|"fallback", …]
+
+
+def last_plan_route() -> str:
+    return _plan_route_log[-1] if _plan_route_log else "?"
+
+
+class ClaudeTimeoutError(RuntimeError):
+    """CLI oltre il tempo massimo (D5). `partial` è l'output già prodotto al
+    momento dello stop: il front-end può mostrarlo come bozza nel canale
+    privato della testa invece di buttarlo."""
+
+    def __init__(self, msg: str, partial: str = ""):
+        super().__init__(msg)
+        self.partial = partial
 
 
 class ClaudeLLM:
@@ -55,8 +103,19 @@ class ClaudeLLM:
     Tries the subscription CLI first; falls back to the metered API.
     """
 
-    def __init__(self, model: str):
+    def __init__(self, model: str, effort: str = ""):
         self.model = model
+        # Profondità di ragionamento (D4/D10): "" = default della CLI.
+        # Valori validi: low|medium|high|xhigh|max (un valore ignoto non è
+        # fatale: la CLI avvisa e usa il default — verificato su 2.1.220).
+        self.effort = effort
+        # Rotta dell'ULTIMA chiamata di QUESTA istanza (EVENT-CONTRACT §7.3):
+        # a differenza di last_claude_route() non è globale di processo.
+        self.last_route = "?"
+        # Perché l'ultima chiamata è finita sull'API: il motivo del fallback
+        # non si inghiotte più (l'errore di credito del 03/08 notte è rimasto
+        # invisibile per un'ora proprio per un `pass` qui sotto).
+        self.last_cli_error = ""
         self._api = LLM(model=f"anthropic/{model}")
 
     def _via_cli(self, prompt: str) -> str:
@@ -66,10 +125,13 @@ class ClaudeLLM:
         env.pop("ANTHROPIC_API_KEY", None)
         env.pop("ANTHROPIC_AUTH_TOKEN", None)
         env.pop("ANTHROPIC_BASE_URL", None)
+        cmd = [CLAUDE_CLI, "-p", "--output-format", "text", "--model", self.model]
+        if self.effort:
+            cmd += ["--effort", self.effort]
         r = subprocess.run(
-            [CLAUDE_CLI, "-p", "--output-format", "text", "--model", self.model],
+            cmd,
             input=prompt, capture_output=True, text=True,
-            env=env, timeout=CLAUDE_TIMEOUT,
+            env=env, timeout=_cli_timeout(),
         )
         if r.returncode != 0:
             raise RuntimeError(f"claude CLI exited {r.returncode}: {r.stderr[:200]}")
@@ -79,23 +141,57 @@ class ClaudeLLM:
         return out
 
     def call(self, prompt: str) -> str:
+        cli_error = None
         if CLAUDE_CLI:
             try:
                 out = self._via_cli(prompt)
                 _route_log.append("subscription")
+                self.last_route = "subscription"
+                self.last_cli_error = ""
                 return out
-            except Exception:
-                pass          # fall through to the paid API
-        out = str(self._api.call(prompt))
+            except subprocess.TimeoutExpired as e:
+                # Un timeout non è un guasto: la testa stava ancora lavorando.
+                # Rifare da capo lo stesso lavoro sull'API (che di timeout non
+                # ne ha) sarebbe il peggio dei due mondi: si segnala e decide
+                # il front-end (D5). Niente fallback silenzioso, e quello che
+                # la CLI aveva già scritto si salva come bozza, non si butta.
+                out = e.stdout or ""
+                if isinstance(out, bytes):
+                    out = out.decode("utf-8", "replace")
+                raise ClaudeTimeoutError(
+                    f"claude CLI oltre il tempo massimo ({_cli_timeout():.0f}s):"
+                    " nessun fallback automatico — ritenta o alza"
+                    " CREW_CLAUDE_TIMEOUT",
+                    partial=out.strip(),
+                ) from None
+            except Exception as e:
+                # Fallback all'API sì, ma TRASPARENTE (D5-bis): il motivo
+                # resta leggibile invece di sparire in un `pass`.
+                cli_error = e
+                self.last_cli_error = f"{type(e).__name__}: {str(e)[:200]}"
+        try:
+            out = str(self._api.call(prompt))
+        except Exception as api_error:
+            if cli_error is not None:
+                # Entrambi i canali giù: l'errore dice TUTTA la verità,
+                # non solo l'ultima metà.
+                raise RuntimeError(
+                    "Claude non disponibile su nessun canale — CLI: "
+                    f"{self.last_cli_error} · API: "
+                    f"{type(api_error).__name__}: {str(api_error)[:200]}"
+                ) from api_error
+            raise
         _route_log.append("api")
+        self.last_route = "api"
         return out
 
 
 # NB: Claude 5 models reject `temperature` — the API returns
 # "`temperature` is deprecated for this model." Do not add it back.
 llm_claude_voice = ClaudeLLM("claude-opus-5")
-# The router only classifies who speaks next — a smaller model is plenty here.
-llm_claude_router = ClaudeLLM("claude-sonnet-5")
+# The router only classifies who speaks next — a smaller model is plenty here,
+# and a effort basso: la sua latenza è la reattività percepita della stanza (D4).
+llm_claude_router = ClaudeLLM("claude-sonnet-5", effort="low")
 llm_gemini = LLM(model="gemini/gemini-3.1-pro-preview", temperature=0.6)
 llm_grok = LLM(model="xai/grok-4.5", temperature=0.75,
                additional_drop_params=["stop"])
@@ -139,6 +235,10 @@ ROLE_PERSONAS = {
 }
 
 SEARCH_RE = re.compile(r"^\s*SEARCH_REQUEST:\s*(.+?)\s*\|\|\s*(.+?)\s*$",
+                       re.MULTILINE)
+# D23: richiesta al tool "social intel" (es. il TikTok analyzer). Stessa forma
+# del SEARCH_REQUEST, stesso gate HITL, ma backend diverso (social_intel()).
+SOCIAL_RE = re.compile(r"^\s*SOCIAL_INTEL:\s*(.+?)\s*\|\|\s*(.+?)\s*$",
                        re.MULTILINE)
 
 # ── the cast ───────────────────────────────────────────────────────────────
@@ -210,15 +310,15 @@ def route(transcript: str, msg: str) -> list:
     """Who speaks next. Falls back to keyword match, then the producer."""
     try:
         raw = llm_claude_router.call(
-            ROUTER_PROMPT.format(transcript=transcript[-6000:], msg=msg))
+            ROUTER_PROMPT.format(transcript=transcript[-ROUTER_CONTEXT_CHARS:], msg=msg))
         m = re.search(r"\[.*\]", str(raw), re.DOTALL)
         plan = json.loads(m.group(0)) if m else []
         plan = [s for s in plan
                 if isinstance(s, dict) and s.get("speaker") in CAST][:4]
         if plan:
             return plan
-    except Exception:
-        pass
+    except Exception as e:
+        log.warning("router v1 fallito (%s): fallback alias/producer", e)
     low = msg.lower()
     for alias, key in ALIASES.items():
         if low.startswith(alias):
@@ -241,6 +341,41 @@ def web_search(query: str, n: int = 5) -> str:
     )
 
 
+# D23: tool "social intel" agganciabile dall'esterno (es. il TikTok analyzer).
+# Il repo pubblico NON cabla nessun percorso: si configura via env, così resta
+# pulito e portabile. Il comando riceve la query come ULTIMO argomento e scrive
+# il digest su stdout; qualunque sentinella fra parentesi quadre = non usabile.
+SOCIAL_TOOL_TIMEOUT = int(os.getenv("CREW_SOCIAL_TOOL_TIMEOUT") or 180)
+
+
+def social_intel(query: str) -> str:
+    """Interroga il tool social configurato in CREW_SOCIAL_TOOL_CMD e ne ritorna
+    il digest. Non configurato -> sentinella esplicita (la testa lo dice in
+    chiaro, non inventa). Il comando decide cosa fa: leggere un signal.json già
+    prodotto (gratis) o lanciare uno scrape live (pesante) — al motore non
+    interessa, è un backend a scatola chiusa."""
+    cmd = os.getenv("CREW_SOCIAL_TOOL_CMD")
+    if not cmd:
+        return "[social tool not configured]"
+    import shlex
+    import subprocess
+    try:
+        argv = shlex.split(cmd) + [query]
+        out = subprocess.run(argv, capture_output=True, text=True,
+                             timeout=SOCIAL_TOOL_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return f"[social tool timed out after {SOCIAL_TOOL_TIMEOUT}s]"
+    except Exception as e:
+        log.warning("social tool non eseguibile (%s)", e)
+        return f"[social tool failed: {e}]"
+    if out.returncode != 0:
+        return f"[social tool error rc={out.returncode}: {(out.stderr or '').strip()[:300]}]"
+    digest = (out.stdout or "").strip()
+    if not digest:
+        return "[social tool returned nothing]"
+    return digest[:6000]      # è un digest per la stanza, non un dump
+
+
 def speak(key: str, transcript: str, instruction: str) -> str:
     """One agent takes the floor. May come back with a SEARCH_REQUEST line."""
     c = CAST[key]
@@ -258,6 +393,15 @@ def parse_search_request(reply: str):
     if not m:
         return reply, None, None
     return SEARCH_RE.sub("", reply).strip(), m.group(1).strip(), m.group(2).strip()
+
+
+def parse_social_request(reply: str):
+    """-> (clean_reply, query, why) or (reply, None, None). Gemello di
+    parse_search_request per la riga SOCIAL_INTEL (D23)."""
+    m = SOCIAL_RE.search(reply)
+    if not m:
+        return reply, None, None
+    return SOCIAL_RE.sub("", reply).strip(), m.group(1).strip(), m.group(2).strip()
 
 
 def speak_after_search(key: str, transcript: str, why: str,
@@ -307,8 +451,11 @@ from dataclasses import dataclass, asdict, field
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Gli unici ID verificati sul registry litellm (T2 del brief).
+# opus-4-8 aggiunto (D17): la CLI in abbonamento lo serve anche a effort max
+# (smoke test 03/08), utile come seconda voce di copy accanto a magnum.
 VERIFIED_MODELS = [
     "anthropic/claude-opus-5",
+    "anthropic/claude-opus-4-8",
     "anthropic/claude-sonnet-5",
     "gemini/gemini-3.1-pro-preview",
     "xai/grok-4.5",
@@ -322,25 +469,43 @@ def temp_for_level(level: int) -> float:
 
 
 # Claude 5 rifiuta `temperature` (T1): per quei modelli la creatività si guida
-# a parole. 3-5 è la fascia neutra: nessuna iniezione = comportamento di oggi.
-_CREATIVITY_BLOCKS = (
-    ((0, 2), "CREATIVE RISK SETTING (the Director turned the dial LOW): stay "
-             "with proven territory, prefer the reliable angle, and flag "
-             "anything you are not sure has worked before."),
-    ((6, 8), "CREATIVE RISK SETTING (the Director turned the dial HIGH): push "
-             "past the obvious. Propose at least one genuinely risky angle "
-             "and say why it might fail."),
-    ((9, 10), "CREATIVE RISK SETTING (the Director turned the dial to MAX): "
-              "take real risks. No safe ideas, no hedging — the Director "
-              "will pull you back if needed."),
-)
+# a parole. Scala ancorata punto-per-punto (D8): ogni gradino è una regola
+# CONTABILE, non un aggettivo — «la maggioranza delle idee rischiosa» sposta
+# l'output in modo verificabile, «sii creativo» no. Da 0 a 4 la scala stringe
+# (quanta prudenza), da 6 a 10 allarga (quanto rischio obbligatorio). Il 5
+# resta neutro: nessuna iniezione = comportamento naturale del modello.
+_CREATIVITY_BLOCKS = {
+    0: "CREATIVE RISK SETTING (dial 0/10): only approaches with a citable "
+       "precedent. If you cannot name where it worked before, do not "
+       "propose it.",
+    1: "CREATIVE RISK SETTING (dial 1/10): stay with proven formulas; "
+       "explicitly mark anything non-standard as such.",
+    2: "CREATIVE RISK SETTING (dial 2/10): prefer the reliable angle; one "
+       "cautious variation is allowed.",
+    3: "CREATIVE RISK SETTING (dial 3/10): mostly safe ground — at most one "
+       "idea outside the formula, and flag it as the risky one.",
+    4: "CREATIVE RISK SETTING (dial 4/10): default behaviour with a brake — "
+       "avoid risk the brief does not require.",
+    # 5: neutro — nessuna iniezione.
+    6: "CREATIVE RISK SETTING (dial 6/10): push past the obvious — at least "
+       "one of the ideas you put forward must be genuinely risky, and say "
+       "why it might fail.",
+    7: "CREATIVE RISK SETTING (dial 7/10): make genuinely risky ideas the "
+       "majority of what you propose, and skip the genre's first obvious "
+       "reference.",
+    8: "CREATIVE RISK SETTING (dial 8/10): everything you propose must be "
+       "risky except at most one safe anchor, and no references to existing "
+       "campaigns.",
+    9: "CREATIVE RISK SETTING (dial 9/10): unseen territory only — if it "
+       "feels familiar, discard it before you speak.",
+    10: "CREATIVE RISK SETTING (dial 10/10): nothing a client would approve "
+        "at first glance. Take real risks — the Director will pull you back "
+        "if needed.",
+}
 
 
 def creativity_block(level: int) -> str:
-    for (lo, hi), text in _CREATIVITY_BLOCKS:
-        if lo <= level <= hi:
-            return text
-    return ""
+    return _CREATIVITY_BLOCKS.get(level, "")
 
 
 @dataclass
@@ -353,6 +518,10 @@ class Head:
     model_id: str         # con prefisso provider, es. "anthropic/claude-opus-5"
     persona: str          # SOLO la parte di ruolo: ROOM_RULES si antepone al volo
     creativity: int = 5
+    # Profondità di ragionamento (D4/D10): oggi agisce solo sulle teste
+    # anthropic/* (flag --effort della CLI); per gemini/xai è un no-op
+    # dichiarato finché il passaggio API non è smoke-testato. "" = default.
+    effort: str = ""
 
     def mechanism_label(self) -> str:
         """Il badge onesto: con che meccanismo lo slider agisce QUI (T1)."""
@@ -385,15 +554,36 @@ _DEFAULT_HEAD_META = {
 }
 
 
+# Modelli open oltre la whitelist (D14): Featherless (abbonamento flat,
+# 4.000+ modelli HF via litellm `featherless_ai/`, chiave
+# FEATHERLESS_AI_API_KEY) e Ollama locale (`ollama/`). Il percorso generico
+# di make_llm li serve già: qui si decide solo COSA è ammesso nel roster.
+OPEN_MODEL_PREFIXES = ("featherless_ai/", "openrouter/", "ollama/")
+
+
+def model_allowed(model_id: str) -> bool:
+    return model_id in VERIFIED_MODELS or model_id.startswith(OPEN_MODEL_PREFIXES)
+
+
 def make_llm(head: Head):
     """L'LLM giusto per una testa. anthropic/* passa SEMPRE da ClaudeLLM
     (subscription-first, T4); temperature solo dove è accettata (T1)."""
     if head.model_id.startswith("anthropic/"):
-        return ClaudeLLM(head.model_id.split("/", 1)[1])
+        return ClaudeLLM(head.model_id.split("/", 1)[1], effort=head.effort)
     kwargs = {"model": head.model_id,
               "temperature": temp_for_level(head.creativity)}
     if head.model_id.startswith("xai/"):
         kwargs["additional_drop_params"] = ["stop"]   # T5
+        # D23: Grok Live Search nativo (X + web in tempo reale). Opt-in via env
+        # perché ha un costo per fonte; "mode: auto" lascia decidere a Grok se
+        # cercare (niente ricerca = niente costo di ricerca). Passa come
+        # extra_body -> litellm lo inoltra nel corpo della richiesta xAI.
+        if os.getenv("CREW_GROK_LIVE_SEARCH", "").lower() in ("1", "true", "yes", "on"):
+            kwargs["extra_body"] = {"search_parameters": {
+                "mode": "auto",
+                "sources": [{"type": "x"}, {"type": "web"}],
+                "max_search_results": int(os.getenv("CREW_GROK_LIVE_SEARCH_MAX") or 10),
+            }}
     return LLM(**kwargs)
 
 
@@ -445,17 +635,21 @@ class Roster:
                     # Bug 14: chiave fuori formato — si scarta SOLO questa
                     # testa, le altre restano (nessun motivo di perdere un
                     # intero roster editato a mano per una voce sbagliata).
+                    log.warning("roster: testa con chiave invalida scartata "
+                                "(%r)", d.get("key"))
                     continue
                 heads[key] = Head.from_dict({**d, "key": key})
             if not heads:
                 raise ValueError("roster vuoto")
             return cls(heads)
-        except Exception:
+        except Exception as e:
             # File rotto: da parte (mai cancellare lavoro altrui), poi default.
+            log.warning("roster illeggibile (%s): copio in %s.bad e torno "
+                        "al default", e, path)
             try:
                 shutil.copy(path, path + ".bad")
-            except OSError:
-                pass
+            except OSError as copy_err:
+                log.warning("copia di sicurezza fallita: %s", copy_err)
             return cls.default()
 
     def save(self, path: str = None):
@@ -508,11 +702,14 @@ def build_turn_prompt(head: Head, context: str, instruction: str,
     la conversazione è privata. Puro: testabile senza API."""
     parts = [ROOM_RULES + head.persona]
     block = creativity_block(head.creativity)
-    if block:
+    # Il blocco a parole solo dove la temperatura non esiste (anthropic, T1):
+    # per Gemini/Grok lo slider agisce già via temperatura, e dare entrambi
+    # significava doppio effetto non dichiarato (D6).
+    if block and head.model_id.startswith("anthropic/"):
         parts.append(block)
     if private:
         parts.append(PRIVATE_PREAMBLE)
-    parts.append(f"ROOM TRANSCRIPT (latest last):\n{context[-8000:]}")
+    parts.append(f"ROOM TRANSCRIPT (latest last):\n{context[-_context_chars():]}")
     parts.append(f"The floor is yours now. Your brief for this turn: "
                  f"{instruction}\nSpeak as {head.name}:")
     return "\n\n".join(parts)
@@ -535,7 +732,7 @@ def build_after_search_prompt(head: Head, context: str, why: str,
     parts = [ROOM_RULES + head.persona]
     if private:
         parts.append(PRIVATE_PREAMBLE)
-    parts.append(f"ROOM TRANSCRIPT (latest last):\n{context[-8000:]}")
+    parts.append(f"ROOM TRANSCRIPT (latest last):\n{context[-_context_chars():]}")
     parts.append(f"You had asked to search the web because: {why}\n{outcome}\n"
                  f"Now give your turn in full, as {head.name} "
                  f"(no SEARCH_REQUEST line this time):")
@@ -547,6 +744,42 @@ def head_speak(roster: Roster, key: str, context: str, instruction: str,
     head = roster.heads[key]
     prompt = build_turn_prompt(head, context, instruction, private)
     return str(roster.llm(key).call(prompt)).strip()
+
+
+# Visione (D15): in v1.1 SOLO le teste Gemini leggono immagini — la
+# GEMINI_API_KEY funziona e il percorso multimodale di litellm è pulito.
+# Additivo: non tocca head_speak né la CLI di Claude (che è text-only).
+def vision_capable(model_id: str) -> bool:
+    return model_id.startswith("gemini/")
+
+
+def head_study_image(roster: Roster, key: str, context: str, instruction: str,
+                     image_b64: str, media_type: str = "image/png") -> str:
+    head = roster.heads[key]
+    if not vision_capable(head.model_id):
+        raise ValueError(
+            f"{key}: il modello {head.model_id} non legge immagini "
+            "(visione solo su teste Gemini in v1.1)")
+    import litellm
+    prompt = build_turn_prompt(head, context, instruction)
+    messages = [{"role": "user", "content": [
+        {"type": "text", "text": prompt},
+        {"type": "image_url",
+         "image_url": {"url": f"data:{media_type};base64,{image_b64}"}},
+    ]}]
+    resp = litellm.completion(model=head.model_id,
+                             temperature=temp_for_level(head.creativity),
+                             messages=messages)
+    return str(resp.choices[0].message.content).strip()
+
+
+def vision_head(roster: Roster) -> "str | None":
+    """La prima testa capace di visione nel roster (per lo smistamento
+    automatico delle immagini)."""
+    for k, h in roster.heads.items():
+        if vision_capable(h.model_id):
+            return k
+    return None
 
 
 def head_speak_after_search(roster: Roster, key: str, context: str, why: str,
@@ -686,13 +919,16 @@ def route_plan(roster: Roster, transcript: str, msg: str) -> list:
         for h in roster.heads.values())
     try:
         raw = llm_claude_router.call(PLAN_PROMPT.format(
-            cast_lines=cast_lines, transcript=transcript[-6000:], msg=msg))
+            cast_lines=cast_lines, transcript=transcript[-ROUTER_CONTEXT_CHARS:], msg=msg))
         waves = parse_wave_plan(raw, set(roster.keys()))
         if waves:
+            _plan_route_log.append("waves")
             return waves
-    except Exception:
-        pass
+    except Exception as e:
+        log.warning("router a ondate fallito (%s): fallback sequenziale", e)
     # Fallback: il router v1 (o keyword/producer) in ondate da un passo l'una.
+    # Non più silenzioso: last_plan_route() lo espone al front-end (§7.2).
+    _plan_route_log.append("fallback")
     steps = [s for s in route(transcript, msg) if s["speaker"] in roster.keys()]
     if not steps:
         first = next(iter(roster.keys()))

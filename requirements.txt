@@ -10,3 +10,9 @@ ddgs
 # La TUI (room_tui.py).
 textual>=8.0
 # Dev/test: .venv/bin/pip install pytest pytest-asyncio
+# Il ponte web (server/, Fase 3).
+fastapi
+uvicorn[standard]
+# Upload documenti nel ponte web (Fase 7).
+pdfplumber
+python-multipart
