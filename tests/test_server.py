@@ -1,5 +1,7 @@
 """Test offline del ponte web (server/main.py): core monkeypatchato,
 nessuna chiamata LLM. Verifica che il server parli il contratto."""
+import os
+
 import crew_cast as core
 from fastapi.testclient import TestClient
 
@@ -332,6 +334,39 @@ def test_room_cannot_be_fully_benched(tmp_path, monkeypatch):
         {"type": "head_active", "key": keys[-1], "active": False}))
     assert keys[-1] not in room.disabled
     assert len({k for k in room.roster.keys() if k not in room.disabled}) >= 1
+
+
+def test_keys_onboarding_writes_env_and_filters(tmp_path, monkeypatch):
+    """D25: /api/keys accetta solo la whitelist, scrive il .env indicato da
+    CREW_ENV_FILE, aggiorna os.environ e non rimanda MAI i valori indietro."""
+    envfile = tmp_path / "dotenv"
+    envfile.write_text("GEMINI_API_KEY=vecchia\n# commento\n", encoding="utf-8")
+    monkeypatch.setenv("CREW_ENV_FILE", str(envfile))
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+
+    with TestClient(app) as client:
+        r = client.post("/api/keys", json={
+            "XAI_API_KEY": "xai-test-123",
+            "GEMINI_API_KEY": "nuova-456",
+            "PATH": "/tmp/evil",              # fuori whitelist: ignorata
+            "ANTHROPIC_API_KEY": "   ",       # vuota: ignorata
+        })
+    assert r.status_code == 200
+    body = r.json()
+    assert body["saved"] == ["GEMINI_API_KEY", "XAI_API_KEY"]
+    assert "xai-test-123" not in r.text        # i valori non tornano indietro
+
+    disk = envfile.read_text(encoding="utf-8")
+    assert "XAI_API_KEY=xai-test-123" in disk
+    assert "GEMINI_API_KEY=nuova-456" in disk   # aggiornata in place
+    assert "vecchia" not in disk
+    assert "# commento" in disk                 # il resto del file sopravvive
+    assert "PATH=/tmp/evil" not in disk
+    assert os.environ["XAI_API_KEY"] == "xai-test-123"
+
+    with TestClient(app) as client:             # payload tutto invalido -> 400
+        r = client.post("/api/keys", json={"PATH": "/tmp/evil"})
+    assert r.status_code == 400
 
 
 def test_roster_add_head_at_runtime(tmp_path, monkeypatch):

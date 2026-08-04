@@ -116,6 +116,52 @@ def status() -> dict:
     }
 
 
+# ── onboarding chiavi (D25): il primo accesso le chiede e le scrive in .env ──
+# Il repo non contiene MAI chiavi: chi clona apre la stanza, la UI vede le
+# missing_keys e propone il modulo. Le chiavi finiscono solo nel .env locale
+# (gitignorato) e in os.environ del processo. Whitelist chiusa: nomi noti,
+# niente scrittura arbitraria di env. I valori non si loggano e non si
+# rimandano mai indietro.
+_KEY_WHITELIST = (
+    "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY",
+    "FEATHERLESS_AI_API_KEY", "OPENROUTER_API_KEY",
+)
+
+
+def _env_file() -> Path:
+    return Path(os.getenv("CREW_ENV_FILE") or (REPO_ROOT / ".env"))
+
+
+@app.post("/api/keys")
+async def set_keys(payload: dict) -> dict:
+    accepted: dict[str, str] = {}
+    for name, value in (payload or {}).items():
+        if name in _KEY_WHITELIST and isinstance(value, str) and value.strip():
+            accepted[name] = value.strip()
+    if not accepted:
+        raise HTTPException(status_code=400, detail="nessuna chiave valida")
+    path = _env_file()
+    lines: list[str] = []
+    if path.is_file():
+        lines = path.read_text(encoding="utf-8").splitlines()
+    for name, value in accepted.items():
+        row = f"{name}={value}"
+        for i, line in enumerate(lines):
+            if line.strip().startswith(f"{name}="):
+                lines[i] = row
+                break
+        else:
+            lines.append(row)
+        os.environ[name] = value          # il processo le vede subito
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    tmp.chmod(0o600)
+    os.replace(tmp, path)
+    core.log.info("onboarding: salvate %d chiavi (%s)", len(accepted),
+                  ", ".join(sorted(accepted)))   # nomi sì, valori mai
+    return {"saved": sorted(accepted), "missing_keys": core.missing_keys()}
+
+
 # ── storico sessioni (Fase 5.5): i transcript di RoomSession, in lettura ──
 _STAMP_RE = re.compile(r"^[0-9]{8}-[0-9]{6}(?:-[0-9]+)?$")
 

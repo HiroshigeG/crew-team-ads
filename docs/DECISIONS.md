@@ -481,3 +481,40 @@ tipo. Contratto: `kind` su `search_pending`/`search_result` (retro-compatibile).
 UI: GateBlock rietichetta («tool social» + icona radar). `.env.example`
 aggiornato. Test: parser, `social_intel` (off + comando), flag Live Search, e un
 e2e che prova che il gate social usa il backend giusto e non tocca `web_search`.
+
+## D24 — 2026-08-04 · Chainlit rimossa (FATTO)
+
+**Decisione**: `app.py`, `chainlit.md` e `.chainlit/` escono dal repo. D1
+diceva «la web app sostituisce Chainlit»: la sostituzione è compiuta, la
+faccia storica non ha più motivo di esistere nel working tree.
+
+**Contesto**: era una chat lineare sull'API v1 del core — niente ondate a
+video, niente cross-talk, nessuna vista di stanza. I suoi comportamenti buoni
+(intake, gate fail-closed, errori per testa) vivono nella ADV Room dal
+porting di Fase 3-4. La diagnosi resta in `docs/recon/C-chainlit.md`; il
+codice resta nella storia git (recuperabile con un checkout).
+
+**Conseguenze**: README aggiornato (due facce, non tre); `chainlit` non era
+nei requirements, quindi nessun cambio di dipendenze.
+
+## D25 — 2026-08-04 · Onboarding chiavi al primo accesso (FATTO)
+
+**Decisione**: chi apre la ADV Room senza chiavi non viene più rimandato
+all'editor di testo: la UI mostra un **modulo di primo accesso** (KeyGate) che
+chiede le chiavi mancanti e le invia a `POST /api/keys`, che le scrive nel
+`.env` locale (gitignorato) e in `os.environ` del processo. È il prerequisito
+per pubblicare la ADV Room: **il repo non contiene mai chiavi**, ognuno
+collega le proprie al primo avvio.
+
+**Guardrail**: whitelist chiusa dei nomi (le 3 obbligatorie + Featherless/
+OpenRouter facoltative) — niente scrittura arbitraria di variabili; valori mai
+loggati e mai rimandati indietro (la risposta porta solo i NOMI salvati);
+scrittura atomica con permessi 600; il resto del `.env` (commenti, altre
+variabili) sopravvive. Il caso «server non raggiungibile» resta un banner:
+non c'è nessuno a cui POSTare. `CREW_ENV_FILE` permette ai test di puntare
+un file temporaneo.
+
+**Conseguenze**: additive. Nuovo endpoint REST + componente `KeyGate.tsx`;
+il banner chiavi in `App.tsx` è sostituito dal gate a schermo intero (il
+banner resta solo per il server irraggiungibile). Test: whitelist, update
+in place del `.env`, valori mai in risposta, 400 su payload invalido.

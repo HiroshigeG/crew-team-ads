@@ -11,6 +11,7 @@ import { Workspace } from './components/Workspace'
 import { PrivateChat } from './components/PrivateChat'
 import { RosterEditor } from './components/RosterEditor'
 import { SessionHistory } from './components/SessionHistory'
+import { KeyGate } from './components/KeyGate'
 
 /* Pannelli ridimensionabili: react-resizable-panels (MIT), la stessa base
    del componente `resizable` di shadcn/ui approvato in docs/recon/B-componenti.md. */
@@ -53,13 +54,22 @@ export default function App({
     [room.entries, rosterRev],
   )
 
+  // D25: chiavi mancanti al primo accesso -> onboarding a schermo intero,
+  // non un banner che rimanda all'editor di testo. Il caso "server non
+  // raggiungibile" resta un banner: lì non c'è nessuno a cui POSTare.
+  const realMissing = missingKeys.filter((k) => k.endsWith('_API_KEY'))
+  if (!demo && realMissing.length > 0) {
+    return <KeyGate missing={realMissing} />
+  }
+
   const banner =
     missingKeys.length > 0 ? (
       <div className="flex items-center gap-2 border-b border-danger/40 bg-danger/10 px-4 py-2 text-[13px] text-danger">
         <KeyRound className="size-4 shrink-0" aria-hidden />
         <span>
-          Chiavi mancanti: <span className="font-mono">{missingKeys.join(', ')}</span>.
-          La stanza non parte finché non sono nel file <span className="font-mono">.env</span> accanto al server.
+          Server non raggiungibile: avvialo con{' '}
+          <span className="font-mono">.venv/bin/uvicorn server.main:app --port 8000</span>{' '}
+          e ricarica la pagina.
         </span>
       </div>
     ) : room.status === 'closed' ? (
