@@ -72,7 +72,7 @@ The default brief is a **fictional example** (an invented maison, "AURELIA") so 
 
 MIT — see [LICENSE](LICENSE).
 
-## Le tre facce dello stesso motore
+## Le due facce dello stesso motore
 
 `crew_cast.py` è il cervello unico — router a ondate, gate di ricerca,
 roster editabile, sessioni persistite. Nessuna faccia lo reimplementa:
@@ -82,7 +82,6 @@ tutte lo renderizzano.
 |---|---|---|
 | **TUI** (`room_tui.py`) | chi lavora in terminale | `.venv/bin/python3 room_tui.py` |
 | **Web / ADV Room** (`server/` + `web/`) | le sessioni ADV col cliente | `.venv/bin/uvicorn server.main:app --port 8000` → `http://localhost:8000` |
-| **Chainlit** (`app.py`) | storica, superata | `.venv/bin/chainlit run app.py` |
 
 **Quando usare quale.** Non sono due porte sulla stessa stanza: sono due
 stanze. La **TUI è il laboratorio** — da soli, a mani sporche: brainstorm
@@ -127,6 +126,10 @@ cd web && npm install && npm run build && cd ..   # solo la prima volta
 .venv/bin/uvicorn server.main:app --port 8000     # poi http://localhost:8000
 ```
 
+Al **primo accesso** la stanza ti chiede le chiavi API che mancano e le
+scrive nel `.env` locale accanto al server (gitignorato: non entrano mai nel
+repo). In alternativa: copia `.env.example` in `.env` e compilalo a mano.
+
 - **Contratto eventi**: server e browser parlano il protocollo di
   `docs/EVENT-CONTRACT.md` (WebSocket, eventi tipizzati TS+Python 1:1).
 - **Timeline agente-agente**: chi risponde a chi viene dal campo `to` del
@@ -147,10 +150,9 @@ cd web && npm install && npm run build && cd ..   # solo la prima volta
 
 ## Che fine ha fatto Chainlit (app.py)
 
-È stata la prima faccia web e resta avviabile
-(`.venv/bin/chainlit run app.py`), ma è **superata dalla ADV Room**: era una
-chat lineare — niente ondate parallele a video, niente cross-talk visibile,
-nessuna vista di stanza — e usa ancora l'API v1 del core. I suoi
-comportamenti buoni (intake, gate di ricerca fail-closed, errori contenuti
-per testa) sono stati portati nella web app; la diagnosi completa è in
-`docs/recon/C-chainlit.md`.
+È stata la prima faccia web ed è stata **rimossa**: la ADV Room la sostituisce
+in tutto (era una chat lineare — niente ondate parallele a video, niente
+cross-talk visibile, nessuna vista di stanza — e usava ancora l'API v1 del
+core). I suoi comportamenti buoni (intake, gate di ricerca fail-closed, errori
+contenuti per testa) vivono nella web app; la diagnosi che ne ha decretato la
+fine resta in `docs/recon/C-chainlit.md`, e il codice nella storia git.
