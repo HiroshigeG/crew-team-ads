@@ -518,3 +518,26 @@ un file temporaneo.
 il banner chiavi in `App.tsx` è sostituito dal gate a schermo intero (il
 banner resta solo per il server irraggiungibile). Test: whitelist, update
 in place del `.env`, valori mai in risposta, 400 su payload invalido.
+
+## D26 — 2026-08-04 · La faccia terminale diventa privata: il repo pubblico è la ADV Room (FATTO)
+
+**Decisione**: il repo pubblico contiene **solo la ADV Room** (motore +
+server + web + docs). Tutta la faccia terminale — `room_tui.py`, i demo CLI
+storici (`room.py`, `room.sh`, `demo.sh`, `demo_listener.py`,
+`brainstorm_crew.py`, `step1.py`), `launcher.sh`, `BUILD_BRIEF.md`,
+`tests/test_tui.py` — esce dal tracking e resta **privata, solo in locale**
+(«quella la uso io»). README riscritto da zero come ADV Room.
+
+**Meccanica**: `git rm --cached` (i file restano su disco: `crew-tui`
+continua a funzionare identico) + `.gitignore` perché non rientrino;
+snapshot completo nel branch **locale** `tui-local` (mai pushato) come rete
+di sicurezza. `textual` esce dai requirements pubblici (serve solo alla TUI:
+in locale è già nel venv; se si ricrea il venv, `pip install textual`).
+
+**Avvertenze**: (1) i file della TUI restano nella **storia pubblica** dei
+commit fino a oggi — innocui e già sanificati; per toglierli anche dalla
+storia servirebbe un force-push di riscrittura, non fatto. (2) ⚠️ un
+`git clean -fd` nella working copy CANCELLEREBBE i file ignorati della TUI:
+mai lanciarlo qui senza controllare; il recupero è il branch `tui-local`.
+(3) I test locali restano 116 (pytest raccoglie `test_tui.py` dal disco);
+un clone pubblico ne vede ~46 (core + server), ed è giusto così.

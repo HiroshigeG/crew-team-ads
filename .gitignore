@@ -19,3 +19,17 @@ venv/
 
 # os
 .DS_Store
+
+# faccia terminale (TUI + demo CLI): privata, vive solo in locale (D26).
+# I file restano su disco e nel branch locale `tui-local`; il repo pubblico
+# e' la ADV Room. Non ri-tracciarli.
+room_tui.py
+room.py
+room.sh
+demo.sh
+demo_listener.py
+brainstorm_crew.py
+step1.py
+launcher.sh
+BUILD_BRIEF.md
+tests/test_tui.py

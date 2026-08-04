@@ -7,8 +7,6 @@ litellm
 # Set XAI_API_KEY in your .env.
 # Keyless web search for the room's gated SEARCH_REQUEST protocol.
 ddgs
-# La TUI (room_tui.py).
-textual>=8.0
 # Dev/test: .venv/bin/pip install pytest pytest-asyncio
 # Il ponte web (server/, Fase 3).
 fastapi
