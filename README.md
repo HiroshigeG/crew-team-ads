@@ -72,11 +72,33 @@ The default brief is a **fictional example** (an invented maison, "AURELIA") so 
 
 MIT — see [LICENSE](LICENSE).
 
+## Le tre facce dello stesso motore
+
+`crew_cast.py` è il cervello unico — router a ondate, gate di ricerca,
+roster editabile, sessioni persistite. Nessuna faccia lo reimplementa:
+tutte lo renderizzano.
+
+| Faccia | Per chi | Avvio |
+|---|---|---|
+| **TUI** (`room_tui.py`) | chi lavora in terminale | `.venv/bin/python3 room_tui.py` |
+| **Web / ADV Room** (`server/` + `web/`) | le sessioni ADV col cliente | `.venv/bin/uvicorn server.main:app --port 8000` → `http://localhost:8000` |
+| **Chainlit** (`app.py`) | storica, superata | `.venv/bin/chainlit run app.py` |
+
+**Quando usare quale.** Non sono due porte sulla stessa stanza: sono due
+stanze. La **TUI è il laboratorio** — da soli, a mani sporche: brainstorm
+veloci, prove di personas e creatività, lavoro sul motore; carica
+`roster.json` (il cast base a 4 teste) e vive di tastiera. La **web è la
+sala riunioni** — quando qualcuno guarda o il risultato va consegnato:
+carica `roster.adv.json` (il cast da campagna a 9 teste), rende cliccabile
+ogni decisione davanti a testimoni (gate, proposte, versioni col diff) e ha
+le cose da riunione: export del dossier, storico, filtri, chat private.
+Regola in una riga: *da soli → Terminale; con un cliente accanto o un
+dossier da consegnare → browser.*
+
 ## La stanza in terminale (room_tui.py)
 
-Avvio: doppio click su `CrewRoom.app`, oppure
-`.venv/bin/python3 room_tui.py`. (La vecchia app browser resta:
-`.venv/bin/chainlit run app.py`.)
+Avvio: `.venv/bin/python3 room_tui.py` (un launcher cliccabile, se lo vuoi,
+è un `.app` locale di poche righe: non viaggia col repo).
 
 - **Brief**: 4 domande all'avvio, poi la stanza è tua. Parla a tutti o a
   qualcuno (`cd: …`, `cd, chiedi a social …`).
@@ -93,3 +115,42 @@ Avvio: doppio click su `CrewRoom.app`, oppure
   stanza non la vede e la testa non la ricorda nei turni pubblici.
 - **🔍**: ogni ricerca web resta dietro il tuo permesso (query + perché).
 - Transcript in `transcripts/`, salvato a ogni turno.
+
+## La stanza nel browser (server/ + web/)
+
+La faccia per le sessioni ADV con il cliente accanto: tre colonne
+(contesto · timeline · proposte), dark, nove teste di default
+(`roster.adv.json`). Un solo processo serve tutto:
+
+```bash
+cd web && npm install && npm run build && cd ..   # solo la prima volta
+.venv/bin/uvicorn server.main:app --port 8000     # poi http://localhost:8000
+```
+
+- **Contratto eventi**: server e browser parlano il protocollo di
+  `docs/EVENT-CONTRACT.md` (WebSocket, eventi tipizzati TS+Python 1:1).
+- **Timeline agente-agente**: chi risponde a chi viene dal campo `to` del
+  router, mai da euristiche sul testo; scambi lunghi fra soli agenti
+  collassabili; filtro per testa e ricerca testuale.
+- **HITL ovunque**: gate di ricerca (approva · riscrivi · nega, uno alla
+  volta), decisione sulle proposte con diff fra versioni, stop che lascia
+  finire i turni in volo e ferma le ondate in coda.
+- **Stati onesti**: card con lo stato vivo di ogni testa (errore col motivo
+  leggibile), banner «instradamento ridotto» con le **@menzioni** come via
+  d'uscita (`@cd`, `@copy`, …), badge `abbonamento`/`API` per turno.
+- **In più della TUI**: chat private 1:1 stagne, collab mode con contatore
+  (tetto 20 giri), storico sessioni in sola lettura, export campagna in
+  Markdown/PDF con le fonti delle ricerche approvate.
+- Sviluppo UI: `cd web && npm run dev` (proxy su `:8000`); demo senza motore:
+  `http://localhost:5173/?demo=1`. Test: `npm test` (vitest) e
+  `tests/test_server.py` (contratto, offline).
+
+## Che fine ha fatto Chainlit (app.py)
+
+È stata la prima faccia web e resta avviabile
+(`.venv/bin/chainlit run app.py`), ma è **superata dalla ADV Room**: era una
+chat lineare — niente ondate parallele a video, niente cross-talk visibile,
+nessuna vista di stanza — e usa ancora l'API v1 del core. I suoi
+comportamenti buoni (intake, gate di ricerca fail-closed, errori contenuti
+per testa) sono stati portati nella web app; la diagnosi completa è in
+`docs/recon/C-chainlit.md`.
