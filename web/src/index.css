@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+/* Token dal DESIGN.md di progetto: neutri OKLCH tinti verso il blu-ardesia,
+   strategia Restrained. Il colore saturo appartiene agli agenti (roster). */
+@theme {
+  --color-bg: oklch(0.17 0.012 260);
+  --color-raised: oklch(0.21 0.014 260);
+  --color-lifted: oklch(0.24 0.016 260);
+  --color-edge: oklch(0.3 0.014 260);
+  --color-ink: oklch(0.93 0.008 260);
+  --color-dim: oklch(0.68 0.012 260);
+  --color-faint: oklch(0.5 0.012 260);
+  --color-accent: oklch(0.72 0.11 250);
+  --color-ok: oklch(0.72 0.13 150);
+  --color-warn: oklch(0.78 0.13 85);
+  --color-danger: oklch(0.65 0.16 25);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.45;
+  font-feature-settings: "kern" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Etichette maiuscole: sempre spaziate (mai caps senza letterspacing). */
+.label-caps {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Scrollbar discreta, coerente col tema (solo colore, niente forme custom). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge) transparent;
+}
