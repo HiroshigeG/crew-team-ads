@@ -11,7 +11,6 @@ const HEAD: Head = {
 
 describe('AgentCard', () => {
   it.each([
-    ['idle', 'in ascolto'],
     ['thinking', 'sta pensando'],
     ['speaking', 'sta scrivendo'],
     ['searching', 'sta cercando'],
@@ -19,6 +18,13 @@ describe('AgentCard', () => {
   ] as const)('stato %s → «%s»', (state, label) => {
     render(<AgentCard head={HEAD} live={{ state, detail: null }} />)
     expect(screen.getByText(label)).toBeTruthy()
+  })
+
+  it('a riposo la card è compatta: nessuna riga di stato (05/08)', () => {
+    // Con 9 teste la colonna deve stare a video: "in ascolto" non si
+    // stampa più — lo stato compare solo quando la testa fa qualcosa.
+    render(<AgentCard head={HEAD} live={{ state: 'idle', detail: null }} />)
+    expect(screen.queryByText('in ascolto')).toBeNull()
   })
 
   it('error mostra «non disponibile» E il motivo leggibile', () => {

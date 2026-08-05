@@ -94,6 +94,7 @@ export default function App({
             <Panel defaultSize={280} minSize={230} maxSize={400}>
               <Sidebar
                 state={state}
+                demo={demo}
                 onOpenPrivate={setPrivateHead}
                 onEditRoster={() => setEditingRoster(true)}
                 onOpenHistory={() => setHistoryOpen(true)}
@@ -107,7 +108,7 @@ export default function App({
             </Panel>
             <ResizeBar />
             <Panel defaultSize={340} minSize={280} maxSize={460}>
-              <Workspace state={state} />
+              <Workspace state={state} demo={demo} />
             </Panel>
           </Group>
         </div>
@@ -122,14 +123,16 @@ export default function App({
             >
               <PanelLeft className="size-5" aria-hidden />
             </button>
-            <h1 className="truncate text-[15px] font-semibold">{CAMPAIGN.name}</h1>
+            <h1 className="truncate text-[15px] font-semibold">
+              {demo ? CAMPAIGN.name : 'ADV Room'}
+            </h1>
           </header>
 
           <div className="min-h-0 flex-1 overflow-y-auto">
             <div className="flex h-[78dvh] flex-col border-b border-edge">
               <Timeline state={state} />
             </div>
-            <Workspace state={state} />
+            <Workspace state={state} demo={demo} />
           </div>
 
           <AnimatePresence>
@@ -159,6 +162,7 @@ export default function App({
                   </button>
                   <Sidebar
                     state={state}
+                    demo={demo}
                     onOpenPrivate={(k) => {
                       setDrawer(false)
                       setPrivateHead(k)

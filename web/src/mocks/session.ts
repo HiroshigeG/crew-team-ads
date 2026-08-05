@@ -31,6 +31,17 @@ export const DECISIONS_LOG = [
   'Il prodotto resta l’eroe in ogni formato',
 ]
 
+/** La stanza VERA parte vuota (05/08): CAMPAIGN e DECISIONS_LOG qui sopra
+ *  vivono SOLO in modalità demo (`?demo`). Questo è il primo avvio reale. */
+export const BLANK_CAMPAIGN = {
+  name: 'Nuova campagna',
+  brand: '',
+  objective: '',
+  budget: '',
+  target: '',
+  kpi: '',
+}
+
 export const FEED: FeedEntry[] = [
   {
     type: 'director_echo',
