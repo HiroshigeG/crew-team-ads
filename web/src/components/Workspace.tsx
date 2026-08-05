@@ -97,7 +97,9 @@ export function Workspace({
     'campagna'
 
   return (
-    <aside className="flex h-full flex-col overflow-y-auto bg-raised">
+    // 05/08: non più colonna a sé — vive sotto campagna+brief nella colonna
+    // del LAVORO (sinistra); lo scroll è del contenitore in App.
+    <div className="shrink-0">
       <div className="border-b border-edge px-4 py-4">
         <p className="label-caps">Proposta in lavorazione</p>
         {demo ? (
@@ -201,7 +203,7 @@ export function Workspace({
         onEdit={(text) => setProposal((p) => ({ ...p, body: text }))}
       />
 
-      <section className="mt-auto px-4 py-4">
+      <section className="px-4 py-4">
         <div className="rounded-lg border border-edge bg-bg px-3 py-3">
           <div className="flex items-center justify-between">
             <p className="label-caps flex items-center gap-1.5">
@@ -281,7 +283,26 @@ export function Workspace({
           </div>
         </div>
       </section>
-    </aside>
+
+      {/* Decisioni prese: seguono la proposta (05/08, prima nella Sidebar). */}
+      <section className="border-t border-edge px-4 py-4">
+        <p className="label-caps pb-2">Decisioni prese</p>
+        {(demo ? DECISIONS_LOG : []).length > 0 ? (
+          <ul className="space-y-2">
+            {DECISIONS_LOG.map((d) => (
+              <li key={d} className="flex gap-2 text-[13px] leading-snug text-dim">
+                <Check className="mt-0.5 size-3.5 shrink-0 text-ok" aria-hidden />
+                <span>{d}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-[13px] leading-snug text-faint">
+            Ancora nessuna: arrivano man mano che la stanza decide.
+          </p>
+        )}
+      </section>
+    </div>
   )
 }
 

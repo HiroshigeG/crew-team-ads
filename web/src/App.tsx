@@ -6,6 +6,7 @@ import { foldEvents } from './state/fold'
 import { CAMPAIGN } from './mocks/session'
 import { RoomContext, useRoom } from './lib/socket'
 import { Sidebar } from './components/Sidebar'
+import { RoomPanel } from './components/RoomPanel'
 import { Timeline } from './components/Timeline'
 import { Workspace } from './components/Workspace'
 import { PrivateChat } from './components/PrivateChat'
@@ -90,25 +91,29 @@ export default function App({
         {/* ─── Desktop: tre colonne ridimensionabili ─── */}
         <div className="hidden min-h-0 flex-1 lg:block">
           {/* Taglie numeriche = pixel (API v4): 280 e 340 come da specifica */}
+          {/* 05/08: a sinistra il LAVORO (campagna+brief+proposta), al centro
+              la conversazione, a destra la REGIA (stanza, panchina, collab). */}
           <Group orientation="horizontal" className="h-full">
-            <Panel defaultSize={280} minSize={230} maxSize={400}>
-              <Sidebar
-                state={state}
-                demo={demo}
-                onOpenPrivate={setPrivateHead}
-                onEditRoster={() => setEditingRoster(true)}
-                onOpenHistory={() => setHistoryOpen(true)}
-                disabled={disabled}
-                onToggleActive={toggleActive}
-              />
+            <Panel defaultSize={330} minSize={280} maxSize={460}>
+              <div className="flex h-full flex-col overflow-y-auto bg-raised">
+                <Sidebar demo={demo} />
+                <Workspace state={state} demo={demo} />
+              </div>
             </Panel>
             <ResizeBar />
             <Panel minSize={420}>
               <Timeline state={state} />
             </Panel>
             <ResizeBar />
-            <Panel defaultSize={340} minSize={280} maxSize={460}>
-              <Workspace state={state} demo={demo} />
+            <Panel defaultSize={290} minSize={250} maxSize={400}>
+              <RoomPanel
+                state={state}
+                onOpenPrivate={setPrivateHead}
+                onEditRoster={() => setEditingRoster(true)}
+                onOpenHistory={() => setHistoryOpen(true)}
+                disabled={disabled}
+                onToggleActive={toggleActive}
+              />
             </Panel>
           </Group>
         </div>
@@ -132,6 +137,7 @@ export default function App({
             <div className="flex h-[78dvh] flex-col border-b border-edge">
               <Timeline state={state} />
             </div>
+            <Sidebar demo={demo} />
             <Workspace state={state} demo={demo} />
           </div>
 
@@ -160,9 +166,8 @@ export default function App({
                   >
                     <X className="size-4" aria-hidden />
                   </button>
-                  <Sidebar
+                  <RoomPanel
                     state={state}
-                    demo={demo}
                     onOpenPrivate={(k) => {
                       setDrawer(false)
                       setPrivateHead(k)
