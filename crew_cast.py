@@ -15,6 +15,8 @@ import os
 import re
 import shutil
 import subprocess
+import urllib.error
+import urllib.request
 
 try:
     from dotenv import load_dotenv
@@ -183,6 +185,69 @@ class ClaudeLLM:
             raise
         _route_log.append("api")
         self.last_route = "api"
+        return out
+
+
+def _grok_timeout() -> float:
+    """I giri di ricerca server-side possono essere lenti (5+ tool call in un
+    turno, misurato dal vivo): default largo, regolabile via env."""
+    return float(os.getenv("CREW_GROK_TIMEOUT") or 180)
+
+
+def grok_output_text(data: dict) -> str:
+    """Il testo del turno da una risposta /v1/responses di xAI: si saltano i
+    blocchi `reasoning` e `custom_tool_call` (i giri di ricerca interni di
+    Grok) e si concatenano gli `output_text` dei blocchi `message`."""
+    parts = []
+    for item in data.get("output") or []:
+        if item.get("type") != "message":
+            continue
+        for c in item.get("content") or []:
+            if c.get("type") == "output_text" and c.get("text"):
+                parts.append(c["text"])
+    return "\n".join(parts).strip()
+
+
+class GrokLiveLLM:
+    """Drop-in per crewai.LLM per le teste xai/ con la ricerca live (D23-bis).
+
+    05/08/2026: xAI ha spento la Live Search sulle chat completions — HTTP 410
+    «Live search is deprecated» su `search_parameters`, e il formato nuovo
+    `tools: [{"type": "live_search"}]` risponde 410 uguale. I tool server-side
+    (web_search, x_search) vivono SOLO sull'endpoint /v1/responses, che
+    litellm/crewai non attraversano: questo client minimale ci parla diretto.
+    Stesso contratto di ClaudeLLM: `.model` + `.call(prompt)`. Grok decide da
+    solo se e quanto cercare; le fonti recuperate si pagano — l'opt-in resta
+    CREW_GROK_LIVE_SEARCH, come prima.
+    """
+
+    ENDPOINT = "https://api.x.ai/v1/responses"
+
+    def __init__(self, model: str, temperature: float):
+        self.model = model                # nome nudo, es. "grok-4.5"
+        self.temperature = temperature
+
+    def call(self, prompt: str) -> str:
+        payload = {
+            "model": self.model,
+            "input": [{"role": "user", "content": prompt}],
+            "temperature": self.temperature,
+            "tools": [{"type": "web_search"}, {"type": "x_search"}],
+        }
+        req = urllib.request.Request(
+            self.ENDPOINT, json.dumps(payload).encode(),
+            {"Authorization": f"Bearer {os.getenv('XAI_API_KEY', '')}",
+             "Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=_grok_timeout()) as r:
+                data = json.loads(r.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode("utf-8", "replace")[:200]
+            raise RuntimeError(
+                f"xAI responses API: HTTP {e.code} — {detail}") from None
+        out = grok_output_text(data)
+        if not out:
+            raise RuntimeError("xAI responses API: risposta senza testo")
         return out
 
 
@@ -574,16 +639,13 @@ def make_llm(head: Head):
               "temperature": temp_for_level(head.creativity)}
     if head.model_id.startswith("xai/"):
         kwargs["additional_drop_params"] = ["stop"]   # T5
-        # D23: Grok Live Search nativo (X + web in tempo reale). Opt-in via env
-        # perché ha un costo per fonte; "mode: auto" lascia decidere a Grok se
-        # cercare (niente ricerca = niente costo di ricerca). Passa come
-        # extra_body -> litellm lo inoltra nel corpo della richiesta xAI.
+        # D23-bis (05/08): xAI ha dismesso la Live Search delle chat
+        # completions (HTTP 410) — con l'opt-in acceso la testa Grok passa dal
+        # client dedicato sull'endpoint /v1/responses coi tool server-side
+        # (web_search + x_search). Flag spento = Grok normale, niente ricerca.
         if os.getenv("CREW_GROK_LIVE_SEARCH", "").lower() in ("1", "true", "yes", "on"):
-            kwargs["extra_body"] = {"search_parameters": {
-                "mode": "auto",
-                "sources": [{"type": "x"}, {"type": "web"}],
-                "max_search_results": int(os.getenv("CREW_GROK_LIVE_SEARCH_MAX") or 10),
-            }}
+            return GrokLiveLLM(head.model_id.split("/", 1)[1],
+                               temperature=temp_for_level(head.creativity))
     return LLM(**kwargs)
 
 

@@ -100,7 +100,10 @@ def test_roster_add_remove(tmp_path):
     r.save(p)  # save esplicito, non implicito nei metodi: lo fa il chiamante
 
 
-def test_make_llm_families():
+def test_make_llm_families(monkeypatch):
+    # Il flag live-search del .env locale cambierebbe il ramo xai/ (D23-bis):
+    # qui si testa la mappatura BASE delle famiglie, quindi lo si neutralizza.
+    monkeypatch.delenv("CREW_GROK_LIVE_SEARCH", raising=False)
     claude = core.make_llm(core.Head(key="x", name="X", avatar="a", color="c",
                                      model_id="anthropic/claude-opus-5",
                                      persona="p", creativity=8))
@@ -115,15 +118,36 @@ def test_make_llm_families():
 
 
 def test_make_llm_grok_live_search_opt_in(monkeypatch):
-    """D23: Grok Live Search entra come extra_body SOLO col flag env acceso."""
+    """D23-bis (05/08): col flag acceso la testa xai/ passa dal client
+    /v1/responses (GrokLiveLLM) — la Live Search delle chat completions è
+    stata dismessa da xAI (HTTP 410). Flag spento = LLM litellm normale."""
     h = core.Head(key="social", name="Social", avatar="a", color="c",
                   model_id="xai/grok-4.5", persona="p", creativity=5)
     monkeypatch.delenv("CREW_GROK_LIVE_SEARCH", raising=False)
-    assert "extra_body" not in core.make_llm(h).additional_params
+    plain = core.make_llm(h)
+    assert not isinstance(plain, core.GrokLiveLLM)
+    assert "extra_body" not in plain.additional_params
     monkeypatch.setenv("CREW_GROK_LIVE_SEARCH", "1")
-    sp = core.make_llm(h).additional_params["extra_body"]["search_parameters"]
-    assert sp["mode"] == "auto"
-    assert {"type": "x"} in sp["sources"]
+    live = core.make_llm(h)
+    assert isinstance(live, core.GrokLiveLLM)
+    assert live.model == "grok-4.5"           # nome nudo: l'endpoint non
+    assert 0 <= live.temperature <= 1         # vuole il prefisso "xai/"
+
+
+def test_grok_output_text_skips_reasoning_and_tool_calls():
+    """D23-bis: dal payload /v1/responses si estrae SOLO il testo dei
+    `message` — i giri interni (reasoning, custom_tool_call) si saltano."""
+    data = {"output": [
+        {"type": "reasoning", "summary": [{"text": "penso", "type": "summary_text"}]},
+        {"type": "custom_tool_call", "name": "x_search"},
+        {"type": "message", "content": [
+            {"type": "output_text", "text": "riga uno"},
+            {"type": "other", "text": "no"},
+        ]},
+        {"type": "message", "content": [{"type": "output_text", "text": "riga due"}]},
+    ]}
+    assert core.grok_output_text(data) == "riga uno\nriga due"
+    assert core.grok_output_text({}) == ""
 
 
 def test_parse_social_request():
