@@ -534,10 +534,17 @@ snapshot completo nel branch **locale** `tui-local` (mai pushato) come rete
 di sicurezza. `textual` esce dai requirements pubblici (serve solo alla TUI:
 in locale è già nel venv; se si ricrea il venv, `pip install textual`).
 
-**Avvertenze**: (1) i file della TUI restano nella **storia pubblica** dei
-commit fino a oggi — innocui e già sanificati; per toglierli anche dalla
-storia servirebbe un force-push di riscrittura, non fatto. (2) ⚠️ un
-`git clean -fd` nella working copy CANCELLEREBBE i file ignorati della TUI:
-mai lanciarlo qui senza controllare; il recupero è il branch `tui-local`.
-(3) I test locali restano 116 (pytest raccoglie `test_tui.py` dal disco);
-un clone pubblico ne vede ~46 (core + server), ed è giusto così.
+**Avvertenze**: (1) la storia è stata **riscritta il 04/08 sera** con
+git-filter-repo (`--refs refs/heads/main`: TUI purgata da TUTTA la storia,
+26 commit; albero del tip verificato identico al pre-rewrite; `tui-local` e
+il remote intatti). Il force push del ramo riscritto lo lancia il Director a
+mano — la deny rule di sicurezza impedisce a Claude i `push --force`, ed è
+giusto così. Gli SHA vecchi restano raggiungibili su GitHub per link diretto
+finché la cache non li scarta. (2) ⚠️ precisazione onesta sul primo verbale:
+`git clean -fd` NON tocca i file ignorati — la TUI è al sicuro dal `-fd`
+semplice; il pericolo reale è `git clean -fdx`/`-fdX`. Guardrail installati
+(04/08): deny `Bash(git clean*)` nelle impostazioni Claude + wrapper `git()`
+in `~/.zshrc` che blocca ogni `git clean` interattivo (scappatoia esplicita:
+`command git clean …`); recupero estremo: branch `tui-local`. (3) I test
+locali restano 116 (pytest raccoglie `test_tui.py` dal disco); un clone
+pubblico ne vede ~46 (core + server), ed è giusto così.
