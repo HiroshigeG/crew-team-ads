@@ -111,16 +111,29 @@ export interface CollabRound extends ServerEventBase {
   round: number
   total: number
   /** v1.2 (D21): "organic" = collab libera (total aperto, "giro k" senza
-   *  denominatore); "fixed" = N giri col contatore classico. */
-  mode?: 'fixed' | 'organic'
-  /** v1.2 (D21): solo sull'evento di chiusura (round 0) — perché si è fermata. */
-  reason?: 'done' | 'exhausted' | 'cap' | 'stopped'
+   *  denominatore); "fixed" = N giri col contatore classico.
+   *  v1.3 (D27): "goal" = loop a obiettivo, total è il tetto WEB_GOAL_CAP. */
+  mode?: 'fixed' | 'organic' | 'goal'
+  /** v1.2 (D21): solo sull'evento di chiusura (round 0) — perché si è fermata.
+   *  v1.3 (D27): "met" = il judge ha certificato l'obiettivo raggiunto. */
+  reason?: 'done' | 'exhausted' | 'cap' | 'stopped' | 'met'
+}
+
+/** v1.3 (D27): verdetto del judge su un giro di goal mode. score è null
+ *  quando il judge non era disponibile quel giro (fail-closed: met resta
+ *  false, il giro conta comunque nel tetto). */
+export interface GoalVerdict extends ServerEventBase {
+  type: 'goal_verdict'
+  round: number
+  score: number | null
+  met: boolean
+  reason: string
 }
 
 export type ServerEvent =
   | WavePlanned | TurnStarted | TurnToken | TurnCompleted
   | SearchPending | SearchResult | HeadState | RouterDegraded
-  | TurnRouteEvent | SessionSaved | CollabRound
+  | TurnRouteEvent | SessionSaved | CollabRound | GoalVerdict
 
 // ---- browser → server ----
 

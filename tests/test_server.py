@@ -285,6 +285,97 @@ def test_collab_organic_stops_when_room_runs_dry(tmp_path, monkeypatch):
         assert close is not None and close["reason"] == "exhausted"
 
 
+def test_goal_mode_parses_trigger_and_leaves_rest_alone():
+    from server.main import Room
+    assert Room._goal_mode(None, "/goal vendi il prodotto in 3 parole") == \
+        "vendi il prodotto in 3 parole"
+    assert Room._goal_mode(None, "/goal   ") is None            # niente obiettivo
+    assert Room._goal_mode(None, "cd: dammi un'idea") is None   # non è un goal
+    assert Room._goal_mode(None, "/auto 3") is None             # non pesta sull'altro trigger
+
+
+def test_goal_run_stops_when_judge_says_met(tmp_path, monkeypatch):
+    from server.main import Room
+    monkeypatch.setenv("CREW_TRANSCRIPTS_DIR", str(tmp_path))
+    monkeypatch.setattr(core, "route_plan", lambda r, t, m: [[
+        {"speaker": "producer", "instruction": m, "to": "director"}]])
+    monkeypatch.setattr(core, "last_plan_route", lambda: "waves")
+    monkeypatch.setattr(
+        core, "head_speak",
+        lambda roster, key, ctx, instr, private=False: "bozza di concept")
+    verdicts = iter([
+        {"score": 4, "met": False, "reason": "manca l'headline"},
+        {"score": 9, "met": True, "reason": "concept e headline chiudono il brief"},
+    ])
+    monkeypatch.setattr(core, "judge_goal",
+                        lambda goal, transcript: next(verdicts))
+
+    with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "director_message",
+                      "text": "/goal chiudi un concept con headline"})
+        rounds, verdict_events, close = [], [], None
+        for _ in range(120):
+            e = ws.receive_json()
+            if e["type"] == "collab_round":
+                if e["round"] == 0:
+                    close = e
+                    break
+                rounds.append((e["round"], e["total"], e["mode"]))
+            elif e["type"] == "goal_verdict":
+                verdict_events.append(e)
+        assert rounds == [(1, Room.WEB_GOAL_CAP, "goal"), (2, Room.WEB_GOAL_CAP, "goal")]
+        assert [v["met"] for v in verdict_events] == [False, True]
+        assert close is not None and close["reason"] == "met"
+
+
+def test_goal_run_stops_at_cap_when_never_met(tmp_path, monkeypatch):
+    from server.main import Room
+    monkeypatch.setattr(Room, "WEB_GOAL_CAP", 2)   # tetto piccolo per un test veloce
+    monkeypatch.setenv("CREW_TRANSCRIPTS_DIR", str(tmp_path))
+    monkeypatch.setattr(core, "route_plan", lambda r, t, m: [[
+        {"speaker": "producer", "instruction": m, "to": "director"}]])
+    monkeypatch.setattr(core, "last_plan_route", lambda: "waves")
+    monkeypatch.setattr(
+        core, "head_speak",
+        lambda roster, key, ctx, instr, private=False: "bozza")
+    monkeypatch.setattr(
+        core, "judge_goal",
+        lambda goal, transcript: {"score": 3, "met": False, "reason": "lontano"})
+
+    with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "director_message", "text": "/goal irraggiungibile"})
+        close = None
+        for _ in range(120):
+            e = ws.receive_json()
+            if e["type"] == "collab_round" and e["round"] == 0:
+                close = e
+                break
+        assert close is not None and close["reason"] == "cap"
+
+
+def test_goal_run_survives_judge_failure(tmp_path, monkeypatch):
+    """Un giudice indisponibile non deve bloccare il giro né farlo contare
+    come raggiunto (fail-closed) — ma consuma comunque il tetto."""
+    from server.main import Room
+    monkeypatch.setattr(Room, "WEB_GOAL_CAP", 1)
+    monkeypatch.setenv("CREW_TRANSCRIPTS_DIR", str(tmp_path))
+    monkeypatch.setattr(core, "route_plan", lambda r, t, m: [[
+        {"speaker": "producer", "instruction": m, "to": "director"}]])
+    monkeypatch.setattr(core, "last_plan_route", lambda: "waves")
+    monkeypatch.setattr(
+        core, "head_speak",
+        lambda roster, key, ctx, instr, private=False: "bozza")
+    monkeypatch.setattr(core, "judge_goal", lambda goal, transcript: None)
+
+    with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "director_message", "text": "/goal qualcosa"})
+        seen = _drain_until(ws, "goal_verdict")
+        v = seen[-1]
+        assert v["score"] is None and v["met"] is False
+        close = _drain_until(ws, "collab_round")[-1]
+        assert close["round"] == 0 and close["reason"] == "cap"
+
+
 def test_disabled_head_is_benched_from_routing(tmp_path, monkeypatch):
     """D22: una testa in panchina non arriva al router (né in collab). Il
     router vede solo le teste attive; il resto della stanza continua."""

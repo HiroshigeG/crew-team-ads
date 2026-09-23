@@ -548,3 +548,52 @@ in `~/.zshrc` che blocca ogni `git clean` interattivo (scappatoia esplicita:
 `command git clean …`); recupero estremo: branch `tui-local`. (3) I test
 locali restano 116 (pytest raccoglie `test_tui.py` dal disco); un clone
 pubblico ne vede ~46 (core + server), ed è giusto così.
+
+## D27 — 2026-08-12 · Goal mode: la stanza persegue un obiettivo da sola (FATTO)
+
+**Decisione**: nuovo trigger `/goal <obiettivo>` nel messaggio del Director.
+La stanza gira a ondate come in collab mode, ma invece di fermarsi per numero
+di giri o per silenzio, un **giudice separato dalla stanza** (`core.judge_goal`,
+stesso motore del router — non una testa, non chi sta inseguendo l'obiettivo)
+valuta il transcript contro l'obiettivo dopo ogni giro e assegna uno score
+0-10 + un verdetto `met`. La corsa si ferma quando `met` è vero, quando il
+Director manda `stop`, o al tetto `WEB_GOAL_CAP` (env `CREW_GOAL_CAP`,
+default 8) — mai altrimenti.
+
+**Contesto**: pattern preso da fuori (Ralph loop / "loop engineering" —
+Claude Code `/goal`, Codex CLI `/goal`, entrambi derivati dallo stesso pattern
+di Geoffrey Huntley): un ciclo pianifica-agisci-verifica con condizione di
+stop esplicita, tetto obbligatorio, criteri di successo dichiarati prima di
+partire. La ADV Room aveva già i due terzi del meccanismo (route_plan a
+ondate + `_run_collab` per il ciclo, session persistita su disco a ogni
+giro — lo stato non vive nel contesto di un singolo processo, sopravvive a
+un crash); mancava solo il terzo pezzo: una condizione di stop legata a un
+obiettivo del Director invece che a un numero di giri o al silenzio della
+stanza.
+
+**Perché un giudice a parte e non una testa**: le teste della stanza sono
+scritte per generare, non per certificare — lasciare che una di loro
+giudichi il proprio lavoro (o quello dei colleghi) è la stessa fiducia mal
+riposta che porterebbe a fidarsi della memoria di un modello per un fatto
+verificabile. Stesso principio già applicato al router (`route_plan` non è
+una testa) e al gate di ricerca (fail-closed, mai un dato inventato).
+
+**Guardrail**: (1) tetto obbligatorio — un giudice rotto o un obiettivo
+irraggiungibile costano al massimo `WEB_GOAL_CAP` ondate, mai un loop
+infinito; (2) fail-closed sul judge — output illeggibile o chiamata fallita
+→ `met: false`, mai un verdetto inventato, il giro comunque consuma il
+tetto; (3) `stop` del Director resta valido a ogni giro, come in collab.
+
+**Conseguenze**: additive, nessuna firma esistente cambiata. Core
+(`crew_cast.py`): `llm_claude_judge`, `JUDGE_PROMPT`, `parse_goal_verdict`,
+`judge_goal` — stesso stile paranoico di `parse_wave_plan`/`route_plan`.
+Server (`server/main.py`): `Room._goal_mode` (controllato PRIMA di
+`_collab_mode`, che resta intatto) e `Room._run_goal`, tetto
+`WEB_GOAL_CAP`. Contratto: nuovo evento `goal_verdict`; `collab_round.mode`
+si allarga a `"goal"`, `collab_round.reason` a `"met"` (vedi
+`docs/EVENT-CONTRACT.md` §9). UI: non ancora agganciata — il loop funziona
+via WebSocket (driveable da `room_tui.py` o da un client di test) ma la ADV
+Room non ha ancora un pulsante o un pannello per `/goal`; resta lavoro
+aperto. Test: 9 nuovi (`tests/test_core_ext.py`: judge + parser;
+`tests/test_server.py`: trigger, obiettivo raggiunto, tetto senza successo,
+judge indisponibile) — 130 verdi in locale, nessuna regressione.

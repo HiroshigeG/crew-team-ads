@@ -302,6 +302,37 @@ def test_route_plan_falls_back_to_sequential(monkeypatch):
                        "to": "director"}]]
 
 
+def test_parse_goal_verdict_valid():
+    raw = 'bla {"score": 8, "met": true, "reason": "manca solo il claim finale"} bla'
+    assert core.parse_goal_verdict(raw) == {
+        "score": 8, "met": True, "reason": "manca solo il claim finale"}
+
+
+def test_parse_goal_verdict_clamps_score():
+    raw = '{"score": 99, "met": false, "reason": "x"}'
+    assert core.parse_goal_verdict(raw)["score"] == 10
+
+
+def test_parse_goal_verdict_garbage_is_none():
+    assert core.parse_goal_verdict("no json here") is None
+    assert core.parse_goal_verdict('{"met": true}') is None                  # score manca
+    assert core.parse_goal_verdict('{"score": true, "met": true}') is None   # bool-come-score
+    assert core.parse_goal_verdict('[1, 2, 3]') is None                      # non un oggetto
+
+
+def test_judge_goal_happy_path(monkeypatch):
+    monkeypatch.setattr(core.llm_claude_judge, "call",
+                        lambda p: '{"score": 9, "met": true, "reason": "ok"}')
+    v = core.judge_goal("vendi il prodotto in 3 parole", "TRANSCRIPT...")
+    assert v == {"score": 9, "met": True, "reason": "ok"}
+
+
+def test_judge_goal_call_failure_is_none(monkeypatch):
+    monkeypatch.setattr(core.llm_claude_judge, "call",
+                        lambda p: (_ for _ in ()).throw(RuntimeError("giù")))
+    assert core.judge_goal("obiettivo", "T") is None
+
+
 def test_parse_auto_request():
     assert core.parse_auto_request("discutete fra voi per 5 giri") == 5
     assert core.parse_auto_request("parlatene fra di voi") == core.AUTO_DEFAULT_CAP

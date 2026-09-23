@@ -482,3 +482,41 @@ Cintura di sicurezza contro i loop (degeneration-of-thought) e il consumo:
 `CREW_ORGANIC_CAP` giri, default 30. In entrambe le modalità il gate di
 ricerca resta attivo dentro i giri; `stop` chiude la corsa a fine giro
 corrente (`reason: "stopped"`).
+
+## 9. Estensione v1.3 (D27) — goal mode
+
+Una aggiunta, nessun cambiamento a ciò che esisteva.
+
+**Browser → server**: nessun messaggio nuovo — `/goal <obiettivo>` è testo
+dentro un normale `director_message`, riconosciuto lato server prima del
+router (come `/auto`).
+
+**Server → browser: `goal_verdict`** — `{ type, ts, seq, round, score, met,
+reason }`. Emesso a fine di ogni giro di goal mode, dopo il `collab_round` di
+apertura giro e dopo che l'ondata ha parlato. `score` è `0-10` oppure `null`
+quando il judge non era disponibile quel giro (chiamata fallita o output
+illeggibile — **fail-closed**, come il gate di ricerca: `met` resta `false`,
+mai un verdetto inventato). `reason` è una riga sola: cosa manca se `met` è
+falso, perché passa se è vero.
+
+`collab_round` si riusa per il contatore di giro anche in goal mode:
+`mode: "goal"`, `total` è il tetto (`WEB_GOAL_CAP`, non un totale aperto come
+in organic — un goal ha sempre un tetto). Sull'evento di chiusura,
+`reason: "met"` si aggiunge al vocabolario esistente (il judge ha certificato
+l'obiettivo raggiunto); `"cap"` coincide col significato che già aveva
+(tetto di sicurezza raggiunto senza successo — non c'è un `"done"` separato
+per il goal: finire il tetto senza aver raggiunto l'obiettivo *è* l'esito
+"cap", non un esito neutro).
+
+**Il giudice non è una testa della stanza.** `core.judge_goal()` è una
+chiamata LLM a parte (stesso modello/effort del router, `llm_claude_router`
+docet) che vede il transcript e il goal, non la persona di nessuna testa:
+chi insegue l'obiettivo non è chi lo certifica — lo stesso motivo per cui il
+router (`route_plan`) non è affidato a una testa della stanza.
+
+**Tetto obbligatorio**: `WEB_GOAL_CAP` (env `CREW_GOAL_CAP`, default 8) —
+più basso del cap organico perché ogni giro è un'ondata intera (fino a 9
+teste) più una chiamata di giudizio: caro per costruzione. Lezione diretta
+del pattern Ralph/loop engineering: un obiettivo senza tetto, o un judge
+rotto, non deve poter far girare la stanza (e la spesa) all'infinito — un
+giro col judge indisponibile conta comunque nel tetto.

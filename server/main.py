@@ -443,6 +443,11 @@ class Room:
             self.session.append_room("Director", text)
             await self.saved()
 
+            goal = self._goal_mode(text)
+            if goal:
+                await self._run_goal(self.WEB_GOAL_CAP, goal)
+                return
+
             spec = self._collab_mode(text)
             if spec:
                 mode, cap = spec
@@ -510,6 +515,22 @@ class Room:
     # Cintura di sicurezza della collab libera (D21): alto ma finito, così
     # "finché hanno qualcosa da dire" non diventa "finché finisce il credito".
     WEB_ORGANIC_CAP = int(os.getenv("CREW_ORGANIC_CAP") or 30)
+    # Tetto del loop a obiettivo (D27, v1.3): ogni giro è un'ondata intera
+    # (fino a 9 teste), quindi caro — più basso del cap organico per
+    # costruzione, non per accidente. Lezione del pattern Ralph: MAI un
+    # obiettivo senza tetto massimo, o un giudice rotto paga all'infinito.
+    WEB_GOAL_CAP = int(os.getenv("CREW_GOAL_CAP") or 8)
+
+    def _goal_mode(self, text: str):
+        """`/goal <obiettivo>` avvia il loop a obiettivo. Controllato PRIMA
+        di `_collab_mode` e tenuto separato apposta: non ne cambia la firma
+        né il comportamento (additivo — stessa regola di casa di D1/D23/D25).
+        Ritorna il testo dell'obiettivo, o None se non è un `/goal`."""
+        stripped = text.strip()
+        if not stripped.lower().startswith("/goal"):
+            return None
+        goal = stripped[len("/goal"):].strip()
+        return goal or None
 
     def _collab_mode(self, text: str):
         """`(mode, cap)` con mode "fixed" (N giri) o "organic" (finché la stanza
@@ -580,6 +601,54 @@ class Room:
                 else:
                     dry = 0
         await self.emit("collab_round", round=0, total=0, reason=reason)
+
+    # ── goal mode (loop a obiettivo, pattern Ralph) — v1.3 ──────────────
+    async def _run_goal(self, cap: int, goal: str) -> None:
+        """Ondate come in collab, ma dopo ogni giro un giudice SEPARATO dalla
+        stanza (`core.judge_goal`, non una testa: chi insegue l'obiettivo non
+        è chi lo certifica) confronta il transcript col goal. Si ferma quando
+        il judge dice `met`, quando il Director manda `stop`, o al tetto —
+        mai altrimenti (lezione del loop engineering: niente obiettivo senza
+        tetto). Un giro col judge indisponibile non conta come raggiunto
+        (fail-closed, come il gate di ricerca) ma consuma comunque il tetto:
+        un judge rotto non deve far girare la stanza all'infinito."""
+        last_speaker = "the Director"
+        reason = "cap"
+        for k in range(1, cap + 1):
+            if self.stop_flag:
+                reason = "stopped"
+                break
+            await self.emit("collab_round", round=k, total=cap, mode="goal")
+            prompt = (
+                f"GOAL MODE round {k}: work toward this goal set by the "
+                f"Director — \"{goal}\". React to what {last_speaker} just "
+                "said; push the work closer to the goal. Do not address the "
+                "Director.")
+            plan = await asyncio.to_thread(
+                core.route_plan, self._routing_roster(),
+                self.session.room_context(), prompt)
+            plan_id = f"p-{next(self._plan):02d}"
+            if core.last_plan_route() == "fallback":
+                await self.emit("router_degraded", plan_id=plan_id,
+                                reason="il router a ondate non ha prodotto un piano valido")
+            spoke = await self._run_plan(plan, plan_id, prompt)
+            if spoke:
+                last_speaker = spoke
+
+            verdict = await asyncio.to_thread(
+                core.judge_goal, goal, self.session.room_context())
+            if verdict is None:
+                await self.emit("goal_verdict", round=k, score=None,
+                                met=False,
+                                reason="giudice non disponibile questo giro")
+                continue
+            await self.emit("goal_verdict", round=k, score=verdict["score"],
+                            met=verdict["met"], reason=verdict["reason"])
+            if verdict["met"]:
+                reason = "met"
+                break
+        await self.emit("collab_round", round=0, total=0, mode="goal",
+                        reason=reason)
 
     # ── studio di un'immagine (D15): solo teste Gemini in v1.1 ──────────
     async def handle_image(self, image_id: str, note: str) -> None:

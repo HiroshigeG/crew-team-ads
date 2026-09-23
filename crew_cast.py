@@ -257,6 +257,9 @@ llm_claude_voice = ClaudeLLM("claude-opus-5")
 # The router only classifies who speaks next — a smaller model is plenty here,
 # and a effort basso: la sua latenza è la reattività percepita della stanza (D4).
 llm_claude_router = ClaudeLLM("claude-sonnet-5", effort="low")
+# Giudica un /goal contro il transcript (v1.3): non è un partecipante della
+# stanza, quindi stesso modello/effort economico del router gli basta.
+llm_claude_judge = ClaudeLLM("claude-sonnet-5", effort="low")
 llm_gemini = LLM(model="gemini/gemini-3.1-pro-preview", temperature=0.6)
 llm_grok = LLM(model="xai/grok-4.5", temperature=0.75,
                additional_drop_params=["stop"])
@@ -996,6 +999,64 @@ def route_plan(roster: Roster, transcript: str, msg: str) -> list:
         first = next(iter(roster.keys()))
         steps = [{"speaker": first, "instruction": msg}]
     return [[{**s, "to": "director"}] for s in steps]
+
+
+# ── goal mode (loop a obiettivo, pattern Ralph) — v1.3 ──────────────────────
+# Un giudice SEPARATO dalla stanza (non una testa: chi insegue l'obiettivo
+# non è chi lo certifica) confronta il transcript col goal ad ogni giro.
+# Stesso stile paranoico di parse_wave_plan/route_plan: output non valido ->
+# None, MAI un verdetto inventato — un giudizio a caso è peggio di nessuno.
+
+JUDGE_PROMPT = """You judge whether a creative room has met a goal. You do not
+participate in the room; you only score its output so far against the goal.
+
+GOAL (set by the Director): {goal}
+
+TRANSCRIPT SO FAR:
+{transcript}
+
+Score 0-10, strict: 10 = the goal is concretely, fully met — not "promising
+direction" or "good progress". If the goal names a specific non-negotiable
+requirement (a hard constraint, not a preference) and it is unmet, cap the
+score at 4 regardless of how good the rest is.
+
+Output ONLY a JSON object, no prose, no markdown fence:
+{{"score": <integer 0-10>, "met": <true or false>, "reason": "<one line: what's missing, or why it passes>"}}
+"""
+
+
+def parse_goal_verdict(raw: str):
+    """Estrae {score, met, reason} dall'output del judge. Paranoico come
+    parse_wave_plan: qualunque cosa non torni -> None."""
+    m = re.search(r"\{.*\}", str(raw), re.DOTALL)
+    if not m:
+        return None
+    try:
+        data = json.loads(m.group(0))
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(data, dict):
+        return None
+    score, met = data.get("score"), data.get("met")
+    if (not isinstance(score, (int, float)) or isinstance(score, bool)
+            or not isinstance(met, bool)):
+        return None
+    return {"score": max(0, min(10, int(score))), "met": met,
+            "reason": str(data.get("reason", ""))[:300]}
+
+
+def judge_goal(goal: str, transcript: str):
+    """Verdetto del judge sul goal corrente. None = judge non disponibile
+    questo giro (chiamata fallita o output illeggibile) — il chiamante NON
+    deve interpretarlo come 'raggiunto': fail-closed, come il gate di
+    ricerca."""
+    try:
+        raw = llm_claude_judge.call(JUDGE_PROMPT.format(
+            goal=goal, transcript=transcript[-ROUTER_CONTEXT_CHARS:]))
+    except Exception as e:
+        log.warning("judge_goal fallito (%s)", e)
+        return None
+    return parse_goal_verdict(raw)
 
 
 # ── collab mode (R6): trigger in linguaggio naturale ───────────────────────
