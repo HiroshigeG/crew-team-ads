@@ -133,7 +133,7 @@ export function RosterEditor({
                 className={cn(field, 'mt-2')}
                 value={h.tagline ?? ''}
                 onChange={(e) => patch(h.key, { tagline: e.target.value })}
-                placeholder="Frase breve mostrata sulla card (in italiano)…"
+                placeholder="Frase breve mostrata sulla card…"
                 aria-label={`Frase breve di ${h.key}`}
               />
               <textarea

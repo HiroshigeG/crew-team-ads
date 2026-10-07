@@ -63,9 +63,9 @@ def test_head_tagline_optional_and_roundtrip():
     assert core.Head.from_dict(old).tagline == ""
     h = core.Head(key="cd", name="CD", avatar="🎨", color="#ff8700",
                   model_id="anthropic/claude-opus-5", persona="x",
-                  creativity=8, tagline="Dalle verità alla direzione.")
+                  creativity=8, tagline="Turns insight into direction.")
     assert core.Head.from_dict(h.to_dict()) == h
-    assert h.to_dict()["tagline"] == "Dalle verità alla direzione."
+    assert h.to_dict()["tagline"] == "Turns insight into direction."
 
 
 def test_roster_default_matches_cast():

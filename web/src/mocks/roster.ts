@@ -26,7 +26,7 @@ export const ROSTER: Head[] = [
     color: '#00afd7',
     model_id: 'gemini/gemini-3.1-pro-preview',
     persona: 'Mappa pubblico e campo competitivo. Evidenze, non sensazioni.',
-    tagline: 'Mappa pubblico e campo competitivo. Evidenze, non sensazioni.',
+    tagline: 'Maps the audience and the competitive field. Evidence first.',
     creativity: 2,
   },
   {
@@ -36,7 +36,7 @@ export const ROSTER: Head[] = [
     color: '#af87ff',
     model_id: 'anthropic/claude-sonnet-5',
     persona: 'Trasforma la ricerca in due o tre angoli genuinamente diversi.',
-    tagline: 'Trasforma la ricerca in due o tre angoli genuinamente diversi.',
+    tagline: 'Turns research into two or three genuinely different angles.',
     creativity: 7,
   },
   {
@@ -46,7 +46,7 @@ export const ROSTER: Head[] = [
     color: '#ff8700',
     model_id: 'anthropic/claude-opus-5',
     persona: 'Dalle verità alla direzione esecutiva: concept, mondo visivo.',
-    tagline: 'Dalle verità alla direzione esecutiva: concept, mondo visivo.',
+    tagline: 'Turns insight into direction: concept and visual world.',
     creativity: 5,
   },
   {
@@ -56,7 +56,7 @@ export const ROSTER: Head[] = [
     color: '#ff5faf',
     model_id: 'featherless_ai/anthracite-org/magnum-v4-72b',
     persona: 'Il liquido della coppia: apre a caldo, voce, la riga che nessuno osa.',
-    tagline: 'Il liquido della coppia: apre a caldo, voce, la riga che nessuno osa.',
+    tagline: 'Writes the first lines: voice, rhythm, the bold option.',
     creativity: 7,
   },
   {
@@ -66,7 +66,7 @@ export const ROSTER: Head[] = [
     color: '#5fff87',
     model_id: 'xai/grok-4.5',
     persona: 'Grammatica del genere e vita social. Bolla i cliché.',
-    tagline: 'Grammatica del genere e vita social. Bolla i cliché.',
+    tagline: 'Knows the genre and the feeds. Flags the clichés.',
     creativity: 5,
   },
   {
@@ -76,7 +76,7 @@ export const ROSTER: Head[] = [
     color: '#d7af00',
     model_id: 'featherless_ai/NousResearch/Hermes-3-Llama-3.1-70B',
     persona: 'Tiene la stanza onesta, impacchetta il dossier. Mai sceglie.',
-    tagline: 'Tiene la stanza onesta, impacchetta il dossier. Mai sceglie.',
+    tagline: 'Keeps the room honest and moving. Never picks the idea.',
     creativity: 7,
   },
   {
@@ -86,7 +86,7 @@ export const ROSTER: Head[] = [
     color: '#c0304a',
     model_id: 'featherless_ai/EVA-UNIT-01/EVA-Qwen2.5-72B-v0.2',
     persona: 'Lo storyteller senza freni: la storia scomoda che nessuno pitcha.',
-    tagline: 'Lo storyteller senza freni: la storia scomoda che nessuno pitcha.',
+    tagline: 'The unfiltered storyteller: the uncomfortable pitch.',
     creativity: 9,
   },
   {
@@ -96,7 +96,7 @@ export const ROSTER: Head[] = [
     color: '#5f8fff',
     model_id: 'anthropic/claude-opus-4-8',
     persona: 'Il recipiente: giudica, verifica i claim, mano finale.',
-    tagline: 'Il recipiente: giudica, verifica i claim, mano finale.',
+    tagline: 'Judges the drafts, checks the claims, writes the final copy.',
     creativity: 7,
     effort: 'max',
   },
@@ -107,7 +107,7 @@ export const ROSTER: Head[] = [
     color: '#af875f',
     model_id: 'featherless_ai/Qwen/Qwen2.5-72B-Instruct',
     persona: 'La voce del cliente: vendibile? difendibile? avvocato dell’idea.',
-    tagline: 'La voce del cliente: vendibile? difendibile? avvocato dell’idea.',
+    tagline: 'The client\'s voice: sellable, defensible, on brief?',
     creativity: 3,
     effort: 'high',
   },
