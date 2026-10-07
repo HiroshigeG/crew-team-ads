@@ -127,6 +127,7 @@ function EmptyRoom({
           ['📎', 'Carica il brief', 'Trascina un PDF nell’input: lo smistatore lo assegna a chi deve studiarlo.'],
           ['@', 'Chiama una testa', '«@strategist dammi tre angoli» — la @menzione la sceglie tu.'],
           ['⚙', 'Discutete fra voi', '«discutete fra voi per 3 giri» = N giri; «…finché avete qualcosa da dire» o «/auto libero» = collab libera.'],
+          ['🎯', 'Dai un obiettivo', '«/goal un claim per il target giovane» — la stanza gira da sola e un giudice la ferma a obiettivo raggiunto (tetto 8 giri).'],
         ].map(([icon, title, body]) => (
           <div key={title} className="flex gap-3 rounded-lg bg-raised px-3 py-2.5">
             <span className="mt-0.5 w-5 shrink-0 text-center text-dim">{icon}</span>
@@ -279,9 +280,11 @@ export function Timeline({ state }: { state: RoomState }) {
         <div className="flex items-center gap-2 border-b border-accent/30 bg-accent/10 px-4 py-2 text-[13px] text-accent">
           <MessagesSquare className="size-4 shrink-0" aria-hidden />
           <span className="tnum">
-            {state.collab.mode === 'organic'
-              ? `Collab libera: giro ${state.collab.round}. La stanza va avanti finché ha qualcosa da dire; lo Stop resta sempre disponibile.`
-              : `Collab in corso: giro ${state.collab.round}/${state.collab.total}. Lo Stop qui sotto resta sempre disponibile.`}
+            {state.collab.mode === 'goal'
+              ? `Goal in corso: giro ${state.collab.round}/${state.collab.total}. Un giudice esterno valuta ogni giro; lo Stop resta sempre disponibile.`
+              : state.collab.mode === 'organic'
+                ? `Collab libera: giro ${state.collab.round}. La stanza va avanti finché ha qualcosa da dire; lo Stop resta sempre disponibile.`
+                : `Collab in corso: giro ${state.collab.round}/${state.collab.total}. Lo Stop qui sotto resta sempre disponibile.`}
           </span>
         </div>
       )}

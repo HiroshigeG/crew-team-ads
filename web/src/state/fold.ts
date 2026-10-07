@@ -84,6 +84,19 @@ export interface HeadLive {
   detail: string | null
 }
 
+/** v1.3 (D27): verdetto del giudice come lo disegna la UI. */
+export interface GoalVerdictView {
+  round: number
+  score: number | null
+  met: boolean
+  reason: string
+}
+
+export interface GoalView {
+  objective: string | null
+  lastVerdict: GoalVerdictView | null
+}
+
 export interface RoomState {
   items: TimelineItem[]
   heads: Record<string, HeadLive>
@@ -96,8 +109,13 @@ export interface RoomState {
   lastPlan: WaveStep[][] | null
   /** v1.1: thread privati per testa — STAGNI, mai negli items di stanza. */
   privateThreads: Record<string, TimelineMessage[]>
-  /** v1.1: collab in corso (null = nessuna). v1.2: `mode` "organic" = libera. */
-  collab: { round: number; total: number; mode?: 'fixed' | 'organic' } | null
+  /** v1.1: collab in corso (null = nessuna). v1.2: `mode` "organic" = libera.
+   *  v1.3 (D27): "goal" = loop a obiettivo, total è il tetto. */
+  collab: { round: number; total: number; mode?: 'fixed' | 'organic' | 'goal' } | null
+  /** v1.3 (D27): goal in corso — obiettivo (catturato dall'eco `/goal` del
+   *  Director: non viaggia in nessun evento server) e ultimo verdetto del
+   *  giudice. null = nessun goal attivo. */
+  goal: GoalView | null
   /** Costo e rotta della sessione: turni per canale di fatturazione. */
   routes: { subscription: number; api: number }
 }
@@ -114,6 +132,10 @@ export function foldEvents(entries: FeedEntry[]): RoomState {
   const privateThreads: Record<string, TimelineMessage[]> = {}
   const routes = { subscription: 0, api: 0 }
   let collab: RoomState['collab'] = null
+  let goal: GoalView | null = null
+  // Ultimo obiettivo scritto dal Director (`/goal …`): l'evento server non
+  // lo trasporta, quindi lo si ricorda dall'eco locale.
+  let lastGoalObjective: string | null = null
   let degraded: RoomState['degraded'] = null
   let lastSaved: RoomState['lastSaved'] = null
   let lastPlan: WaveStep[][] | null = null
@@ -125,6 +147,11 @@ export function foldEvents(entries: FeedEntry[]): RoomState {
   for (const e of sorted) {
     switch (e.type) {
       case 'director_echo': {
+        // Stessa permissività di `_goal_mode` lato server (startswith, poi
+        // strip): così quello che mostra il pannello è quello che il giudice
+        // valuta davvero, a capo inclusi. Obiettivo vuoto = non è un goal.
+        const m = /^\/goal([\s\S]*)$/i.exec(e.text.trim())
+        if (m && m[1].trim()) lastGoalObjective = m[1].trim()
         items.push({
           kind: 'message',
           id: `dir-${e.seq}`,
@@ -256,14 +283,24 @@ export function foldEvents(entries: FeedEntry[]): RoomState {
       case 'collab_round': {
         if (e.round === 0) {
           collab = null
+          // Chiusura del goal mode (D27): il server la marca con mode "goal";
+          // "met" è comunque inequivoco (lo emette solo il loop a obiettivo).
+          const inGoal = e.mode === 'goal' || e.reason === 'met'
+          if (inGoal) goal = null
           const text =
-            e.reason === 'exhausted'
-              ? 'Collab conclusa: la stanza ha esaurito, la parola torna al Director.'
-              : e.reason === 'cap'
-                ? 'Collab conclusa al tetto di sicurezza: la parola torna al Director.'
-                : e.reason === 'stopped'
-                  ? 'Collab fermata dal Director.'
-                  : 'Collab conclusa: la parola torna al Director.'
+            e.reason === 'met'
+              ? 'Obiettivo raggiunto: la parola torna al Director.'
+              : inGoal && e.reason === 'cap'
+                ? 'Tetto raggiunto senza obiettivo: la parola torna al Director.'
+                : inGoal && e.reason === 'stopped'
+                  ? 'Goal fermato dal Director.'
+                  : e.reason === 'exhausted'
+                    ? 'Collab conclusa: la stanza ha esaurito, la parola torna al Director.'
+                    : e.reason === 'cap'
+                      ? 'Collab conclusa al tetto di sicurezza: la parola torna al Director.'
+                      : e.reason === 'stopped'
+                        ? 'Collab fermata dal Director.'
+                        : 'Collab conclusa: la parola torna al Director.'
           items.push({
             kind: 'system',
             id: `collab-${e.seq}`,
@@ -273,17 +310,51 @@ export function foldEvents(entries: FeedEntry[]): RoomState {
           })
         } else {
           collab = { round: e.round, total: e.total, ...(e.mode ? { mode: e.mode } : {}) }
+          if (e.mode === 'goal' && goal === null) {
+            // L'obiettivo si fissa SOLO all'apertura e l'eco si consuma:
+            // un `/goal` scritto a metà corsa (il server lo accoda) non
+            // deve riscrivere il pannello del goal che sta ancora girando.
+            goal = { objective: lastGoalObjective, lastVerdict: null }
+            lastGoalObjective = null
+          }
           items.push({
             kind: 'system',
             id: `collab-${e.seq}`,
             ts: e.ts,
             text:
-              e.mode === 'organic'
-                ? `Collab libera: giro ${e.round}.`
-                : `Collab: giro ${e.round}/${e.total}.`,
+              e.mode === 'goal'
+                ? `Goal: giro ${e.round}/${e.total}.`
+                : e.mode === 'organic'
+                  ? `Collab libera: giro ${e.round}.`
+                  : `Collab: giro ${e.round}/${e.total}.`,
             tone: 'info',
           })
         }
+        break
+      }
+      case 'goal_verdict': {
+        // Il giudice ha parlato (o non era disponibile): score null è
+        // fail-closed — nessun numero inventato, il giro conta nel tetto.
+        const prevObjective: string | null = goal ? goal.objective : lastGoalObjective
+        goal = {
+          objective: prevObjective,
+          lastVerdict: {
+            round: e.round,
+            score: e.score,
+            met: e.met,
+            reason: e.reason,
+          },
+        }
+        items.push({
+          kind: 'system',
+          id: `goal-${e.seq}`,
+          ts: e.ts,
+          text:
+            e.score === null
+              ? 'Giudice non disponibile in questo giro: il giro conta comunque nel tetto.'
+              : `Giudice, giro ${e.round}: ${e.score}/10 — ${e.reason}`,
+          tone: e.score === null ? 'warn' : 'info',
+        })
         break
       }
       case 'session_saved': {
@@ -303,6 +374,7 @@ export function foldEvents(entries: FeedEntry[]): RoomState {
     lastPlan,
     privateThreads,
     collab,
+    goal,
     routes,
   }
 }

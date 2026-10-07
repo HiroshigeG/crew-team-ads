@@ -10,6 +10,7 @@ import type { RoomState } from '../state/fold'
 import { useRoomActions } from '../lib/socket'
 import { cn } from '../lib/cn'
 import { AgentCard } from './AgentCard'
+import { GoalPanel } from './GoalPanel'
 
 /**
  * La colonna della REGIA (destra, 05/08): chi c'è in stanza, chi è in
@@ -136,6 +137,9 @@ export function RoomPanel({
           Avvia la discussione
         </button>
       </section>
+
+      {/* Goal mode (D27): lanciatore `/goal` e stato del goal in corso. */}
+      <GoalPanel state={state} />
 
       <div className="mt-auto border-t border-edge">
         {(state.routes.subscription > 0 || state.routes.api > 0) && (

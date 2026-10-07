@@ -103,6 +103,17 @@ describe('foldEvents: degrado, collab, rotte', () => {
     expect(foldEvents(feed).collab).toBeNull()
   })
 
+  it('cap fuori dal goal mode tiene il testo collab di sempre', () => {
+    const feed: FeedEntry[] = [
+      { type: 'collab_round', seq: seq(), ts, round: 1, total: 0, mode: 'organic' },
+      { type: 'collab_round', seq: seq(), ts, round: 0, total: 0, reason: 'cap' },
+    ]
+    const room = foldEvents(feed)
+    const sys = room.items.filter((i) => i.kind === 'system')
+    expect(sys.some((i) => 'text' in i &&
+      i.text.includes('tetto di sicurezza'))).toBe(true)
+  })
+
   it('conta le rotte di fatturazione per turno', () => {
     const feed: FeedEntry[] = [
       ...turn('cd', 'a', { id: 't-x' }),
@@ -112,5 +123,123 @@ describe('foldEvents: degrado, collab, rotte', () => {
     ]
     const room = foldEvents(feed)
     expect(room.routes).toEqual({ subscription: 1, api: 1 })
+  })
+})
+
+describe('foldEvents: goal mode (D27)', () => {
+  it('collab_round mode goal apre il contatore e la riga «Goal: giro k/N»', () => {
+    const feed: FeedEntry[] = [
+      { type: 'director_echo', seq: seq(), ts, text: '/goal un claim per la e-bike' },
+      { type: 'collab_round', seq: seq(), ts, round: 1, total: 8, mode: 'goal' },
+    ]
+    const room = foldEvents(feed)
+    expect(room.collab).toEqual({ round: 1, total: 8, mode: 'goal' })
+    expect(room.goal?.objective).toBe('un claim per la e-bike')
+    const sys = room.items.filter((i) => i.kind === 'system')
+    expect(sys.some((i) => 'text' in i && i.text === 'Goal: giro 1/8.')).toBe(true)
+  })
+
+  it('goal_verdict entra in timeline con punteggio e motivo, e aggiorna lastVerdict', () => {
+    const feed: FeedEntry[] = [
+      { type: 'collab_round', seq: seq(), ts, round: 1, total: 8, mode: 'goal' },
+      { type: 'goal_verdict', seq: seq(), ts, round: 1, score: 6, met: false,
+        reason: 'manca il target giovane' },
+    ]
+    const room = foldEvents(feed)
+    expect(room.goal?.lastVerdict).toEqual(
+      { round: 1, score: 6, met: false, reason: 'manca il target giovane' })
+    const sys = room.items.filter((i) => i.kind === 'system')
+    expect(sys.some((i) => 'text' in i &&
+      i.text.includes('6/10') && i.text.includes('manca il target giovane'))).toBe(true)
+  })
+
+  it('score null = giudice non disponibile: mai un numero inventato (fail-closed)', () => {
+    const feed: FeedEntry[] = [
+      { type: 'collab_round', seq: seq(), ts, round: 2, total: 8, mode: 'goal' },
+      { type: 'goal_verdict', seq: seq(), ts, round: 2, score: null, met: false,
+        reason: 'giudice non disponibile questo giro' },
+    ]
+    const room = foldEvents(feed)
+    expect(room.goal?.lastVerdict?.score).toBeNull()
+    const line = room.items.find((i) => i.kind === 'system' && 'text' in i &&
+      i.text.includes('iudice non disponibile'))
+    expect(line).toBeDefined()
+    expect(line && 'text' in line && /\d\/10|null|NaN/.test(line.text)).toBe(false)
+  })
+
+  it('chiusura reason met: obiettivo raggiunto, goal e collab si azzerano', () => {
+    const feed: FeedEntry[] = [
+      { type: 'collab_round', seq: seq(), ts, round: 1, total: 8, mode: 'goal' },
+      { type: 'goal_verdict', seq: seq(), ts, round: 1, score: 9, met: true, reason: 'ok' },
+      { type: 'collab_round', seq: seq(), ts, round: 0, total: 0, mode: 'goal', reason: 'met' },
+    ]
+    const room = foldEvents(feed)
+    expect(room.collab).toBeNull()
+    expect(room.goal).toBeNull()
+    const sys = room.items.filter((i) => i.kind === 'system')
+    expect(sys.some((i) => 'text' in i && i.text.includes('Obiettivo raggiunto'))).toBe(true)
+  })
+
+  it('chiusura cap in goal mode: tetto raggiunto senza obiettivo', () => {
+    const feed: FeedEntry[] = [
+      { type: 'collab_round', seq: seq(), ts, round: 8, total: 8, mode: 'goal' },
+      { type: 'collab_round', seq: seq(), ts, round: 0, total: 0, mode: 'goal', reason: 'cap' },
+    ]
+    const room = foldEvents(feed)
+    const sys = room.items.filter((i) => i.kind === 'system')
+    expect(sys.some((i) => 'text' in i &&
+      i.text.includes('Tetto raggiunto senza obiettivo'))).toBe(true)
+  })
+
+  it('chiusura stopped in goal mode: goal fermato dal Director', () => {
+    const feed: FeedEntry[] = [
+      { type: 'collab_round', seq: seq(), ts, round: 2, total: 8, mode: 'goal' },
+      { type: 'collab_round', seq: seq(), ts, round: 0, total: 0, mode: 'goal', reason: 'stopped' },
+    ]
+    const room = foldEvents(feed)
+    expect(room.goal).toBeNull()
+    const sys = room.items.filter((i) => i.kind === 'system')
+    expect(sys.some((i) => 'text' in i && i.text.includes('Goal fermato'))).toBe(true)
+  })
+
+  it('un /goal scritto a metà corsa non cambia l’obiettivo in corso', () => {
+    const feed: FeedEntry[] = [
+      { type: 'director_echo', seq: seq(), ts, text: '/goal claim A' },
+      { type: 'collab_round', seq: seq(), ts, round: 1, total: 8, mode: 'goal' },
+      { type: 'goal_verdict', seq: seq(), ts, round: 1, score: 4, met: false, reason: 'manca A' },
+      // Il Director scrive un secondo /goal mentre A sta ancora girando:
+      // il server lo accoda, il pannello deve restare su A fino alla chiusura.
+      { type: 'director_echo', seq: seq(), ts, text: '/goal claim B' },
+      { type: 'collab_round', seq: seq(), ts, round: 2, total: 8, mode: 'goal' },
+    ]
+    const room = foldEvents(feed)
+    expect(room.goal?.objective).toBe('claim A')
+    expect(room.goal?.lastVerdict?.score).toBe(4)
+  })
+
+  it('«/goal: X» (come lo accetta il server) non fa ricomparire l’obiettivo vecchio', () => {
+    const feed: FeedEntry[] = [
+      { type: 'director_echo', seq: seq(), ts, text: '/goal claim A' },
+      { type: 'collab_round', seq: seq(), ts, round: 1, total: 8, mode: 'goal' },
+      { type: 'collab_round', seq: seq(), ts, round: 0, total: 0, mode: 'goal', reason: 'met' },
+      { type: 'director_echo', seq: seq(), ts, text: '/goal: un claim nuovo' },
+      { type: 'collab_round', seq: seq(), ts, round: 1, total: 8, mode: 'goal' },
+    ]
+    const room = foldEvents(feed)
+    expect(room.goal?.objective).toBe(': un claim nuovo')
+  })
+
+  it('un secondo /goal sovrascrive obiettivo e verdetto precedenti', () => {
+    const feed: FeedEntry[] = [
+      { type: 'director_echo', seq: seq(), ts, text: '/goal vecchio obiettivo' },
+      { type: 'collab_round', seq: seq(), ts, round: 1, total: 8, mode: 'goal' },
+      { type: 'goal_verdict', seq: seq(), ts, round: 1, score: 9, met: true, reason: 'ok' },
+      { type: 'collab_round', seq: seq(), ts, round: 0, total: 0, mode: 'goal', reason: 'met' },
+      { type: 'director_echo', seq: seq(), ts, text: '/goal nuovo obiettivo' },
+      { type: 'collab_round', seq: seq(), ts, round: 1, total: 8, mode: 'goal' },
+    ]
+    const room = foldEvents(feed)
+    expect(room.goal?.objective).toBe('nuovo obiettivo')
+    expect(room.goal?.lastVerdict).toBeNull()
   })
 })
