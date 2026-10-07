@@ -591,9 +591,9 @@ Server (`server/main.py`): `Room._goal_mode` (controllato PRIMA di
 `_collab_mode`, che resta intatto) e `Room._run_goal`, tetto
 `WEB_GOAL_CAP`. Contratto: nuovo evento `goal_verdict`; `collab_round.mode`
 si allarga a `"goal"`, `collab_round.reason` a `"met"` (vedi
-`docs/EVENT-CONTRACT.md` §9). UI: non ancora agganciata — il loop funziona
-via WebSocket (driveable da `room_tui.py` o da un client di test) ma la ADV
-Room non ha ancora un pulsante o un pannello per `/goal`; resta lavoro
-aperto. Test: 9 nuovi (`tests/test_core_ext.py`: judge + parser;
+`docs/EVENT-CONTRACT.md` §9). UI agganciata (commit `093ba56`, 07/10/2026):
+fold degli eventi goal, GoalPanel in regia (lanciatore + obiettivo/giro/
+punteggio), banner e aiuto comandi — verificata dal browser con un
+obiettivo vero. Test: 9 nuovi (`tests/test_core_ext.py`: judge + parser;
 `tests/test_server.py`: trigger, obiettivo raggiunto, tetto senza successo,
 judge indisponibile) — 130 verdi in locale, nessuna regressione.
