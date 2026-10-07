@@ -70,6 +70,9 @@ export function PrivateChat({
             <p className="truncate text-[14px] font-semibold" style={{ color: head.color }}>
               {head.name}
             </p>
+            {head.tagline && (
+              <p className="truncate text-[11.5px] text-faint">{head.tagline}</p>
+            )}
             <p className="flex items-center gap-1 text-[11.5px] text-warn">
               <Lock className="size-3" aria-hidden />
               Canale privato: la stanza non lo vede

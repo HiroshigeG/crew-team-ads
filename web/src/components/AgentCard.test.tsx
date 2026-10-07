@@ -7,6 +7,7 @@ import type { Head } from '../mocks/roster'
 const HEAD: Head = {
   key: 'cd', name: 'Creative Director', avatar: '🎨', color: '#ff8700',
   model_id: 'anthropic/claude-opus-5', persona: 'x', creativity: 7,
+  tagline: 'Dalle verità alla direzione esecutiva.',
 }
 
 describe('AgentCard', () => {
@@ -41,5 +42,18 @@ describe('AgentCard', () => {
   it('la barra creatività dichiara il livello', () => {
     render(<AgentCard head={HEAD} />)
     expect(screen.getByLabelText('Creatività 7 su 10')).toBeTruthy()
+  })
+
+  it('la tagline è visibile sulla card (scelta UX 07/10)', () => {
+    render(<AgentCard head={HEAD} live={{ state: 'idle', detail: null }} />)
+    expect(screen.getByText('Dalle verità alla direzione esecutiva.')).toBeTruthy()
+  })
+
+  it('senza tagline la card resta com’era: nessuna riga vuota', () => {
+    const { container } = render(
+      <AgentCard head={{ ...HEAD, tagline: undefined }} live={{ state: 'idle', detail: null }} />,
+    )
+    expect(container.textContent).not.toContain('undefined')
+    expect(screen.queryByText('Dalle verità alla direzione esecutiva.')).toBeNull()
   })
 })

@@ -59,7 +59,7 @@ export function AgentCard({
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen?.()}
       title={
-        head.persona.trim() +
+        (head.tagline?.trim() || head.persona.trim()) +
         (onOpen ? ' — click: canale privato' : '')
       }
       className={cn(
@@ -103,6 +103,13 @@ export function AgentCard({
             ))}
           </span>
         </div>
+        {/* Frase breve del ruolo (scelta UX 07/10): una riga faint, troncata —
+            la colonna si allunga un filo ma ogni testa dichiara cosa fa. */}
+        {head.tagline && (
+          <p className="truncate text-[11.5px] leading-tight text-faint">
+            {head.tagline}
+          </p>
+        )}
         {busy && (
           <div className="mt-0.5 flex items-center gap-1.5">
             {PULSING.has(state) ? (

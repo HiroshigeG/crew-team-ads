@@ -37,7 +37,7 @@ export function RosterEditor({
         continue
       }
       const changed: Record<string, unknown> = {}
-      for (const f of ['name', 'avatar', 'color', 'model_id', 'persona', 'effort'] as const) {
+      for (const f of ['name', 'avatar', 'color', 'model_id', 'persona', 'tagline', 'effort'] as const) {
         if (h[f] !== before[f]) changed[f] = h[f]
       }
       if (Object.keys(changed).length) {
@@ -129,6 +129,13 @@ export function RosterEditor({
                   <Trash2 className="size-4" aria-hidden />
                 </button>
               </div>
+              <input
+                className={cn(field, 'mt-2')}
+                value={h.tagline ?? ''}
+                onChange={(e) => patch(h.key, { tagline: e.target.value })}
+                placeholder="Frase breve mostrata sulla card (in italiano)…"
+                aria-label={`Frase breve di ${h.key}`}
+              />
               <textarea
                 className={cn(field, 'mt-2 resize-none leading-snug')}
                 rows={2}
@@ -192,7 +199,7 @@ export function RosterEditor({
                 setAdded({
                   key: '', name: '', avatar: '🤖', color: '#8899aa',
                   model_id: MODELS[1] ?? MODELS[0], persona: ' You are ',
-                  creativity: 5, effort: '',
+                  tagline: '', creativity: 5, effort: '',
                 })
               }
               className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge py-2.5 text-[13px] text-dim hover:border-accent hover:text-ink"

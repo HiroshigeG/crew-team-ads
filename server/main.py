@@ -105,6 +105,11 @@ def status() -> dict:
         "featherless_ai/huihui-ai/Qwen2.5-14B-Instruct-abliterated-v2",   # leggero, asciutto
         "featherless_ai/zetasepic/Qwen2.5-72B-Instruct-abliterated",      # 72B abliterated
         "featherless_ai/anthracite-org/magnum-v4-72b",                     # creativo forte
+        # In stanza dal 07/10 (smoke test vivi): senza queste voci il select
+        # dell'editor non mostra il modello delle teste che li usano.
+        "featherless_ai/NousResearch/Hermes-3-Llama-3.1-70B",              # regia ordinata
+        "featherless_ai/Qwen/Qwen2.5-72B-Instruct",                        # formale, affidabile
+        "featherless_ai/EVA-UNIT-01/EVA-Qwen2.5-72B-v0.2",                 # storyteller (dark_angel)
         "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition",  # creativo+uncensored
     ]
     return {
@@ -780,7 +785,8 @@ class Room:
             if action == "update" and key in self.roster.heads:
                 allowed = {k: v for k, v in fields.items()
                            if k in ("name", "avatar", "color", "model_id",
-                                    "persona", "creativity", "effort")}
+                                    "persona", "tagline", "creativity",
+                                    "effort")}
                 bad_model = ("model_id" in allowed
                              and not core.model_allowed(str(allowed["model_id"])))
                 if bad_model:
@@ -801,6 +807,7 @@ class Room:
                     color=str(fields.get("color") or "#8899aa"),
                     model_id=model,
                     persona=str(fields.get("persona") or f" You are {name}."),
+                    tagline=str(fields.get("tagline", "")),
                     creativity=max(0, min(10, int(fields.get("creativity", 5)))),
                     effort=str(fields.get("effort", "")),
                 ))
