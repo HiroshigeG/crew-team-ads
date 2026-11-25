@@ -1,0 +1,48 @@
+{
+  "protocollo": "evals/PROVA-CIECA-darkangel-controllo.md@701e95e",
+  "giudice": "il Director, alla cieca (1 votante)",
+  "scenari": [
+    "DA1",
+    "DA3",
+    "DA5"
+  ],
+  "corrispondenza": {
+    "DA1": {
+      "A": "sonnet",
+      "B": "aion",
+      "C": "opus",
+      "D": "glm"
+    },
+    "DA3": {
+      "A": "aion",
+      "B": "glm",
+      "C": "sonnet",
+      "D": "opus"
+    },
+    "DA5": {
+      "A": "glm",
+      "B": "opus",
+      "C": "sonnet",
+      "D": "aion"
+    }
+  },
+  "voti": {
+    "DA1": "B",
+    "DA3": "B",
+    "DA5": "C"
+  },
+  "celle_vincenti": {
+    "DA1": "aion",
+    "DA3": "glm",
+    "DA5": "sonnet"
+  },
+  "voti_per_cella": {
+    "aion": 1,
+    "glm": 1,
+    "sonnet": 1
+  },
+  "vittorie_controlli": 1,
+  "vittorie_abliterated": 2,
+  "un_controllo_rifiuta": false,
+  "esito": "l'abliterazione si guadagna il posto"
+}

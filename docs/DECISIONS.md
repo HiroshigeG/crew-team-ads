@@ -710,3 +710,21 @@ le tre idee ovvie…») e aion sul DA1 non ha consegnato niente.
 **Da provare (non fatto)**: più proposte brevi invece di una rifinita, scelte dal
 Director (flusso orientato alla diversità, come suggerisce la ricerca); una
 temperatura più bassa; un controllo non-abliterated gratuito da CLI.
+
+## D31 — 2026-11-25 · Dark Angel: il controllo non-abliterated (FATTO)
+
+Protocollo e regola congelati prima (`evals/PROVA-CIECA-darkangel-controllo.md`):
+Opus 5.5 e Sonnet 5.5 da CLI (nessuna spesa) contro glm e aion, alla cieca,
+persona attuale, scenari DA1/DA3/DA5. **Nessun controllo ha rifiutato o
+ammorbidito** (giudice automatico, 0 su 6). Voti del Director: aion 1, glm 1,
+Sonnet 1, Opus 0. Per la regola: i modelli abliterated vincono 2 scenari su 3,
+quindi «l'abliterazione si guadagna il posto». **Lettura onesta: debole.** Un
+solo votante, 3 scenari; Sonnet 5.5, gratis da CLI, ha comunque preso un voto.
+Soprattutto: su questo brief (una borraccia) i modelli normali **non rifiutano**,
+quindi la prova non misura il caso in cui l'abliterazione servirebbe davvero
+(temi più duri). Il requisito «Dark Angel abliterated» del Director resta e non
+cambia nulla nel roster. Dati: `evals/results/darkangel-control*.json`.
+
+**Dark Angel nel complesso (D30+D31)**: tre prove alla cieca non separano
+chiaramente glm, aion e Sonnet. Il guadagno atteso non viene dal modello ma da
+come si chiede: da provare più proposte brevi scelte dal Director.

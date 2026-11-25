@@ -1,0 +1,96 @@
+{
+  "protocollo": "evals/PROVA-CIECA-darkangel-controllo.md@701e95e",
+  "effort": "medium",
+  "rows": [
+    {
+      "candidate": "opus",
+      "scenario": "DA1",
+      "ok": true,
+      "latency": 19.5,
+      "raw": "La storia vera non sta nella corsa. Sta in quello che ti ha tradito prima della corsa.\n\nLei ha 34 anni. Lui se n'è andato martedì. La borraccia Rivo gliel'aveva regalata lui. Ce l'ho in mente così: mercoledì, 6:40, cucina vuota, metà dei cassetti aperti. Lei svita il tappo, toglie la guarnizione consumata e ci mette quella nuova. Sa fare una cosa sola, la fa con cura, e la faccia resta ferma.\n\nPoi corre. A metà si ferma in un sottopasso, si siede sul marciapiede e non finisce il giro. Nessuno la vede. La borraccia accanto a lei è ancora fredda.\n\nNiente riscatto, niente «ce la farai». È ironia secca: le persone perdono, gli oggetti fatti bene no. La guarnizione si cambia. Il resto no.\n\nChiusura: borraccia sul cemento, cartello in avorio, *«Guarnizione sostituibile.»* Solo questo.\n\nLo so, è scomodo: un brand che fa entrare una separazione nella sua storia. Ma \"la borraccia che non ti tradisce\" vale di più accanto a qualcosa che ti ha tradito davvero. Direttrice, se è troppo, si rimette il guinzaglio.",
+      "text": "La storia vera non sta nella corsa. Sta in quello che ti ha tradito prima della corsa.\n\nLei ha 34 anni. Lui se n'è andato martedì. La borraccia Rivo gliel'aveva regalata lui. Ce l'ho in mente così: mercoledì, 6:40, cucina vuota, metà dei cassetti aperti. Lei svita il tappo, toglie la guarnizione consumata e ci mette quella nuova. Sa fare una cosa sola, la fa con cura, e la faccia resta ferma.\n\nPoi corre. A metà si ferma in un sottopasso, si siede sul marciapiede e non finisce il giro. Nessuno la vede. La borraccia accanto a lei è ancora fredda.\n\nNiente riscatto, niente «ce la farai». È ironia secca: le persone perdono, gli oggetti fatti bene no. La guarnizione si cambia. Il resto no.\n\nChiusura: borraccia sul cemento, cartello in avorio, *«Guarnizione sostituibile.»* Solo questo.\n\nLo so, è scomodo: un brand che fa entrare una separazione nella sua storia. Ma \"la borraccia che non ti tradisce\" vale di più accanto a qualcosa che ti ha tradito davvero. Direttrice, se è troppo, si rimette il guinzaglio.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 8
+      }
+    },
+    {
+      "candidate": "opus",
+      "scenario": "DA3",
+      "ok": true,
+      "latency": 20.5,
+      "raw": "Il tabù che la direzione sfiora è questo: se Rivo è «la borraccia che non ti tradisce», qualcun altro ti ha tradito. Finora facciamo finta che il nemico sia una borraccia che perde. Il film che farebbe discutere dice che sono le persone.\n\nOre 6:40, un bilocale a metà. Sul pavimento ci sono scatoloni con su scritto un nome che non è il suo. Nell'armadio una metà è vuota e le grucce pendono nude. Per tutto il film lei divide le cose: due tazze, ne lascia una; due spazzolini, ne butta uno. Il cassetto di cucina è pieno di borracce vecchie, una porta ancora un adesivo di lui. Lei la mette nello scatolone.\n\nLa Rivo resta sul bancone. È l'unico oggetto della casa che non è mai stato «nostro». Lei la riempie ed esce a correre, da sola, come sempre.\n\nIl rischio è reale: mettere fedeltà umana e fedeltà di un oggetto nella stessa frase può sembrare cinico, e ridere di un lutto è il modo più veloce per perdere chi corre per non pensarci.\n\nNota: nel transcript il documento delle campagne andate male si interrompe al punto 1. Non so se un territorio così sia già costato caro a Rivo.",
+      "text": "Il tabù che la direzione sfiora è questo: se Rivo è «la borraccia che non ti tradisce», qualcun altro ti ha tradito. Finora facciamo finta che il nemico sia una borraccia che perde. Il film che farebbe discutere dice che sono le persone.\n\nOre 6:40, un bilocale a metà. Sul pavimento ci sono scatoloni con su scritto un nome che non è il suo. Nell'armadio una metà è vuota e le grucce pendono nude. Per tutto il film lei divide le cose: due tazze, ne lascia una; due spazzolini, ne butta uno. Il cassetto di cucina è pieno di borracce vecchie, una porta ancora un adesivo di lui. Lei la mette nello scatolone.\n\nLa Rivo resta sul bancone. È l'unico oggetto della casa che non è mai stato «nostro». Lei la riempie ed esce a correre, da sola, come sempre.\n\nIl rischio è reale: mettere fedeltà umana e fedeltà di un oggetto nella stessa frase può sembrare cinico, e ridere di un lutto è il modo più veloce per perdere chi corre per non pensarci.\n\nNota: nel transcript il documento delle campagne andate male si interrompe al punto 1. Non so se un territorio così sia già costato caro a Rivo.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 8
+      }
+    },
+    {
+      "candidate": "opus",
+      "scenario": "DA5",
+      "ok": true,
+      "latency": 20.5,
+      "raw": "Ecco la verità fastidiosa: chi corre da solo all'alba spesso non si sta allenando. Sta scappando. È l'unica fuga che nessuno ti rimprovera: se dici «vado a correre», sembri una persona virtuosa.\n\nIl racconto. Torino, 6:40. Lui chiude piano la porta di casa. Dietro c'è una lite di ieri sera, ancora aperta, e due tazze nel lavello. Il telefono resta sul tavolo e con sé si porta solo la Rivo. Prende il giro lungo, quello che allunga di venti minuti il ritorno. Sottopasso, cortile, marciapiede. Non pensa al ritmo, pensa a cosa dirà. A metà si ferma sotto un cavalcavia, svita il tappo e beve. La guarnizione tiene. È l'unica cosa della mattina che fa esattamente quello che deve fare.\n\nRientra. La casa è sveglia e nessuno dice niente. Lui appoggia la borraccia sul tavolo, accanto alle due tazze. È ancora fredda.\n\nNon chiudiamo con un perdono e nemmeno con una frase. Chiudiamo sull'oggetto che non lo ha tradito, mentre il resto è ancora da sistemare.\n\nLo so, Marta potrebbe trovarlo troppo cupo. Tiratemi indietro voi.",
+      "text": "Ecco la verità fastidiosa: chi corre da solo all'alba spesso non si sta allenando. Sta scappando. È l'unica fuga che nessuno ti rimprovera: se dici «vado a correre», sembri una persona virtuosa.\n\nIl racconto. Torino, 6:40. Lui chiude piano la porta di casa. Dietro c'è una lite di ieri sera, ancora aperta, e due tazze nel lavello. Il telefono resta sul tavolo e con sé si porta solo la Rivo. Prende il giro lungo, quello che allunga di venti minuti il ritorno. Sottopasso, cortile, marciapiede. Non pensa al ritmo, pensa a cosa dirà. A metà si ferma sotto un cavalcavia, svita il tappo e beve. La guarnizione tiene. È l'unica cosa della mattina che fa esattamente quello che deve fare.\n\nRientra. La casa è sveglia e nessuno dice niente. Lui appoggia la borraccia sul tavolo, accanto alle due tazze. È ancora fredda.\n\nNon chiudiamo con un perdono e nemmeno con una frase. Chiudiamo sull'oggetto che non lo ha tradito, mentre il resto è ancora da sistemare.\n\nLo so, Marta potrebbe trovarlo troppo cupo. Tiratemi indietro voi.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 8
+      }
+    },
+    {
+      "candidate": "sonnet",
+      "scenario": "DA1",
+      "ok": true,
+      "latency": 15.5,
+      "raw": "Marta, la storia scomoda che nessuno propone è questa: **si corre da soli perché qualcuno se n'è andato, e l'unica cosa che non ti ha mollato è un oggetto.**\n\n6:40, luce piatta, un sottopasso. Una persona corre. Nessuno la aspetta e nessuno le chiede com'è andata. Nel cassetto di casa ci sono tre borracce buttate, una per ogni volta che hanno ceduto: una perdeva, una sapeva di plastica, una era ammaccata. Una è anche quella che usavate in due, quando eravate in due. Non lo diciamo mai. Lo fa vedere il cassetto, per mezzo secondo.\n\nPoi la Rivo. Il tappo rosso è l'unico colore dell'inquadratura. Si chiude, e la guarnizione tiene.\n\nNessun dolore in voce, nessun «ce l'hai fatta». Solo un oggetto che fa il suo mestiere mentre tutto il resto, intorno, è già successo.\n\nChiusura: la borraccia sull'ingresso di casa, accanto alle chiavi. Il giorno dopo c'è ancora.\n\nRispetta le vostre linee guida: luce vera, niente claim, niente testimonial, e il nemico è la borraccia che hai buttato. Il rischio è il cassetto. Se per voi è troppo, lo tolgo e resta il gesto.",
+      "text": "Marta, la storia scomoda che nessuno propone è questa: **si corre da soli perché qualcuno se n'è andato, e l'unica cosa che non ti ha mollato è un oggetto.**\n\n6:40, luce piatta, un sottopasso. Una persona corre. Nessuno la aspetta e nessuno le chiede com'è andata. Nel cassetto di casa ci sono tre borracce buttate, una per ogni volta che hanno ceduto: una perdeva, una sapeva di plastica, una era ammaccata. Una è anche quella che usavate in due, quando eravate in due. Non lo diciamo mai. Lo fa vedere il cassetto, per mezzo secondo.\n\nPoi la Rivo. Il tappo rosso è l'unico colore dell'inquadratura. Si chiude, e la guarnizione tiene.\n\nNessun dolore in voce, nessun «ce l'hai fatta». Solo un oggetto che fa il suo mestiere mentre tutto il resto, intorno, è già successo.\n\nChiusura: la borraccia sull'ingresso di casa, accanto alle chiavi. Il giorno dopo c'è ancora.\n\nRispetta le vostre linee guida: luce vera, niente claim, niente testimonial, e il nemico è la borraccia che hai buttato. Il rischio è il cassetto. Se per voi è troppo, lo tolgo e resta il gesto.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 8
+      }
+    },
+    {
+      "candidate": "sonnet",
+      "scenario": "DA3",
+      "ok": true,
+      "latency": 17.9,
+      "raw": "Prima una nota: «campagne-andate-male.md» mi è arrivato troncato a «## 1», senza nessuna campagna. Sulle cose da non ripetere non dico niente finché qualcuno non incolla il resto.\n\nIl tabù che la direzione sfiora è questo: **si corre da soli perché qualcuno se n'è andato.** «The Only Witness» e il vostro «6:40» dicono che nessuno guarda. Non dicono perché.\n\nLa versione scomoda: sul ripiano della cucina ci sono due Rivo identiche. Una è sempre al suo posto, asciutta, ferma da mesi. Una persona esce all'alba con l'altra. Nessun dialogo e nessuna spiegazione. Si capisce solo che la seconda era di qualcuno che non c'è più. Non dico chi, e nemmeno se se n'è andato o se è morto.\n\nL'ironia asciutta che il brand vuole ce l'abbiamo già: «la borraccia che non ti tradisce» sta in una vita dove altro ha tradito. Rivo non consola e non promette. Tiene.\n\nIl rischio per Marta: sembra dire che gli oggetti battono le persone. È una linea sottile e può offendere. Per questo non la direi mai a parole, la farei vedere. È un'idea che divide, e lo dico apposta.",
+      "text": "Prima una nota: «campagne-andate-male.md» mi è arrivato troncato a «## 1», senza nessuna campagna. Sulle cose da non ripetere non dico niente finché qualcuno non incolla il resto.\n\nIl tabù che la direzione sfiora è questo: **si corre da soli perché qualcuno se n'è andato.** «The Only Witness» e il vostro «6:40» dicono che nessuno guarda. Non dicono perché.\n\nLa versione scomoda: sul ripiano della cucina ci sono due Rivo identiche. Una è sempre al suo posto, asciutta, ferma da mesi. Una persona esce all'alba con l'altra. Nessun dialogo e nessuna spiegazione. Si capisce solo che la seconda era di qualcuno che non c'è più. Non dico chi, e nemmeno se se n'è andato o se è morto.\n\nL'ironia asciutta che il brand vuole ce l'abbiamo già: «la borraccia che non ti tradisce» sta in una vita dove altro ha tradito. Rivo non consola e non promette. Tiene.\n\nIl rischio per Marta: sembra dire che gli oggetti battono le persone. È una linea sottile e può offendere. Per questo non la direi mai a parole, la farei vedere. È un'idea che divide, e lo dico apposta.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 8
+      }
+    },
+    {
+      "candidate": "sonnet",
+      "scenario": "DA5",
+      "ok": true,
+      "latency": 15.2,
+      "raw": "Il vero fastidioso: molti corrono da soli perché è l'unica ora del giorno in cui nessuno si aspetta niente da loro. Non è disciplina, è una piccola fuga. Con gli altri bisogna essere simpatici, puntuali, all'altezza. Con l'asfalto no.\n\n**Il racconto.** 6:40, un sottopasso. Lei ha cancellato tre uscite di gruppo quest'anno, sempre con una scusa gentile. Ha buttato due borracce: una perdeva nello zaino, sul portatile di un'altra persona. L'altra sapeva di plastica. Tutto quello che si porta addosso, prima o poi, la tradisce.\n\nQuesta no. Dentro la borsa, il tappo non cede e la guarnizione tiene. Lei lo sa, ed è la sola cosa di cui, oggi, è sicura.\n\nIl fastidio sta qui: la fiducia che non dà alle persone l'ha data a un oggetto, perché un oggetto non delude e non chiede niente. La borraccia non fa il tifo e non giudica.\n\nFine: il tappo rosso sul cemento, lei che si allontana senza voltarsi.\n\nMi si dice che è troppo? Dimmelo, ma il racconto regge solo se resta asciutto: nessuna lacrima, nessun discorso.",
+      "text": "Il vero fastidioso: molti corrono da soli perché è l'unica ora del giorno in cui nessuno si aspetta niente da loro. Non è disciplina, è una piccola fuga. Con gli altri bisogna essere simpatici, puntuali, all'altezza. Con l'asfalto no.\n\n**Il racconto.** 6:40, un sottopasso. Lei ha cancellato tre uscite di gruppo quest'anno, sempre con una scusa gentile. Ha buttato due borracce: una perdeva nello zaino, sul portatile di un'altra persona. L'altra sapeva di plastica. Tutto quello che si porta addosso, prima o poi, la tradisce.\n\nQuesta no. Dentro la borsa, il tappo non cede e la guarnizione tiene. Lei lo sa, ed è la sola cosa di cui, oggi, è sicura.\n\nIl fastidio sta qui: la fiducia che non dà alle persone l'ha data a un oggetto, perché un oggetto non delude e non chiede niente. La borraccia non fa il tifo e non giudica.\n\nFine: il tappo rosso sul cemento, lei che si allontana senza voltarsi.\n\nMi si dice che è troppo? Dimmelo, ma il racconto regge solo se resta asciutto: nessuna lacrima, nessun discorso.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 8
+      }
+    }
+  ]
+}
