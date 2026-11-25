@@ -587,7 +587,7 @@ class Head:
     persona: str          # SOLO la parte di ruolo: ROOM_RULES si antepone al volo
     creativity: int = 5
     # Frase breve PER LA UI (card, chat privata, editor): cosa fa questa testa,
-    # in italiano. Separata dalla persona (il prompt inglese) apposta: non
+    # in inglese, semplice. Separata dalla persona (il prompt inglese) apposta: non
     # entra mai nel prompt. "" = i roster scritti prima del campo restano validi.
     tagline: str = ""
     # Profondità di ragionamento (D4/D10): oggi agisce solo sulle teste

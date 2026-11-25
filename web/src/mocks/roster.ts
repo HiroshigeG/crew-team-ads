@@ -12,7 +12,7 @@ export interface Head {
   color: string
   model_id: string
   persona: string
-  /** Frase breve in italiano per la UI (card, chat privata); dal roster vero. */
+  /** Short plain-English line for the UI (card, private chat); from the real roster. */
   tagline?: string
   creativity: number
   effort?: string
