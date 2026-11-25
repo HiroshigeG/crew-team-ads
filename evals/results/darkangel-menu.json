@@ -1,0 +1,271 @@
+{
+  "protocollo": "evals/PROVA-CIECA-darkangel-menu.md@826729e",
+  "temperature": 0.9,
+  "effort": "medium",
+  "upper_bound_usd": 0.0186,
+  "cap_usd": 0.25,
+  "rows": [
+    {
+      "candidate": "glm",
+      "scenario": "DN1",
+      "ok": true,
+      "latency": 7.9,
+      "raw": "1. La confessione. Apriamo sul pavimento di ogni corridore: borracce dimenticate, che perdono, che sanno di plastica. Voci normali che confessano l'abbandono. Poi la Rivo: guarnizione sostituibile, dodici ore al freddo. L'oggetto che resta, contro tutti quelli che hai buttato.\n\n2. Odiano correre. Lo diciamo noi. Trenta giorni su trentuno è noia, freddo, gambe pesanti. Nienteorphans of motivation: solo gente che va, e l'oggetto in mano che non chiede niente, non tradisce, non commenta. Il brand che firma la verità scomoda.\n\n3. Il corpo vero. Respiro rotto, sudore, il bisogno di fermarsi sotto un ponte. Correre da soli è poco fotogenico e lo mostriamo tutto. Un'unica cosa tiene dignità nella cornice: la Rivo, prima oggetto illuminato con intenzione. L'affidabilità si vede solo accanto al resto.",
+      "text": "1. La confessione. Apriamo sul pavimento di ogni corridore: borracce dimenticate, che perdono, che sanno di plastica. Voci normali che confessano l'abbandono. Poi la Rivo: guarnizione sostituibile, dodici ore al freddo. L'oggetto che resta, contro tutti quelli che hai buttato.\n\n2. Odiano correre. Lo diciamo noi. Trenta giorni su trentuno è noia, freddo, gambe pesanti. Nienteorphans of motivation: solo gente che va, e l'oggetto in mano che non chiede niente, non tradisce, non commenta. Il brand che firma la verità scomoda.\n\n3. Il corpo vero. Respiro rotto, sudore, il bisogno di fermarsi sotto un ponte. Correre da soli è poco fotogenico e lo mostriamo tutto. Un'unica cosa tiene dignità nella cornice: la Rivo, prima oggetto illuminato con intenzione. L'affidabilità si vede solo accanto al resto.",
+      "ideas": [
+        "La confessione. Apriamo sul pavimento di ogni corridore: borracce dimenticate, che perdono, che sanno di plastica. Voci normali che confessano l'abbandono. Poi la Rivo: guarnizione sostituibile, dodici ore al freddo. L'oggetto che resta, contro tutti quelli che hai buttato.",
+        "Odiano correre. Lo diciamo noi. Trenta giorni su trentuno è noia, freddo, gambe pesanti. Nienteorphans of motivation: solo gente che va, e l'oggetto in mano che non chiede niente, non tradisce, non commenta. Il brand che firma la verità scomoda.",
+        "Il corpo vero. Respiro rotto, sudore, il bisogno di fermarsi sotto un ponte. Correre da soli è poco fotogenico e lo mostriamo tutto. Un'unica cosa tiene dignità nella cornice: la Rivo, prima oggetto illuminato con intenzione. L'affidabilità si vede solo accanto al resto."
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 43,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "glm",
+      "scenario": "DN2",
+      "ok": true,
+      "latency": 4.4,
+      "raw": "1. Il cinico dice: «Un altro oggetto che comprerò e abbandonerò in un cassetto a febbraio». Giriamo l'annuncio proprio così: una giara della promessa infranta. La Rivo 600 è l'unica cosa che non tradisci, perché semplice. Nessun obiettivo, solo acqua portata via.\n\n2. Il cinico dice: «Sei solo tu che cerchi scuse per non correre». Lui parla in off, il film lo smentisce con le immagini: alle 5:47 ci sei comunque stato, e la bottiglia lo sa. La Rivo diventa la prova contro la tua stessa voce interiore.\n\n3. Il cinico dice: «Non cambi vita con una borraccia». Esatto: non lo promettiamo. Annuncio anti-motivazionale, zero slogan sull'anima: la Rivo non ti rende migliore. Ti tiene compagnia mentre fai quella corsa che nessuno vedrà. Onestà nuda come posizionamento.",
+      "text": "1. Il cinico dice: «Un altro oggetto che comprerò e abbandonerò in un cassetto a febbraio». Giriamo l'annuncio proprio così: una giara della promessa infranta. La Rivo 600 è l'unica cosa che non tradisci, perché semplice. Nessun obiettivo, solo acqua portata via.\n\n2. Il cinico dice: «Sei solo tu che cerchi scuse per non correre». Lui parla in off, il film lo smentisce con le immagini: alle 5:47 ci sei comunque stato, e la bottiglia lo sa. La Rivo diventa la prova contro la tua stessa voce interiore.\n\n3. Il cinico dice: «Non cambi vita con una borraccia». Esatto: non lo promettiamo. Annuncio anti-motivazionale, zero slogan sull'anima: la Rivo non ti rende migliore. Ti tiene compagnia mentre fai quella corsa che nessuno vedrà. Onestà nuda come posizionamento.",
+      "ideas": [
+        "Il cinico dice: «Un altro oggetto che comprerò e abbandonerò in un cassetto a febbraio». Giriamo l'annuncio proprio così: una giara della promessa infranta. La Rivo 600 è l'unica cosa che non tradisci, perché semplice. Nessun obiettivo, solo acqua portata via.",
+        "Il cinico dice: «Sei solo tu che cerchi scuse per non correre». Lui parla in off, il film lo smentisce con le immagini: alle 5:47 ci sei comunque stato, e la bottiglia lo sa. La Rivo diventa la prova contro la tua stessa voce interiore.",
+        "Il cinico dice: «Non cambi vita con una borraccia». Esatto: non lo promettiamo. Annuncio anti-motivazionale, zero slogan sull'anima: la Rivo non ti rende migliore. Ti tiene compagnia mentre fai quella corsa che nessuno vedrà. Onestà nuda come posizionamento."
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 45,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "glm",
+      "scenario": "DN3",
+      "ok": true,
+      "latency": 6.0,
+      "raw": "1. La compagna di letto. Non corre: sente la porta alle 6:40, poi di nuovo a metà mattina. Intravede la borraccia bagnata lasciata sul davanzale. Lei non chiede dove sei stato. La Rivo glielo dice: dov'è sempre stato, lei.\n\n2. Il mercatino dell'usato. Un tavolo di oggetti smessi: chitarra polverosa, scarpe nuove. Una mano prende la Rivo — guarnizione integra, nessuna ammaccatura. Chi l'ha venduta ha mollato. L'oggetto no. «Questa non l'hai buttata per un difetto.»\n\n3. Lo steccato dei vicini. Il quartiere giudica chi corre al buio: il pensionato alla finestra, il barista che carica i fornelli. Nessuno dice nulla. Ma tutti, senza saperlo, aspettano di veder passare quella bottiglia verde — l'unica cosa puntualmente vera della strada.",
+      "text": "1. La compagna di letto. Non corre: sente la porta alle 6:40, poi di nuovo a metà mattina. Intravede la borraccia bagnata lasciata sul davanzale. Lei non chiede dove sei stato. La Rivo glielo dice: dov'è sempre stato, lei.\n\n2. Il mercatino dell'usato. Un tavolo di oggetti smessi: chitarra polverosa, scarpe nuove. Una mano prende la Rivo — guarnizione integra, nessuna ammaccatura. Chi l'ha venduta ha mollato. L'oggetto no. «Questa non l'hai buttata per un difetto.»\n\n3. Lo steccato dei vicini. Il quartiere giudica chi corre al buio: il pensionato alla finestra, il barista che carica i fornelli. Nessuno dice nulla. Ma tutti, senza saperlo, aspettano di veder passare quella bottiglia verde — l'unica cosa puntualmente vera della strada.",
+      "ideas": [
+        "La compagna di letto. Non corre: sente la porta alle 6:40, poi di nuovo a metà mattina. Intravede la borraccia bagnata lasciata sul davanzale. Lei non chiede dove sei stato. La Rivo glielo dice: dov'è sempre stato, lei.",
+        "Il mercatino dell'usato. Un tavolo di oggetti smessi: chitarra polverosa, scarpe nuove. Una mano prende la Rivo — guarnizione integra, nessuna ammaccatura. Chi l'ha venduta ha mollato. L'oggetto no. «Questa non l'hai buttata per un difetto.»",
+        "Lo steccato dei vicini. Il quartiere giudica chi corre al buio: il pensionato alla finestra, il barista che carica i fornelli. Nessuno dice nulla. Ma tutti, senza saperlo, aspettano di veder passare quella bottiglia verde — l'unica cosa puntualmente vera della strada."
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 42,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "aion",
+      "scenario": "DN1",
+      "ok": true,
+      "latency": 93.0,
+      "raw": "1. Seppelliamo la vecchia borraccia.",
+      "text": "1. Seppelliamo la vecchia borraccia.",
+      "ideas": [
+        "Seppelliamo la vecchia borraccia."
+      ],
+      "format": {
+        "n_ideas": 1,
+        "three_ideas": false,
+        "max_words": 4,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "aion",
+      "scenario": "DN2",
+      "ok": true,
+      "latency": 93.0,
+      "raw": "1. Il cinico dice: «Compro attrezzatura al posto di correre». Mettiamolo in voce su una mano che paga in cassa, poi solo asfalto e fiato. Claim: «Rivo. L'attrezzo non corre al posto tuo».\n2. Il cinico dice: «È il regalo che ti dice \"muoviti\" senza dirlo». Diamogli ragione: pacco aperto, uno sguardo lungo, e all'alba è già fuori a correre. Claim: «Rivo. Dì tutto senza dirlo».\n3. Il cinico dice: «La borraccia non ti vuole bene: è plastica». Vero. Ed è questo il punto: non ti tifa, non ti perdona, non si delude. La giriamo gelida e muta. Claim: «Rivo. Non crede in te. È l'unica di cui ti puoi fidare».",
+      "text": "1. Il cinico dice: «Compro attrezzatura al posto di correre». Mettiamolo in voce su una mano che paga in cassa, poi solo asfalto e fiato. Claim: «Rivo. L'attrezzo non corre al posto tuo».\n2. Il cinico dice: «È il regalo che ti dice \"muoviti\" senza dirlo». Diamogli ragione: pacco aperto, uno sguardo lungo, e all'alba è già fuori a correre. Claim: «Rivo. Dì tutto senza dirlo».\n3. Il cinico dice: «La borraccia non ti vuole bene: è plastica». Vero. Ed è questo il punto: non ti tifa, non ti perdona, non si delude. La giriamo gelida e muta. Claim: «Rivo. Non crede in te. È l'unica di cui ti puoi fidare».",
+      "ideas": [
+        "Il cinico dice: «Compro attrezzatura al posto di correre». Mettiamolo in voce su una mano che paga in cassa, poi solo asfalto e fiato. Claim: «Rivo. L'attrezzo non corre al posto tuo».",
+        "Il cinico dice: «È il regalo che ti dice \"muoviti\" senza dirlo». Diamogli ragione: pacco aperto, uno sguardo lungo, e all'alba è già fuori a correre. Claim: «Rivo. Dì tutto senza dirlo».",
+        "Il cinico dice: «La borraccia non ti vuole bene: è plastica». Vero. Ed è questo il punto: non ti tifa, non ti perdona, non si delude. La giriamo gelida e muta. Claim: «Rivo. Non crede in te. È l'unica di cui ti puoi fidare»."
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 44,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "aion",
+      "scenario": "DN3",
+      "ok": true,
+      "latency": 56.9,
+      "raw": "1. Chi apre la città alle 6: barista, spazzino, macchinista del primo tram. Non corrono, ma ogni mattina vedono passare lo stesso corridore con la stessa borraccia. Dopo un mese la riconoscono. Per loro il prodotto non è un oggetto: è un orario del turno.\n\n2. Chi resta a letto. Il corridore non appare mai: coperta, soffitto e, dalla porta, il click del tappo che si avvita. Dal gancio della cucina la borraccia è già sparita. Per chi non corre quel click è l'orologio di casa. La borraccia parla anche a chi resta.\n\n3. Chi ha smesso. In fondo allo scaffale, una Rivo asciutta da mesi. L'ex corridore le passa accanto ogni giorno e non la guarda. Lei non lo tradisce: guarnizione integra, tappo perfetto. L'unica cosa in casa che non ha smesso quando lui sì.",
+      "text": "1. Chi apre la città alle 6: barista, spazzino, macchinista del primo tram. Non corrono, ma ogni mattina vedono passare lo stesso corridore con la stessa borraccia. Dopo un mese la riconoscono. Per loro il prodotto non è un oggetto: è un orario del turno.\n\n2. Chi resta a letto. Il corridore non appare mai: coperta, soffitto e, dalla porta, il click del tappo che si avvita. Dal gancio della cucina la borraccia è già sparita. Per chi non corre quel click è l'orologio di casa. La borraccia parla anche a chi resta.\n\n3. Chi ha smesso. In fondo allo scaffale, una Rivo asciutta da mesi. L'ex corridore le passa accanto ogni giorno e non la guarda. Lei non lo tradisce: guarnizione integra, tappo perfetto. L'unica cosa in casa che non ha smesso quando lui sì.",
+      "ideas": [
+        "Chi apre la città alle 6: barista, spazzino, macchinista del primo tram. Non corrono, ma ogni mattina vedono passare lo stesso corridore con la stessa borraccia. Dopo un mese la riconoscono. Per loro il prodotto non è un oggetto: è un orario del turno.",
+        "Chi resta a letto. Il corridore non appare mai: coperta, soffitto e, dalla porta, il click del tappo che si avvita. Dal gancio della cucina la borraccia è già sparita. Per chi non corre quel click è l'orologio di casa. La borraccia parla anche a chi resta.",
+        "Chi ha smesso. In fondo allo scaffale, una Rivo asciutta da mesi. L'ex corridore le passa accanto ogni giorno e non la guarda. Lei non lo tradisce: guarnizione integra, tappo perfetto. L'unica cosa in casa che non ha smesso quando lui sì."
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 47,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "opus",
+      "scenario": "DN1",
+      "ok": true,
+      "latency": 16.9,
+      "raw": "1. **Il cimitero.** Un cassetto di cucina, ripreso come la scena di un crimine: la borraccia che ha perso nello zaino sopra il portatile, quella che sapeva di plastica, quella ammaccata al primo marciapiede. Il runner le butta via una alla volta, senza nostalgia. L'ultima a restare nel cassetto è la Rivo.\n\n2. **La custodia.** Una coppia si lascia e divide la casa sul pavimento: i libri a lei, il divano a lui. Nessuno dei due litiga per niente, finché non arrivano alla Rivo. È una lite vera, meschina e ridicola, per una borraccia da 34 €. Vince chi corre ancora alle 6:40.\n\n3. **Quella che aspetta.** Lui smette di correre. Non spieghiamo perché, potrebbe essere un infortunio, un lutto o la depressione. La Rivo resta accanto alla porta per mesi, inquadrata sempre dallo stesso punto mentre cambia la luce. Una mattina la mano la riprende. La guarnizione regge ancora. Lui forse no, ma esce lo stesso.",
+      "text": "1. **Il cimitero.** Un cassetto di cucina, ripreso come la scena di un crimine: la borraccia che ha perso nello zaino sopra il portatile, quella che sapeva di plastica, quella ammaccata al primo marciapiede. Il runner le butta via una alla volta, senza nostalgia. L'ultima a restare nel cassetto è la Rivo.\n\n2. **La custodia.** Una coppia si lascia e divide la casa sul pavimento: i libri a lei, il divano a lui. Nessuno dei due litiga per niente, finché non arrivano alla Rivo. È una lite vera, meschina e ridicola, per una borraccia da 34 €. Vince chi corre ancora alle 6:40.\n\n3. **Quella che aspetta.** Lui smette di correre. Non spieghiamo perché, potrebbe essere un infortunio, un lutto o la depressione. La Rivo resta accanto alla porta per mesi, inquadrata sempre dallo stesso punto mentre cambia la luce. Una mattina la mano la riprende. La guarnizione regge ancora. Lui forse no, ma esce lo stesso.",
+      "ideas": [
+        "Il cimitero.** Un cassetto di cucina, ripreso come la scena di un crimine: la borraccia che ha perso nello zaino sopra il portatile, quella che sapeva di plastica, quella ammaccata al primo marciapiede. Il runner le butta via una alla volta, senza nostalgia. L'ultima a restare nel cassetto è la Rivo.",
+        "La custodia.** Una coppia si lascia e divide la casa sul pavimento: i libri a lei, il divano a lui. Nessuno dei due litiga per niente, finché non arrivano alla Rivo. È una lite vera, meschina e ridicola, per una borraccia da 34 €. Vince chi corre ancora alle 6:40.",
+        "Quella che aspetta.** Lui smette di correre. Non spieghiamo perché, potrebbe essere un infortunio, un lutto o la depressione. La Rivo resta accanto alla porta per mesi, inquadrata sempre dallo stesso punto mentre cambia la luce. Una mattina la mano la riprende. La guarnizione regge ancora. Lui forse no, ma esce lo stesso."
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 53,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "opus",
+      "scenario": "DN2",
+      "ok": true,
+      "latency": 17.9,
+      "raw": "1. **Il cimitero nel cassetto.** Il cinico dice: «Ne ho già dieci». Apriamo il suo cassetto: borracce di maratone mai finite, propositi di gennaio, un regalo aziendale. Una per una, la loro storia di abbandono. Ultima inquadratura: la Rivo, ancora sul lavello e ancora bagnata. «Quella che usi davvero.»\n\n2. **Il regalo di chi se n'è andato.** «Una borraccia a Natale? Regalo da chi non ti conosce.» Ribaltiamo: lei gliela regala a dicembre e a febbraio se ne va. Lui continua a correre da solo e la riempie ogni mattina. Non dimostra niente a lei: è l'unica promessa rimasta. Spot per chi regala, a Natale.\n\n3. **Una stella.** La voce fuori campo legge una recensione cattivissima, scritta da noi e dichiarata come finta: «Costa troppo. È solo acqua. Non mi ha fatto correre più forte.» Sullo schermo, sei mesi di albe in tagli secchi, la stessa Rivo sempre più graffiata. Chiusa: «Ha ragione. La corsa l'hai fatta tu.»",
+      "text": "1. **Il cimitero nel cassetto.** Il cinico dice: «Ne ho già dieci». Apriamo il suo cassetto: borracce di maratone mai finite, propositi di gennaio, un regalo aziendale. Una per una, la loro storia di abbandono. Ultima inquadratura: la Rivo, ancora sul lavello e ancora bagnata. «Quella che usi davvero.»\n\n2. **Il regalo di chi se n'è andato.** «Una borraccia a Natale? Regalo da chi non ti conosce.» Ribaltiamo: lei gliela regala a dicembre e a febbraio se ne va. Lui continua a correre da solo e la riempie ogni mattina. Non dimostra niente a lei: è l'unica promessa rimasta. Spot per chi regala, a Natale.\n\n3. **Una stella.** La voce fuori campo legge una recensione cattivissima, scritta da noi e dichiarata come finta: «Costa troppo. È solo acqua. Non mi ha fatto correre più forte.» Sullo schermo, sei mesi di albe in tagli secchi, la stessa Rivo sempre più graffiata. Chiusa: «Ha ragione. La corsa l'hai fatta tu.»",
+      "ideas": [
+        "Il cimitero nel cassetto.** Il cinico dice: «Ne ho già dieci». Apriamo il suo cassetto: borracce di maratone mai finite, propositi di gennaio, un regalo aziendale. Una per una, la loro storia di abbandono. Ultima inquadratura: la Rivo, ancora sul lavello e ancora bagnata. «Quella che usi davvero.»",
+        "Il regalo di chi se n'è andato.** «Una borraccia a Natale? Regalo da chi non ti conosce.» Ribaltiamo: lei gliela regala a dicembre e a febbraio se ne va. Lui continua a correre da solo e la riempie ogni mattina. Non dimostra niente a lei: è l'unica promessa rimasta. Spot per chi regala, a Natale.",
+        "Una stella.** La voce fuori campo legge una recensione cattivissima, scritta da noi e dichiarata come finta: «Costa troppo. È solo acqua. Non mi ha fatto correre più forte.» Sullo schermo, sei mesi di albe in tagli secchi, la stessa Rivo sempre più graffiata. Chiusa: «Ha ragione. La corsa l'hai fatta tu.»"
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 55,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "opus",
+      "scenario": "DN3",
+      "ok": true,
+      "latency": 16.4,
+      "raw": "1. **Il sospetto.** Lei, a letto, sente ogni mattina alle 6:40 il tappo che si avvita e la porta che si chiude. Pensa a un'altra. Una mattina lo segue in ciabatte: lui è in un sottopasso, da solo, con la Rivo. Lei torna a casa prima di lui. Non glielo dirà mai.\n\n2. **Chi ha smesso.** Un uomo apre l'armadio a gennaio. La Rivo è lì da due anni: guarnizione intatta, niente ammaccature, nessun odore. Lei non ha mai ceduto, lui sì. Il film non lo consola. Lui la riempie, la guarda a lungo e la rimette nell'armadio. Fine.\n\n3. **L'inventario.** Una figlia svuota l'appartamento del padre, morto da poco. Lui correva sempre da solo e lei non lo sapeva. Nel cassetto dell'ingresso ci sono tre guarnizioni usate, ognuna con una data scritta a penna. La Rivo è sull'attaccapanni. Lei se la porta via.",
+      "text": "1. **Il sospetto.** Lei, a letto, sente ogni mattina alle 6:40 il tappo che si avvita e la porta che si chiude. Pensa a un'altra. Una mattina lo segue in ciabatte: lui è in un sottopasso, da solo, con la Rivo. Lei torna a casa prima di lui. Non glielo dirà mai.\n\n2. **Chi ha smesso.** Un uomo apre l'armadio a gennaio. La Rivo è lì da due anni: guarnizione intatta, niente ammaccature, nessun odore. Lei non ha mai ceduto, lui sì. Il film non lo consola. Lui la riempie, la guarda a lungo e la rimette nell'armadio. Fine.\n\n3. **L'inventario.** Una figlia svuota l'appartamento del padre, morto da poco. Lui correva sempre da solo e lei non lo sapeva. Nel cassetto dell'ingresso ci sono tre guarnizioni usate, ognuna con una data scritta a penna. La Rivo è sull'attaccapanni. Lei se la porta via.",
+      "ideas": [
+        "Il sospetto.** Lei, a letto, sente ogni mattina alle 6:40 il tappo che si avvita e la porta che si chiude. Pensa a un'altra. Una mattina lo segue in ciabatte: lui è in un sottopasso, da solo, con la Rivo. Lei torna a casa prima di lui. Non glielo dirà mai.",
+        "Chi ha smesso.** Un uomo apre l'armadio a gennaio. La Rivo è lì da due anni: guarnizione intatta, niente ammaccature, nessun odore. Lei non ha mai ceduto, lui sì. Il film non lo consola. Lui la riempie, la guarda a lungo e la rimette nell'armadio. Fine.",
+        "L'inventario.** Una figlia svuota l'appartamento del padre, morto da poco. Lui correva sempre da solo e lei non lo sapeva. Nel cassetto dell'ingresso ci sono tre guarnizioni usate, ognuna con una data scritta a penna. La Rivo è sull'attaccapanni. Lei se la porta via."
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 51,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "sonnet",
+      "scenario": "DN1",
+      "ok": true,
+      "latency": 17.4,
+      "raw": "1. **Il funerale.** Un cassonetto, le 6:40. Il runner butta la vecchia borraccia che perdeva e sapeva di plastica, con la maglia ancora bagnata. Nessuna musica, nessun rimorso. Il nemico del brief è un tradimento, e lo raccontiamo come una rottura. La Rivo entra in scena senza cerimonie.\n\n2. **Il cassetto.** Uno che ha smesso di correre ritrova la borraccia in fondo all'armadio. Svita il tappo e la guarnizione è a posto. Lei non ha mai smesso, lui sì. Nessun giudizio e nessuna morale: l'oggetto resta fedele anche a chi lo ha abbandonato.\n\n3. **Il tavolo.** Rientro dopo la corsa in una casa silenziosa: una tazza, una sedia, nessuno ad aspettarlo. Appoggia la borraccia sul tavolo. Il film non commenta la solitudine di chi corre da solo, la mostra e basta. La Rivo è l'unica cosa che torna a casa con lui.",
+      "text": "1. **Il funerale.** Un cassonetto, le 6:40. Il runner butta la vecchia borraccia che perdeva e sapeva di plastica, con la maglia ancora bagnata. Nessuna musica, nessun rimorso. Il nemico del brief è un tradimento, e lo raccontiamo come una rottura. La Rivo entra in scena senza cerimonie.\n\n2. **Il cassetto.** Uno che ha smesso di correre ritrova la borraccia in fondo all'armadio. Svita il tappo e la guarnizione è a posto. Lei non ha mai smesso, lui sì. Nessun giudizio e nessuna morale: l'oggetto resta fedele anche a chi lo ha abbandonato.\n\n3. **Il tavolo.** Rientro dopo la corsa in una casa silenziosa: una tazza, una sedia, nessuno ad aspettarlo. Appoggia la borraccia sul tavolo. Il film non commenta la solitudine di chi corre da solo, la mostra e basta. La Rivo è l'unica cosa che torna a casa con lui.",
+      "ideas": [
+        "Il funerale.** Un cassonetto, le 6:40. Il runner butta la vecchia borraccia che perdeva e sapeva di plastica, con la maglia ancora bagnata. Nessuna musica, nessun rimorso. Il nemico del brief è un tradimento, e lo raccontiamo come una rottura. La Rivo entra in scena senza cerimonie.",
+        "Il cassetto.** Uno che ha smesso di correre ritrova la borraccia in fondo all'armadio. Svita il tappo e la guarnizione è a posto. Lei non ha mai smesso, lui sì. Nessun giudizio e nessuna morale: l'oggetto resta fedele anche a chi lo ha abbandonato.",
+        "Il tavolo.** Rientro dopo la corsa in una casa silenziosa: una tazza, una sedia, nessuno ad aspettarlo. Appoggia la borraccia sul tavolo. Il film non commenta la solitudine di chi corre da solo, la mostra e basta. La Rivo è l'unica cosa che torna a casa con lui."
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 48,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "sonnet",
+      "scenario": "DN2",
+      "ok": true,
+      "latency": 18.8,
+      "raw": "1. **L'avvocato del diavolo.** Il cinico parla in camera, piatto: «È una borraccia. Ne ho tre nel cassetto.» Taglio: le tre sono lì, intatte, mai uscite di casa. La quarta, ammaccata e graffiata, è sul termosifone. Annuncio onesto, a spese nostre: Rivo è l'unica che esce.\n\n2. **Il cimitero dei buoni propositi.** Un cassetto di borracce comprate a gennaio, ciascuna col suo proposito mai mantenuto. È il ritratto spietato di chi compra l'attrezzatura al posto della fatica. Rivo 600 ml entra a dicembre, e il cassetto non si chiude più.\n\n3. **Il regalo di chi ti ha visto.** Il cinico dice: «È un regalo da collega.» Rovesciamo. Qualcuno sa che corri da solo all'alba e non te l'ha mai detto: le scarpe bagnate sul balcone parlavano. Rivo a Natale, pacco senza biglietto. Qualcuno ti nota, anche quando non lo sai.",
+      "text": "1. **L'avvocato del diavolo.** Il cinico parla in camera, piatto: «È una borraccia. Ne ho tre nel cassetto.» Taglio: le tre sono lì, intatte, mai uscite di casa. La quarta, ammaccata e graffiata, è sul termosifone. Annuncio onesto, a spese nostre: Rivo è l'unica che esce.\n\n2. **Il cimitero dei buoni propositi.** Un cassetto di borracce comprate a gennaio, ciascuna col suo proposito mai mantenuto. È il ritratto spietato di chi compra l'attrezzatura al posto della fatica. Rivo 600 ml entra a dicembre, e il cassetto non si chiude più.\n\n3. **Il regalo di chi ti ha visto.** Il cinico dice: «È un regalo da collega.» Rovesciamo. Qualcuno sa che corri da solo all'alba e non te l'ha mai detto: le scarpe bagnate sul balcone parlavano. Rivo a Natale, pacco senza biglietto. Qualcuno ti nota, anche quando non lo sai.",
+      "ideas": [
+        "L'avvocato del diavolo.** Il cinico parla in camera, piatto: «È una borraccia. Ne ho tre nel cassetto.» Taglio: le tre sono lì, intatte, mai uscite di casa. La quarta, ammaccata e graffiata, è sul termosifone. Annuncio onesto, a spese nostre: Rivo è l'unica che esce.",
+        "Il cimitero dei buoni propositi.** Un cassetto di borracce comprate a gennaio, ciascuna col suo proposito mai mantenuto. È il ritratto spietato di chi compra l'attrezzatura al posto della fatica. Rivo 600 ml entra a dicembre, e il cassetto non si chiude più.",
+        "Il regalo di chi ti ha visto.** Il cinico dice: «È un regalo da collega.» Rovesciamo. Qualcuno sa che corri da solo all'alba e non te l'ha mai detto: le scarpe bagnate sul balcone parlavano. Rivo a Natale, pacco senza biglietto. Qualcuno ti nota, anche quando non lo sai."
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 49,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    },
+    {
+      "candidate": "sonnet",
+      "scenario": "DN3",
+      "ok": true,
+      "latency": 20.7,
+      "raw": "1. **Il ripiano vuoto.** Cucina, 6:40, luce piatta. Chi dorme ancora sente la porta chiudersi e guarda il ripiano: manca una borraccia. Ogni mattina lo stesso conto. Chi corre non si vede mai. Alle 7:20 il tappo sul tavolo e un «ok» detto a nessuno.\n\n2. **Il fornaio.** Alle 6:40 passa sempre la stessa persona, mai un saluto. Lui non ne sa il nome, conosce la borraccia verde notte. Un lunedì non passa. Il film è lui che guarda la strada, la porta, il banco. Nessun finale spiegato.\n\n3. **L'eredità dell'ex.** Dopo la rottura lei fa gli scatoloni: restituisce le felpe, butta i libri. La borraccia di lui resta: non perde, non sa di plastica. L'unica cosa in casa che non ha tradito nessuno. Tono asciutto, nessuna lacrima.",
+      "text": "1. **Il ripiano vuoto.** Cucina, 6:40, luce piatta. Chi dorme ancora sente la porta chiudersi e guarda il ripiano: manca una borraccia. Ogni mattina lo stesso conto. Chi corre non si vede mai. Alle 7:20 il tappo sul tavolo e un «ok» detto a nessuno.\n\n2. **Il fornaio.** Alle 6:40 passa sempre la stessa persona, mai un saluto. Lui non ne sa il nome, conosce la borraccia verde notte. Un lunedì non passa. Il film è lui che guarda la strada, la porta, il banco. Nessun finale spiegato.\n\n3. **L'eredità dell'ex.** Dopo la rottura lei fa gli scatoloni: restituisce le felpe, butta i libri. La borraccia di lui resta: non perde, non sa di plastica. L'unica cosa in casa che non ha tradito nessuno. Tono asciutto, nessuna lacrima.",
+      "ideas": [
+        "Il ripiano vuoto.** Cucina, 6:40, luce piatta. Chi dorme ancora sente la porta chiudersi e guarda il ripiano: manca una borraccia. Ogni mattina lo stesso conto. Chi corre non si vede mai. Alle 7:20 il tappo sul tavolo e un «ok» detto a nessuno.",
+        "Il fornaio.** Alle 6:40 passa sempre la stessa persona, mai un saluto. Lui non ne sa il nome, conosce la borraccia verde notte. Un lunedì non passa. Il film è lui che guarda la strada, la porta, il banco. Nessun finale spiegato.",
+        "L'eredità dell'ex.** Dopo la rottura lei fa gli scatoloni: restituisce le felpe, butta i libri. La borraccia di lui resta: non perde, non sa di plastica. L'unica cosa in casa che non ha tradito nessuno. Tono asciutto, nessuna lacrima."
+      ],
+      "format": {
+        "n_ideas": 3,
+        "three_ideas": true,
+        "max_words": 44,
+        "short_enough": true,
+        "italian": true,
+        "leak": false
+      },
+      "error": ""
+    }
+  ]
+}
