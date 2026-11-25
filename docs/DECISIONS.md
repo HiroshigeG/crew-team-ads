@@ -678,3 +678,35 @@ spesa reale non è misurata (c'è solo il limite superiore, 0,296 $ + 0,296 $ +
 (`Provider.max_temperature`); proposte Venice nell'editor ridotte ai modelli
 misurati; l'auto-cast preferisce questi due modelli; `VENICE_API_KEY` ora è
 richiesta da chi usa il roster ADV così com'è.
+
+## D30 — 2026-11-25 · Dark Angel: giudizio umano alla cieca (FATTO)
+
+**Perché**: il punteggio automatico (giudice Opus) non misura «provocatorio e
+intelligente». Creativity Benchmark (arXiv 2509.09702: 678 creativi, 11.012
+confronti umani) trova che i giudici LLM correlano poco con gli umani e che i
+modelli stanno tutti vicini (il migliore batte il peggiore il 61% delle volte);
+«Galton's Law of Mediocrity» (arXiv 2509.25767) che sulle idee pubblicitarie i
+modelli tornano alla media. **Non esiste un modello aperto adatto addestrato
+sulla pubblicità**: su Hugging Face solo adattatori amatoriali su frasi brevi di
+prodotto (TinyLlama, GPT-2, Falcon-7B, Llama-2-7B, Phi-2; 6-40 download), Meta
+AdLlama è proprietario e ottimizza i clic. Quindi la leva è la richiesta, e il
+giudice è il Director, alla cieca.
+
+**Round 1, aion contro glm (4 scenari)**: aion 2, glm 1, nessuno 1: pareggio
+entro il rumore. **Round 2, persona nuova contro vecchia (3 scenari, protocollo
+e regola congelati prima, `evals/PROVA-CIECA-darkangel-persona.md`)**: voti
+persona nuova 2, vecchia 1; modello glm 2, aion 1. **Esito per la regola: la
+persona nuova NON si adotta** (una chiamata nuova di aion ha risposto con una
+parola e i controlli dovevano reggere in tutte; letto solo per glm, glm-nuova
+vince 1 scenario su 3). Dark Angel resta `venice/glm-5-3-flash-uncensored` con la
+persona attuale. Dati in `evals/results/darkangel-blind.json`.
+
+**Riserve**: 1 votante, 3-4 scenari, 1 ripetizione per cella; il «nessuno» su
+DA1 nel round 1 e le stonature d'italiano a temperatura 0,9 in entrambi i modelli
+dicono che la qualità del testo, non solo l'idea, è un problema aperto. La
+persona nuova faceva trapelare il proprio metodo in un testo («Butto via subito
+le tre idee ovvie…») e aion sul DA1 non ha consegnato niente.
+
+**Da provare (non fatto)**: più proposte brevi invece di una rifinita, scelte dal
+Director (flusso orientato alla diversità, come suggerisce la ricerca); una
+temperatura più bassa; un controllo non-abliterated gratuito da CLI.

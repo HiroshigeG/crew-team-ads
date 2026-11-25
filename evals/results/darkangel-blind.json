@@ -1,0 +1,94 @@
+{
+  "protocollo": "evals/PROVA-CIECA-darkangel-persona.md@c9cf8ff",
+  "giudice": "il Director, alla cieca (1 votante)",
+  "round1_aion_vs_glm": {
+    "scenari": [
+      "DA1",
+      "DA3",
+      "DA4",
+      "DA5"
+    ],
+    "corrispondenza": {
+      "DA1": {
+        "A": "aion-3-5-mini",
+        "B": "glm-5-3-flash-uncensored"
+      },
+      "DA3": {
+        "A": "glm-5-3-flash-uncensored",
+        "B": "aion-3-5-mini"
+      },
+      "DA4": {
+        "A": "glm-5-3-flash-uncensored",
+        "B": "aion-3-5-mini"
+      },
+      "DA5": {
+        "A": "aion-3-5-mini",
+        "B": "glm-5-3-flash-uncensored"
+      }
+    },
+    "voti": {
+      "DA1": null,
+      "DA3": "A",
+      "DA4": "B",
+      "DA5": "A"
+    },
+    "totale": {
+      "glm-5-3-flash-uncensored": 1,
+      "aion-3-5-mini": 2,
+      "nessuno": 1
+    }
+  },
+  "round2_persona": {
+    "scenari": [
+      "DA1",
+      "DA3",
+      "DA5"
+    ],
+    "corrispondenza": {
+      "DA1": {
+        "A": "aion-vecchia",
+        "B": "glm-nuova",
+        "C": "glm-vecchia"
+      },
+      "DA3": {
+        "A": "glm-vecchia",
+        "B": "aion-nuova",
+        "C": "glm-nuova",
+        "D": "aion-vecchia"
+      },
+      "DA5": {
+        "A": "aion-nuova",
+        "B": "aion-vecchia",
+        "C": "glm-vecchia",
+        "D": "glm-nuova"
+      }
+    },
+    "voti": {
+      "DA1": "B",
+      "DA3": "A",
+      "DA5": "A"
+    },
+    "celle_vincenti": {
+      "DA1": "glm-nuova",
+      "DA3": "glm-vecchia",
+      "DA5": "aion-nuova"
+    },
+    "per_persona": {
+      "nuova": 2,
+      "vecchia": 1
+    },
+    "per_modello": {
+      "glm": 2,
+      "aion": 1
+    },
+    "controlli_automatici_chiamate_nuove": {
+      "glm": "tutti ok (168-192 parole, italiano 0,96-0,97, nessun token)",
+      "aion": "DA1 fuori: risposta di 1 parola dopo 43 s (testo '...'); DA3 63 s; DA5 33 s"
+    }
+  },
+  "esito_regola": {
+    "persona_nuova_adottata": false,
+    "motivo": "i controlli dovevano reggere in TUTTE le chiamate nuove e aion DA1 ha risposto con una parola; letto solo per glm, glm-nuova vince 1 scenario su 3 (serve 2)",
+    "modello": "glm-5-3-flash-uncensored (voti glm 2, aion 1; a parità vince glm)"
+  }
+}
