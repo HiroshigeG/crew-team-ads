@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Check,
   Eye,
@@ -14,7 +14,8 @@ import {
 import { useRoomActions } from '../lib/socket'
 import { cn } from '../lib/cn'
 import { wordDiff } from '../lib/diff'
-import { buildMarkdown, downloadMarkdown, openPrintView } from '../lib/export'
+import { buildMarkdown, downloadMarkdown, exportBrief, openPrintView } from '../lib/export'
+import { proposalTitle, useCampaign } from '../state/campaign'
 import { BLANK_CAMPAIGN, CAMPAIGN, DECISIONS_LOG } from '../mocks/session'
 import type { RoomState } from '../state/fold'
 
@@ -62,19 +63,22 @@ export function Workspace({
   demo?: boolean
 }) {
   const campaign = demo ? CAMPAIGN : BLANK_CAMPAIGN
-  const [proposal, setProposal] = useState(
-    demo
-      ? {
-          headline: '«Ricordati la serata.»',
-          support: '«La sera comincia lucida.»',
-          body: 'Quattro parole che sono un brindisi e una sfida. Mai spiegare la linea, mai la parola «senza»: il prodotto non si scusa.',
-        }
-      : { headline: '', support: '', body: '' },
-  )
-  const hasProposal = Boolean(
-    proposal.headline.trim() || proposal.support.trim() || proposal.body.trim(),
-  )
-  const [versions, setVersions] = useState<string[]>([])
+  // Brief, proposta e versioni stanno nello stato condiviso (state/campaign):
+  // prima erano locali e il componente era montato due volte.
+  const { brief, proposal, setProposal, versions, addVersion } = useCampaign()
+  const title = proposalTitle(proposal)
+  const hasProposal = title !== null
+  // A goal raggiunto il server manda la proposta vincente (`proposal_drafted`).
+  // Si applica UNA volta per bozza (seq) e mai sopra a qualcosa che il Director
+  // ha già scritto: la bozza aiuta, non sovrascrive.
+  const lastDraftSeq = useRef<number | null>(null)
+  const draft = state.proposalDraft
+  useEffect(() => {
+    if (!draft || draft.seq === lastDraftSeq.current) return
+    lastDraftSeq.current = draft.seq
+    if (hasProposal) return
+    setProposal({ headline: draft.headline, support: draft.support, body: draft.body })
+  }, [draft, hasProposal, setProposal])
   const [showDiff, setShowDiff] = useState(true)
   const final = versions.length > 0
   const latest = versions[versions.length - 1] ?? null
@@ -82,12 +86,7 @@ export function Workspace({
 
   const exportInput = {
     campaignName: campaign.name,
-    brief: {
-      Obiettivo: campaign.objective,
-      Budget: campaign.budget,
-      Target: campaign.target,
-      KPI: campaign.kpi,
-    },
+    brief: exportBrief(brief),
     decisions: demo ? DECISIONS_LOG : [],
     finalVersion: latest,
     state,
@@ -117,7 +116,7 @@ export function Workspace({
                 !hasProposal && 'text-faint',
               )}
             >
-              {proposal.headline || 'Ancora niente sul tavolo'}
+              {title ?? 'Ancora niente sul tavolo'}
             </h2>
             <p className="mt-0.5 text-xs text-faint">
               Si costruisce qui sotto («Modifica») quando la stanza converge.
@@ -199,7 +198,7 @@ export function Workspace({
 
       <ProposalGate
         canApprove={hasProposal}
-        onApprove={() => setVersions((v) => [...v, composeVersion(proposal)])}
+        onApprove={() => addVersion(composeVersion(proposal))}
         onEdit={(text) => setProposal((p) => ({ ...p, body: text }))}
       />
 

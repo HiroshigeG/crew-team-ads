@@ -130,10 +130,22 @@ export interface GoalVerdict extends ServerEventBase {
   reason: string
 }
 
+/** v1.4: a goal raggiunto la stanza mette la proposta vincente sul tavolo.
+ *  Estratta dal transcript (mai inventata) da un modello fuori dalla stanza;
+ *  se non c'è una proposta chiara l'evento non viene emesso. */
+export interface ProposalDrafted extends ServerEventBase {
+  type: 'proposal_drafted'
+  source: 'goal'
+  headline: string
+  support: string
+  body: string
+}
+
 export type ServerEvent =
   | WavePlanned | TurnStarted | TurnToken | TurnCompleted
   | SearchPending | SearchResult | HeadState | RouterDegraded
   | TurnRouteEvent | SessionSaved | CollabRound | GoalVerdict
+  | ProposalDrafted
 
 // ---- browser → server ----
 

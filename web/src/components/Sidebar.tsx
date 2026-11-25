@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, Send } from 'lucide-react'
 import { BLANK_CAMPAIGN, CAMPAIGN } from '../mocks/session'
 import { useRoomActions } from '../lib/socket'
+import { useCampaign } from '../state/campaign'
 import { cn } from '../lib/cn'
 
 /**
@@ -45,12 +46,9 @@ export function Sidebar({
 }) {
   const { sendDirector } = useRoomActions()
   const campaign = demo ? CAMPAIGN : BLANK_CAMPAIGN
-  const [brief, setBrief] = useState({
-    obiettivo: campaign.objective,
-    budget: campaign.budget,
-    target: campaign.target,
-    kpi: campaign.kpi,
-  })
+  // Il brief sta nello stato condiviso: l'export (Workspace) legge la stessa
+  // copia che il Director sta scrivendo qui.
+  const { brief, setBrief } = useCampaign()
   // Il brief serve all'inizio: dopo l'invio si richiude da solo — sotto c'è
   // la proposta, che è il vero lavoro della colonna (UX 05/08).
   const [briefOpen, setBriefOpen] = useState(true)

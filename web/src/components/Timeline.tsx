@@ -160,11 +160,22 @@ function SystemLine({ item }: { item: Extract<TimelineItem, { kind: 'system' }> 
   )
 }
 
+/** Un allegato già caricato sul server, in attesa del prossimo invio. */
+interface Attachment {
+  name: string
+  text: string
+  isImage: boolean
+  imageId: string
+}
+
+/** Tetto per messaggio: ogni documento entra nel prompt di chi lo studia. */
+const MAX_ATTACHMENTS = 8
+
 export function Timeline({ state }: { state: RoomState }) {
   const [draft, setDraft] = useState('')
   const [degradedSeen, setDegradedSeen] = useState(false)
   const [stopSent, setStopSent] = useState(false)
-  const [attached, setAttached] = useState<{ name: string; text: string; isImage: boolean; imageId: string } | null>(null)
+  const [attached, setAttached] = useState<Attachment[]>([])
   const [uploadErr, setUploadErr] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
   // Fase 5.6: filtro per agente + ricerca testuale nel transcript.
@@ -214,46 +225,61 @@ export function Timeline({ state }: { state: RoomState }) {
 
   const submit = () => {
     const note = draft.trim()
-    // Immagine: percorso di visione dedicato (D15) — va alla testa Gemini,
-    // che è l'unica che la legge. Eco locale così resta a schermo.
-    if (attached?.isImage) {
-      sendDirector(`📎 ${attached.name} → alla testa con visione. ${note}`.trim())
-      send({ type: 'study_image', image_id: attached.imageId, text: note })
-      setDraft('')
-      setAttached(null)
-      return
+    const docs = attached.filter((a) => !a.isImage)
+    const images = attached.filter((a) => a.isImage)
+    // Documenti di testo: UN solo messaggio del Director (nota + tutti i
+    // documenti), che passa dal solito router — nessuna @menzione = lo
+    // smistatore decide chi studia — o da una @menzione se la testa è scelta.
+    if (docs.length) {
+      const blocks = docs
+        .map((d) => `Documento allegato «${d.name}»:\n"""\n${d.text}\n"""`)
+        .join('\n\n')
+      sendDirector(note ? `${note}\n\n${blocks}` : blocks)
     }
-    // Documento di testo: entra come UN messaggio del Director e passa dal
-    // solito router (nessuna @menzione = lo smistatore decide chi studia)
-    // o da una @menzione se il Director ha già scelto la testa.
-    let text = note
-    if (attached) {
-      const doc = `Documento allegato «${attached.name}»:\n"""\n${attached.text}\n"""`
-      text = note ? `${note}\n\n${doc}` : doc
+    // Immagini: percorso di visione dedicato (D15) — vanno alla testa Gemini,
+    // l'unica che le legge. Una per volta; la nota accompagna la prima solo se
+    // non è già partita coi documenti. Eco locale così restano a schermo.
+    images.forEach((img, i) => {
+      const imgNote = !docs.length && i === 0 ? note : ''
+      sendDirector(`📎 ${img.name} → alla testa con visione. ${imgNote}`.trim())
+      send({ type: 'study_image', image_id: img.imageId, text: imgNote })
+    })
+    if (!docs.length && !images.length) {
+      if (!note) return
+      sendDirector(note)
     }
-    if (!text) return
-    sendDirector(text)
     setDraft('')
-    setAttached(null)
+    setAttached([])
   }
 
-  const onPick = async (f: File | undefined) => {
-    if (!f) return
+  const onPick = async (files: File[]) => {
+    if (!files.length) return
     setUploadErr('')
-    try {
-      const body = new FormData()
-      body.append('file', f)
-      const res = await fetch('/api/upload', { method: 'POST', body })
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}))
-        throw new Error(d.detail || `upload fallito (${res.status})`)
+    let room = MAX_ATTACHMENTS - attached.length
+    if (files.length > room) {
+      setUploadErr(`massimo ${MAX_ATTACHMENTS} allegati per messaggio: ne carico ${Math.max(room, 0)}`)
+    }
+    for (const f of files) {
+      if (room <= 0) break
+      try {
+        const body = new FormData()
+        body.append('file', f)
+        const res = await fetch('/api/upload', { method: 'POST', body })
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}))
+          throw new Error(d.detail || `upload fallito (${res.status})`)
+        }
+        const d = await res.json()
+        setAttached((prev) => [
+          ...prev,
+          { name: d.filename, text: d.text, isImage: d.is_image, imageId: d.image_id },
+        ])
+        room -= 1
+      } catch (e) {
+        setUploadErr(
+          e instanceof Error ? e.message : 'upload non disponibile (modalità demo?)',
+        )
       }
-      const d = await res.json()
-      setAttached({ name: d.filename, text: d.text, isImage: d.is_image, imageId: d.image_id })
-    } catch (e) {
-      setUploadErr(
-        e instanceof Error ? e.message : 'upload non disponibile (modalità demo?)',
-      )
     }
   }
 
@@ -404,33 +430,37 @@ export function Timeline({ state }: { state: RoomState }) {
         {uploadErr && (
           <p className="mb-2 text-xs text-danger">{uploadErr}</p>
         )}
-        {attached && (
-          <div className="mb-2 flex items-center gap-2 rounded-md border border-edge bg-raised px-2.5 py-1.5 text-[12.5px]">
+        {attached.map((a, i) => (
+          <div
+            key={`${a.name}-${i}`}
+            className="mb-2 flex items-center gap-2 rounded-md border border-edge bg-raised px-2.5 py-1.5 text-[12.5px]"
+          >
             <Paperclip className="size-3.5 shrink-0 text-accent" aria-hidden />
             <span className="min-w-0 flex-1 truncate">
-              <span className="font-medium">{attached.name}</span>
+              <span className="font-medium">{a.name}</span>
               <span className="text-faint">
-                {attached.isImage
+                {a.isImage
                   ? ' — immagine, la studia la testa con visione (Gemini)'
-                  : ` — ${(attached.text.length / 1000).toFixed(1)}k caratteri, pronto per lo smistatore`}
+                  : ` — ${(a.text.length / 1000).toFixed(1)}k caratteri, pronto per lo smistatore`}
               </span>
             </span>
             <button
-              onClick={() => setAttached(null)}
+              onClick={() => setAttached((prev) => prev.filter((_, j) => j !== i))}
               className="shrink-0 rounded p-0.5 text-faint hover:text-ink"
               aria-label="Togli l'allegato"
             >
               <X className="size-3.5" aria-hidden />
             </button>
           </div>
-        )}
+        ))}
         <input
           ref={fileRef}
           type="file"
+          multiple
           accept=".pdf,.txt,.md,.markdown,.csv,image/*"
           className="hidden"
           onChange={(e) => {
-            void onPick(e.target.files?.[0])
+            void onPick(Array.from(e.target.files ?? []))
             e.target.value = ''
           }}
         />
@@ -471,11 +501,11 @@ export function Timeline({ state }: { state: RoomState }) {
           <button
             className={cn(
               'grid size-10 shrink-0 place-items-center rounded-lg',
-              draft.trim() || attached
+              draft.trim() || attached.length > 0
                 ? 'bg-accent text-bg'
                 : 'bg-lifted text-faint',
             )}
-            disabled={!draft.trim() && !attached}
+            disabled={!draft.trim() && attached.length === 0}
             onClick={submit}
             aria-label="Invia alla stanza"
           >

@@ -116,6 +116,9 @@ export interface RoomState {
    *  Director: non viaggia in nessun evento server) e ultimo verdetto del
    *  giudice. null = nessun goal attivo. */
   goal: GoalView | null
+  /** v1.4: ultima proposta messa sul tavolo dal goal (null = nessuna). `seq`
+   *  identifica la bozza: la UI la applica una volta sola. */
+  proposalDraft: { seq: number; headline: string; support: string; body: string } | null
   /** Costo e rotta della sessione: turni per canale di fatturazione. */
   routes: { subscription: number; api: number }
 }
@@ -133,6 +136,7 @@ export function foldEvents(entries: FeedEntry[]): RoomState {
   const routes = { subscription: 0, api: 0 }
   let collab: RoomState['collab'] = null
   let goal: GoalView | null = null
+  let proposalDraft: RoomState['proposalDraft'] = null
   // Ultimo obiettivo scritto dal Director (`/goal …`): l'evento server non
   // lo trasporta, quindi lo si ricorda dall'eco locale.
   let lastGoalObjective: string | null = null
@@ -357,6 +361,19 @@ export function foldEvents(entries: FeedEntry[]): RoomState {
         })
         break
       }
+      case 'proposal_drafted': {
+        proposalDraft = {
+          seq: e.seq, headline: e.headline, support: e.support, body: e.body,
+        }
+        items.push({
+          kind: 'system',
+          id: `draft-${e.seq}`,
+          ts: e.ts,
+          text: `Proposta sul tavolo: ${e.headline || e.body.slice(0, 80)}`,
+          tone: 'info',
+        })
+        break
+      }
       case 'session_saved': {
         lastSaved = { stamp: e.stamp, file: e.file }
         break
@@ -375,6 +392,7 @@ export function foldEvents(entries: FeedEntry[]): RoomState {
     privateThreads,
     collab,
     goal,
+    proposalDraft,
     routes,
   }
 }

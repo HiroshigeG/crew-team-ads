@@ -5,6 +5,8 @@ import { KeyRound, PanelLeft, Unplug, X } from 'lucide-react'
 import { foldEvents } from './state/fold'
 import { CAMPAIGN } from './mocks/session'
 import { RoomContext, useRoom } from './lib/socket'
+import { useMediaQuery } from './lib/useMediaQuery'
+import { CampaignProvider, initialCampaign } from './state/campaign'
 import { Sidebar } from './components/Sidebar'
 import { RoomPanel } from './components/RoomPanel'
 import { Timeline } from './components/Timeline'
@@ -31,6 +33,7 @@ export default function App({
   missingKeys: string[]
 }) {
   const room = useRoom(demo)
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [drawer, setDrawer] = useState(false)
   const [privateHead, setPrivateHead] = useState<string | null>(null)
   const [editingRoster, setEditingRoster] = useState(false)
@@ -85,11 +88,15 @@ export default function App({
 
   return (
     <RoomContext.Provider value={room}>
+     <CampaignProvider initial={initialCampaign(demo)}>
       <div className="flex h-full flex-col">
         {banner}
 
-        {/* ─── Desktop: tre colonne ridimensionabili ─── */}
-        <div className="hidden min-h-0 flex-1 lg:block">
+        {/* ─── Desktop: tre colonne ridimensionabili ───
+            Si monta UN layout solo (isDesktop): prima erano montati entrambi e
+            nascosti col CSS, quindi ogni componente esisteva due volte. */}
+        {isDesktop && (
+        <div className="min-h-0 flex-1">
           {/* Taglie numeriche = pixel (API v4): 280 e 340 come da specifica */}
           {/* 05/08: a sinistra il LAVORO (campagna+brief+proposta), al centro
               la conversazione, a destra la REGIA (stanza, panchina, collab). */}
@@ -117,9 +124,11 @@ export default function App({
             </Panel>
           </Group>
         </div>
+        )}
 
         {/* ─── Mobile: sidebar a drawer, workspace in coda ─── */}
-        <div className="flex min-h-0 flex-1 flex-col lg:hidden">
+        {!isDesktop && (
+        <div className="flex min-h-0 flex-1 flex-col">
           <header className="flex shrink-0 items-center gap-3 border-b border-edge bg-raised px-3 py-2.5">
             <button
               onClick={() => setDrawer(true)}
@@ -188,6 +197,7 @@ export default function App({
             )}
           </AnimatePresence>
         </div>
+        )}
 
         {privateHead && (
           <PrivateChat
@@ -204,6 +214,7 @@ export default function App({
         )}
         {historyOpen && <SessionHistory onClose={() => setHistoryOpen(false)} />}
       </div>
+     </CampaignProvider>
     </RoomContext.Provider>
   )
 }

@@ -167,6 +167,25 @@ describe('foldEvents: goal mode (D27)', () => {
     expect(line && 'text' in line && /\d\/10|null|NaN/.test(line.text)).toBe(false)
   })
 
+  it('proposal_drafted: la bozza entra nello stato (l\'ultima vince) e in timeline', () => {
+    const feed: FeedEntry[] = [
+      { type: 'proposal_drafted', seq: seq(), ts, source: 'goal',
+        headline: 'Prima', support: '', body: 'b1' },
+      { type: 'proposal_drafted', seq: 77, ts, source: 'goal',
+        headline: 'Non ti incita. Non perde.', support: 'S', body: 'B' },
+    ]
+    const room = foldEvents(feed)
+    expect(room.proposalDraft).toEqual({
+      seq: 77, headline: 'Non ti incita. Non perde.', support: 'S', body: 'B',
+    })
+    const sys = room.items.filter((i) => i.kind === 'system')
+    expect(sys.some((i) => 'text' in i && /proposta/i.test(i.text))).toBe(true)
+  })
+
+  it('senza proposal_drafted lo stato non ha bozza', () => {
+    expect(foldEvents([]).proposalDraft).toBeNull()
+  })
+
   it('chiusura reason met: obiettivo raggiunto, goal e collab si azzerano', () => {
     const feed: FeedEntry[] = [
       { type: 'collab_round', seq: seq(), ts, round: 1, total: 8, mode: 'goal' },

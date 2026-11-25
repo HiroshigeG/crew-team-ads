@@ -4,7 +4,13 @@
  * scelta dichiarata).
  */
 import type { RoomState } from '../state/fold'
+import type { Brief } from '../state/campaign'
 import { HEADS } from '../mocks/roster'
+
+/** Il brief come sezione del dossier: etichette leggibili, valori veri. */
+export function exportBrief(b: Brief): Record<string, string> {
+  return { Obiettivo: b.obiettivo, Budget: b.budget, Target: b.target, KPI: b.kpi }
+}
 
 export interface ExportInput {
   campaignName: string
