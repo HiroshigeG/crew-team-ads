@@ -750,3 +750,19 @@ non una conclusione. Un votante, 3 scenari, 1 generazione per cella.
 
 Dati: `evals/results/darkangel-menu.json` e `darkangel-menu-blind.json`. Il roster
 non è stato toccato.
+
+## D33 — 2026-11-25 · Dark Angel risponde con tre idee brevi (FATTO)
+
+Scelta del Director dopo il menù di D32: modello invariato (`venice/glm-5-3-flash-uncensored`),
+persona = quella attuale **più** una regola: tre idee numerate, al massimo 50 parole
+ciascuna, su angoli diversi tra loro e da quello che la stanza sta già battendo,
+senza premesse. Tagline della card: «Three uncomfortable pitches, no brakes.».
+Le altre teste non cambiano (test).
+
+**Verifica dal vivo** (3 chiamate vere a glm, senza la richiesta del formato nel
+messaggio, circa 0,004 $ di limite superiore): il formato regge **3 volte su 3**
+(tre idee numerate, in italiano, nessun token trapelato); il limite di 50 parole
+regge **2 volte su 3** (una idea di 85 parole). Restano piccole stonature
+d'italiano di glm (es. «si ammacciava»). Il formato non è stato confrontato con la
+risposta lunga di prima: l'evidenza è che dal menù il Director ha trovato almeno
+un'idea da tenere per scenario, non che il menù batta il testo lungo.
