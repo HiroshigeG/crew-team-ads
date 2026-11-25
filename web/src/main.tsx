@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { applyRoster, setModels } from './mocks/roster'
+import { setProviders } from './lib/providers'
 
 const DEMO = new URLSearchParams(location.search).has('demo')
 
@@ -17,6 +18,7 @@ async function boot() {
       missingKeys = status.missing_keys ?? []
       applyRoster(status.roster ?? [])
       setModels(status.models ?? [])
+      setProviders(status.providers ?? [])
     } catch {
       missingKeys = ['server non raggiungibile']
     }

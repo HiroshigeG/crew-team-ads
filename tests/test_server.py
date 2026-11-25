@@ -758,3 +758,68 @@ def test_study_image_expired_id_is_reported(tmp_path, monkeypatch):
                       "text": "x"})
         deg = _drain_until(ws, "router_degraded")[-1]
         assert "scaduta" in deg["reason"]
+
+
+# ── provider registry (25/11/2026): chiavi e modelli non più scritti a mano ──
+
+def test_status_lists_providers_and_asks_only_for_the_keys_the_roster_uses(monkeypatch):
+    import providers as pv
+    for k in pv.key_names():
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr(core, "CLAUDE_CLI", "claude")
+    monkeypatch.setenv("VENICE_API_KEY", "valore-segreto-venice-999")
+    with TestClient(app) as client:
+        r = client.get("/api/status")
+    body = r.json()
+    ids = {p["id"] for p in body["providers"]}
+    assert {"anthropic", "gemini", "xai", "featherless_ai", "openrouter",
+            "venice", "ollama"} <= ids
+    # il roster ADV usa Gemini, Grok e Featherless; Claude passa dalla CLI,
+    # Venice non è usata da nessuna testa: nessuna delle due viene chiesta
+    assert body["missing_keys"] == ["FEATHERLESS_AI_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY"]
+    venice = next(p for p in body["providers"] if p["id"] == "venice")
+    assert venice["configured"] is True and venice["needed"] is False
+    assert any(m.startswith("venice/") for m in body["models"])
+    assert "valore-segreto-venice-999" not in r.text      # i valori non escono mai
+
+
+def test_keys_endpoint_accepts_the_venice_key_from_the_registry(tmp_path, monkeypatch):
+    envfile = tmp_path / "dotenv"
+    monkeypatch.setenv("CREW_ENV_FILE", str(envfile))
+    monkeypatch.delenv("VENICE_API_KEY", raising=False)
+    with TestClient(app) as client:
+        r = client.post("/api/keys", json={"VENICE_API_KEY": "venice-test-777"})
+    assert r.status_code == 200
+    assert r.json()["saved"] == ["VENICE_API_KEY"]
+    assert "venice-test-777" not in r.text
+    assert "VENICE_API_KEY=venice-test-777" in envfile.read_text(encoding="utf-8")
+
+
+def test_autocast_endpoint_suggests_models_for_the_providers_the_user_has(monkeypatch):
+    import providers as pv
+    for k in pv.key_names():
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr(core, "CLAUDE_CLI", None)
+    monkeypatch.setenv("FEATHERLESS_AI_API_KEY", "valore-segreto-feather-555")
+    with TestClient(app) as client:
+        r = client.get("/api/autocast")
+    body = r.json()
+    assert body["available"] == ["featherless_ai"]
+    roles = {h["key"] for h in body["roster"]}
+    assert set(body["assignments"]) == roles                    # ogni ruolo coperto
+    assert all(m.startswith("featherless_ai/") for m in body["assignments"].values())
+    assert "valore-segreto-feather-555" not in r.text
+    # è un suggerimento: non ha cambiato il roster su disco né in memoria
+    with TestClient(app) as client:
+        before = client.get("/api/status").json()["roster"]
+    assert before == body["roster"]
+
+
+def test_autocast_endpoint_reports_when_nothing_is_available(monkeypatch):
+    import providers as pv
+    for k in pv.key_names():
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr(core, "CLAUDE_CLI", None)
+    with TestClient(app) as client:
+        body = client.get("/api/autocast").json()
+    assert body["available"] == [] and body["assignments"] == {}

@@ -63,13 +63,42 @@ cd web && npm install && npm run build && cd ..
 ```
 
 **No keys in the repo — ever.** On first access the room shows a setup
-screen asking for the API keys it needs (Anthropic, Gemini, xAI; Featherless
-and OpenRouter optional) and writes them to a local, gitignored `.env` next
-to the server. Alternatively, copy `.env.example` to `.env` and fill it in
-by hand.
+screen asking only for the API keys that *your* cast actually uses, and
+writes them to a local, gitignored `.env` next to the server. Alternatively,
+copy `.env.example` to `.env` and fill it in by hand.
 
 UI development: `cd web && npm run dev` (proxies to `:8000`); engine-less
 demo: `http://localhost:5173/?demo=1`.
+
+## Bring your own keys and models
+
+Nothing here assumes the author's accounts. Every provider is one row in
+`providers.py`; a model id is always `<provider>/<model>`.
+
+| Provider | Key variable | Notes |
+|---|---|---|
+| Anthropic (Claude) | `ANTHROPIC_API_KEY` | Not needed if the `claude` CLI is signed in: Claude heads run through it first and fall back to the metered API only when it fails (and the fallback is logged). |
+| Google Gemini | `GEMINI_API_KEY` | The only provider whose heads can read images. |
+| xAI (Grok) | `XAI_API_KEY` | |
+| Featherless | `FEATHERLESS_AI_API_KEY` | Open models, flat plan. |
+| OpenRouter | `OPENROUTER_API_KEY` | Open models, pay per token. |
+| Venice | `VENICE_API_KEY` | Uncensored / abliterated models, OpenAI-compatible. Override the endpoint with `VENICE_API_BASE`. |
+| Ollama | none | Local models. |
+
+- **Only the keys your cast uses are asked for.** A roster with no Grok head
+  never asks for an xAI key.
+- **Pick a model per role** in the roster editor (suggestions come from the
+  registry, any id with a known provider prefix can be typed by hand).
+- **No idea which model fits which role?** `GET /api/autocast` proposes one
+  model per role using only the providers you have, and writes nothing.
+- **Open models are guarded.** Anything on Featherless, OpenRouter, Venice or
+  Ollama gets stop tokens, a reply cap (`CREW_MAX_REPLY_TOKENS`, default 900)
+  and a hard timeout (`CREW_OPEN_MODEL_TIMEOUT`, default 120 s): without them a
+  model that never emits its end-of-turn token keeps inventing the Director's
+  next message for minutes.
+- **Choosing a model for a role with evidence:** `evals/` holds a bake-off
+  with its criteria frozen *before* measuring
+  (`evals/CRITERI-producer.md`).
 
 ## Architecture
 

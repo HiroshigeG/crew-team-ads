@@ -34,12 +34,23 @@ from crewai import LLM
 import logging
 log = logging.getLogger("crew_cast")
 
+import providers as pv
+
 REQUIRED_KEYS = ("ANTHROPIC_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY")
 
 
-def missing_keys() -> list:
-    """Which API keys are absent — the front-end decides how to complain."""
-    return [k for k in REQUIRED_KEYS if not os.getenv(k)]
+def missing_keys(roster=None) -> list:
+    """Which API keys are absent — the front-end decides how to complain.
+
+    Senza roster: il vecchio default (Anthropic+Gemini+xAI), che la TUI usa
+    ancora. Con un roster: SOLO le chiavi dei provider che le sue teste usano
+    (Claude non chiede la chiave se la CLI in abbonamento c'è): chi non ha Grok
+    e non lo usa non deve vederselo chiedere."""
+    if roster is None:
+        return [k for k in REQUIRED_KEYS if not os.getenv(k)]
+    models = [h.model_id for h in roster.heads.values()]
+    return sorted(k for k in pv.keys_needed(models, claude_cli=bool(CLAUDE_CLI))
+                  if not os.getenv(k))
 
 
 # ── Claude: subscription first, metered API only as a fallback ─────────────
@@ -697,7 +708,7 @@ _DEFAULT_HEAD_META = {
 # 4.000+ modelli HF via litellm `featherless_ai/`, chiave
 # FEATHERLESS_AI_API_KEY) e Ollama locale (`ollama/`). Il percorso generico
 # di make_llm li serve già: qui si decide solo COSA è ammesso nel roster.
-OPEN_MODEL_PREFIXES = ("featherless_ai/", "openrouter/", "ollama/")
+OPEN_MODEL_PREFIXES = pv.open_prefixes()   # dal registro dei provider
 OPEN_MODEL_STOP = ("<|im_end|>", "<|im_start|>", "<|eot_id|>", "<|endoftext|>")
 
 
@@ -719,7 +730,7 @@ def make_llm(head: Head):
     (subscription-first, T4); temperature solo dove è accettata (T1)."""
     if head.model_id.startswith("anthropic/"):
         return ClaudeLLM(head.model_id.split("/", 1)[1], effort=head.effort)
-    kwargs = {"model": head.model_id,
+    kwargs = {**pv.litellm_kwargs(head.model_id, os.environ),
               "temperature": temp_for_level(head.creativity)}
     if head.model_id.startswith(OPEN_MODEL_PREFIXES):
         # Guardrail dei modelli open (misura 25/11/2026): senza stop-token e
@@ -905,7 +916,8 @@ def head_speak(roster: Roster, key: str, context: str, instruction: str,
 # GEMINI_API_KEY funziona e il percorso multimodale di litellm è pulito.
 # Additivo: non tocca head_speak né la CLI di Claude (che è text-only).
 def vision_capable(model_id: str) -> bool:
-    return model_id.startswith("gemini/")
+    p = pv.provider_of(model_id)
+    return bool(p and p.vision)
 
 
 def head_study_image(roster: Roster, key: str, context: str, instruction: str,

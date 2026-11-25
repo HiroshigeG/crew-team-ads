@@ -112,12 +112,34 @@ def status() -> dict:
         "featherless_ai/EVA-UNIT-01/EVA-Qwen2.5-72B-v0.2",                 # storyteller (dark_angel)
         "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition",  # creativo+uncensored
     ]
+    # Modelli suggeriti dal registro (es. Venice): proposte nell'editor, non una
+    # whitelist — qualunque id con un prefisso noto si può digitare a mano.
+    suggested = [m for p in core.pv.PROVIDERS.values() for m in p.suggested]
+    models = list(dict.fromkeys(list(core.VERIFIED_MODELS) + open_models + suggested))
+    model_ids = [h.model_id for h in roster.heads.values()]
     return {
         "protocol": 1,
-        "missing_keys": core.missing_keys(),
+        # Solo le chiavi dei provider che QUESTO roster usa (Claude non chiede la
+        # chiave se c'è la CLI): chi non usa Grok non se lo vede chiedere.
+        "missing_keys": core.missing_keys(roster),
+        "providers": core.pv.describe(os.environ, model_ids, bool(core.CLAUDE_CLI)),
         "roster": [h.to_dict() for h in roster.heads.values()],
-        "models": list(core.VERIFIED_MODELS) + open_models,
+        "models": models,
         "featherless_key": bool(os.getenv("FEATHERLESS_AI_API_KEY")),
+    }
+
+
+@app.get("/api/autocast")
+def autocast() -> dict:
+    """Suggerisce un modello per ogni ruolo del roster, scegliendo solo fra i
+    provider che QUESTO utente può usare (chiave presente, o Claude con la CLI).
+    È un suggerimento: non scrive il roster. I valori delle chiavi non escono."""
+    roster = core.Roster.load(ADV_ROSTER)
+    avail = core.pv.available_providers(os.environ, bool(core.CLAUDE_CLI))
+    return {
+        "available": sorted(avail),
+        "assignments": core.pv.autocast(list(roster.heads), avail),
+        "roster": [h.to_dict() for h in roster.heads.values()],
     }
 
 
@@ -127,10 +149,7 @@ def status() -> dict:
 # (gitignorato) e in os.environ del processo. Whitelist chiusa: nomi noti,
 # niente scrittura arbitraria di env. I valori non si loggano e non si
 # rimandano mai indietro.
-_KEY_WHITELIST = (
-    "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY",
-    "FEATHERLESS_AI_API_KEY", "OPENROUTER_API_KEY",
-)
+_KEY_WHITELIST = core.pv.key_names()      # dal registro dei provider
 
 
 def _env_file() -> Path:
@@ -164,7 +183,8 @@ async def set_keys(payload: dict) -> dict:
     os.replace(tmp, path)
     core.log.info("onboarding: salvate %d chiavi (%s)", len(accepted),
                   ", ".join(sorted(accepted)))   # nomi sì, valori mai
-    return {"saved": sorted(accepted), "missing_keys": core.missing_keys()}
+    return {"saved": sorted(accepted),
+            "missing_keys": core.missing_keys(core.Roster.load(ADV_ROSTER))}
 
 
 # ── storico sessioni (Fase 5.5): i transcript di RoomSession, in lettura ──

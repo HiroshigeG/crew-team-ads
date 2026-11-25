@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { KeyRound, LoaderCircle } from 'lucide-react'
+import { keyLabel } from '../lib/providers'
 
 /**
  * Onboarding chiavi (D25): al primo accesso, se mancano chiavi, la stanza le
@@ -7,14 +8,6 @@ import { KeyRound, LoaderCircle } from 'lucide-react'
  * verso il server locale (localhost), che le scrive nel `.env` gitignorato:
  * mai nel repo, mai rimandate indietro, mai loggate in valore.
  */
-const KEY_LABEL: Record<string, string> = {
-  ANTHROPIC_API_KEY: 'Anthropic (Claude) — teste anthropic/*',
-  GEMINI_API_KEY: 'Google Gemini — ricerca e visione',
-  XAI_API_KEY: 'xAI (Grok) — analista social',
-  FEATHERLESS_AI_API_KEY: 'Featherless — modelli open (facoltativa)',
-  OPENROUTER_API_KEY: 'OpenRouter — modelli open (facoltativa)',
-}
-
 export function KeyGate({ missing }: { missing: string[] }) {
   const [values, setValues] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
@@ -62,7 +55,7 @@ export function KeyGate({ missing }: { missing: string[] }) {
         <div className="mt-5 space-y-3.5">
           {missing.map((k) => (
             <label key={k} className="block">
-              <span className="label-caps">{KEY_LABEL[k] ?? k}</span>
+              <span className="label-caps">{keyLabel(k)}</span>
               <input
                 type="password"
                 autoComplete="off"
