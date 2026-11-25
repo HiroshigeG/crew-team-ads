@@ -191,7 +191,7 @@ def judge_prompt(scn: str, instruction: str, reply: str, transcript: str) -> str
 
 # ── esecuzione ──────────────────────────────────────────────────────────────
 
-def run(reps: int, only: list[str] | None, out: Path) -> dict:
+def run(reps: int, only: list[str] | None, out: Path, persona_file: str | None = None) -> dict:
     os.environ.setdefault("CREW_CLAUDE_TIMEOUT", "90")
     os.environ.setdefault("CREW_OPEN_MODEL_TIMEOUT", "90")
     import crew_cast as core
@@ -200,6 +200,8 @@ def run(reps: int, only: list[str] | None, out: Path) -> dict:
     head_base = "BRIEF:\nSessione ADV (web)\n\n"
     roster_path = str(REPO / "roster.adv.json")
     names = [n for n in CANDIDATES if not only or n in only]
+    # v2: la persona del produttore si può sostituire (l'unica cosa che cambia)
+    persona_override = Path(persona_file).read_text(encoding="utf-8") if persona_file else None
 
     def ask(name: str, prompt: str) -> str:
         kind, model = CANDIDATES[name]
@@ -214,6 +216,8 @@ def run(reps: int, only: list[str] | None, out: Path) -> dict:
         r = core.Roster.load(roster_path)
         kind, model = CANDIDATES[name]
         r.update_head("producer", model_id=model if kind == "open" else f"anthropic/{model}")
+        if persona_override is not None:
+            r.update_head("producer", persona=persona_override)
         ctx = head_base + fixture[:cut]
         return core.build_turn_prompt(r.heads["producer"], ctx, instruction), ctx
 
@@ -257,7 +261,8 @@ def run(reps: int, only: list[str] | None, out: Path) -> dict:
         list(ex.map(do_judge, all_rows))
 
     evals = {n: evaluate([r for r in all_rows if r["candidate"] == n]) for n in names}
-    result = {"criteri": "evals/CRITERI-producer.md@ab64fc2", "judge": judge_model,
+    result = {"criteri": "evals/CRITERI-producer-v2.md" if persona_file else "evals/CRITERI-producer.md@ab64fc2",
+              "persona_file": persona_file, "judge": judge_model,
               "evals": evals, "winner": pick_winner(evals, FREE_OF_CLAUDE_QUOTA),
               "rows": [{k: v for k, v in r.items() if k != "ctx"} for r in all_rows]}
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -270,8 +275,10 @@ def main() -> None:
     ap.add_argument("--reps", type=int, default=2)
     ap.add_argument("--only", nargs="*")
     ap.add_argument("--out", default=str(REPO / "evals/results/producer.json"))
+    ap.add_argument("--persona-file", default=None,
+                    help="sostituisce la persona del produttore (v2)")
     a = ap.parse_args()
-    res = run(a.reps, a.only, Path(a.out))
+    res = run(a.reps, a.only, Path(a.out), a.persona_file)
     print(json.dumps({"evals": res["evals"], "winner": res["winner"]}, ensure_ascii=False, indent=2))
 
 
