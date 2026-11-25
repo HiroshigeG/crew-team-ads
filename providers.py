@@ -27,6 +27,9 @@ class Provider:
     open_model: bool = False      # modelli open: servono stop-token, tetto, timeout
     vision: bool = False          # legge immagini (oggi: Gemini)
     suggested: tuple = ()         # modelli proposti nell'editor (si può digitarne altri)
+    # Massimo di temperatura accettato dal provider (None = nessun limite
+    # dichiarato). Venice risponde 400 sopra 1: la scala di creatività arriva a 1,2.
+    max_temperature: float | None = None
 
 
 # I modelli suggeriti per Venice vengono dal catalogo letto il 25/11/2026 da
@@ -44,7 +47,7 @@ PROVIDERS: dict[str, Provider] = {p.id: p for p in (
              "OPENROUTER_API_KEY", open_model=True),
     Provider("venice", "Venice — modelli uncensored/abliterated (crediti USD)",
              "VENICE_API_KEY", openai_base="https://api.venice.ai/api/v1",
-             base_env="VENICE_API_BASE", open_model=True,
+             base_env="VENICE_API_BASE", open_model=True, max_temperature=1.0,
              suggested=(
                  "venice/abliteration-abliterated-model-large-v2",
                  "venice/glm-5-3-flash-uncensored",
@@ -62,6 +65,12 @@ def provider_of(model_id: str) -> Provider | None:
     if not sep or not rest:
         return None
     return PROVIDERS.get(head)
+
+
+def max_temperature_for(model_id: str) -> float | None:
+    """Il massimo di temperatura che il provider di questo modello accetta."""
+    p = provider_of(model_id)
+    return p.max_temperature if p else None
 
 
 def is_open_model(model_id: str) -> bool:

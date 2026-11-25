@@ -114,3 +114,25 @@ def test_describe_lists_providers_with_labels_and_state():
     assert d["venice"]["label"] and d["venice"]["key_env"] == "VENICE_API_KEY"
     # il NOME della variabile si può mostrare, il VALORE mai
     assert "valore-segreto-xyz-123" not in repr(d)
+
+
+# ── temperatura: ogni provider ha il suo massimo (25/11: Venice rifiutava 1,09) ──
+
+def test_venice_declares_a_max_temperature_of_one():
+    assert pv.PROVIDERS["venice"].max_temperature == 1.0
+    assert pv.max_temperature_for("venice/qualunque") == 1.0
+    assert pv.max_temperature_for("gemini/g") is None          # nessun limite dichiarato
+
+
+def test_make_llm_clamps_temperature_to_the_provider_max(monkeypatch):
+    monkeypatch.setenv("VENICE_API_KEY", "chiave-finta")
+    r = core.Roster.default()
+    r.update_head("cd", model_id="venice/abliteration-abliterated-model-large-v2", creativity=9)
+    assert core.temp_for_level(9) > 1.0                       # la scala darebbe 1,09
+    assert core.make_llm(r.heads["cd"]).temperature == 1.0    # Venice: al massimo 1
+
+
+def test_other_providers_keep_the_full_creativity_scale():
+    r = core.Roster.default()
+    r.update_head("cd", model_id="gemini/gemini-3.1-pro-preview", creativity=10)
+    assert core.make_llm(r.heads["cd"]).temperature == core.temp_for_level(10)

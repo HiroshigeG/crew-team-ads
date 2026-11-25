@@ -746,8 +746,15 @@ def make_llm(head: Head):
     (subscription-first, T4); temperature solo dove è accettata (T1)."""
     if head.model_id.startswith("anthropic/"):
         return ClaudeLLM(head.model_id.split("/", 1)[1], effort=head.effort)
+    temperature = temp_for_level(head.creativity)
+    cap = pv.max_temperature_for(head.model_id)
+    if cap is not None:
+        # Il 25/11 Venice rispondeva 400 («temperature … at most 1») a Dark
+        # Angel (creatività 9 = 1,09): ogni turno falliva. Ora si taglia al
+        # massimo del provider invece di spedire un valore che verrà rifiutato.
+        temperature = min(temperature, cap)
     kwargs = {**pv.litellm_kwargs(head.model_id, os.environ),
-              "temperature": temp_for_level(head.creativity)}
+              "temperature": temperature}
     if head.model_id.startswith(OPEN_MODEL_PREFIXES):
         # Guardrail dei modelli open (misura 25/11/2026): senza stop-token e
         # senza tetto un Hermes-3 inventa turni dell'utente e genera fino al
