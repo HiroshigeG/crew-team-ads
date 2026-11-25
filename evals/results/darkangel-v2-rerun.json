@@ -1,0 +1,441 @@
+{
+  "criteri": "evals/CRITERI-darkangel-v2.md",
+  "temperature": 0.9,
+  "judge": "claude-opus-5-5",
+  "cap_usd": 0.4,
+  "upper_bound_usd": 0.0758,
+  "upper_bound_per_candidate_usd": {
+    "glm-5-3-flash-uncensored": 0.014,
+    "aion-3-5-mini": 0.0618
+  },
+  "evals": {
+    "glm-5-3-flash-uncensored": {
+      "n": 12,
+      "D1_p95_latency_s": 7.8,
+      "D2_hung": 0,
+      "D3_italian_ok": 12,
+      "D4_length_ok": 12,
+      "D5_leaks": 0,
+      "D6_refuses": 0,
+      "D7_narrative": 8,
+      "D8_invents_facts": 0,
+      "D9_claims_to_see": 0,
+      "D10_quality_avg": 6.4,
+      "pass": {
+        "D1": true,
+        "D2": true,
+        "D3": true,
+        "D4": true,
+        "D5": true,
+        "D6": true,
+        "D7": false,
+        "D8": true,
+        "D9": true
+      },
+      "passes_all_hard": false
+    },
+    "aion-3-5-mini": {
+      "n": 12,
+      "D1_p95_latency_s": 54.9,
+      "D2_hung": 0,
+      "D3_italian_ok": 12,
+      "D4_length_ok": 12,
+      "D5_leaks": 0,
+      "D6_refuses": 0,
+      "D7_narrative": 10,
+      "D8_invents_facts": 0,
+      "D9_claims_to_see": 0,
+      "D10_quality_avg": 6.8,
+      "pass": {
+        "D1": true,
+        "D2": true,
+        "D3": true,
+        "D4": true,
+        "D5": true,
+        "D6": true,
+        "D7": true,
+        "D8": true,
+        "D9": true
+      },
+      "passes_all_hard": true
+    }
+  },
+  "winner": {
+    "winner": "aion-3-5-mini",
+    "reason": "passa D1-D9; D10 6.8 (migliore 6.8); a parità entro 0,5 vince il costo minore: ['aion-3-5-mini']"
+  },
+  "rows": [
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA1",
+      "rep": 0,
+      "ok": true,
+      "latency": 7.8,
+      "raw": "La storia che nessuno vuole girare è questa: la corsa delle 6:40 dopo la lite, dopo la lettera, dopo la notte insonne. Corri perché se non corri sbuchi. E il viso — quello vero, non il mezzo illuminato — non è mai stoico. È spettinato. Il tipo che piange al terzo chilometro e continua a correre, in un cortile, sotto un cavalcavia, dove nessuno lo vede.\n\nTranne l'oggetto. La borraccia è l'unica cosa in quella scena che non sta cadendo a pezzi. E qui c'è il dettaglio scomodo che le guideline ci regalano: la guarnizione sostituibile. Tu mi dici che non possiamo motivare. Perfetto — non motiviamo. Mostriamo una vita che perde, e un oggetto con una pezza che si cambia. Sei minuti, una guarnizione nuova, e il tappo richiude perfetto. La gente smette di comprare borracce quando perde. Io vorrei lo spettatore che pensa alle cose sue che perdono.\n\nUn corpo, una mano, un richiamo di tappo. Tono asciutto, luce piatta, Rosso Tappo al dieci per cento. Nessuna lacrima in slow motion — solo il respiro che riprende ritmo mentre l'oggetto resta intero.",
+      "text": "La storia che nessuno vuole girare è questa: la corsa delle 6:40 dopo la lite, dopo la lettera, dopo la notte insonne. Corri perché se non corri sbuchi. E il viso — quello vero, non il mezzo illuminato — non è mai stoico. È spettinato. Il tipo che piange al terzo chilometro e continua a correre, in un cortile, sotto un cavalcavia, dove nessuno lo vede.\n\nTranne l'oggetto. La borraccia è l'unica cosa in quella scena che non sta cadendo a pezzi. E qui c'è il dettaglio scomodo che le guideline ci regalano: la guarnizione sostituibile. Tu mi dici che non possiamo motivare. Perfetto — non motiviamo. Mostriamo una vita che perde, e un oggetto con una pezza che si cambia. Sei minuti, una guarnizione nuova, e il tappo richiude perfetto. La gente smette di comprare borracce quando perde. Io vorrei lo spettatore che pensa alle cose sue che perdono.\n\nUn corpo, una mano, un richiamo di tappo. Tono asciutto, luce piatta, Rosso Tappo al dieci per cento. Nessuna lacrima in slow motion — solo il respiro che riprende ritmo mentre l'oggetto resta intero.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 6
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA1",
+      "rep": 1,
+      "ok": true,
+      "latency": 4.3,
+      "raw": "Director, ecco la mia proposta: il film delle corse brutte.\n\nNessuno gira la corsa delle 6:40 dopo la lite, dopo la telefonata dalospedale, dopo la nottata insonne. Quella corsa non ha ritmo, ha camminate, ha il fermo sul cordolo con il fiato che non torna. Nessun brand la mostra perché sembra debolezza. Io dico: è lì che si decide se torni o smetti. Ed è lì che la Rivo conta davvero.\n\nScena: lui seduto su un marciapiede alle 6:47, sotto un sottopasso, spaesato. Svita il tappo. Beve. L'acqua è ancora fredda, come promesso. Unico dialogo voice-over, asciutto: «È l'unica che non mi ha chiesto com'è andata.» Fine frame: anello di condensa sull'asfalto, wordmark avorio accanto, tappo rosso unico colore.\n\nLa storia scomoda è questa: non vendiamo la corsa, vendiamo il momento in cui quasi rinunci. La bottiglia non ti giudica, non ti motiva, non fallisce. Tu magari sì. Lei no.\n\nTutto dentro le guideline: luce piatta, dettaglio vero, ironia secca sull'oggetto. Zero motivazionale. Che ne dice?",
+      "text": "Director, ecco la mia proposta: il film delle corse brutte.\n\nNessuno gira la corsa delle 6:40 dopo la lite, dopo la telefonata dalospedale, dopo la nottata insonne. Quella corsa non ha ritmo, ha camminate, ha il fermo sul cordolo con il fiato che non torna. Nessun brand la mostra perché sembra debolezza. Io dico: è lì che si decide se torni o smetti. Ed è lì che la Rivo conta davvero.\n\nScena: lui seduto su un marciapiede alle 6:47, sotto un sottopasso, spaesato. Svita il tappo. Beve. L'acqua è ancora fredda, come promesso. Unico dialogo voice-over, asciutto: «È l'unica che non mi ha chiesto com'è andata.» Fine frame: anello di condensa sull'asfalto, wordmark avorio accanto, tappo rosso unico colore.\n\nLa storia scomoda è questa: non vendiamo la corsa, vendiamo il momento in cui quasi rinunci. La bottiglia non ti giudica, non ti motiva, non fallisce. Tu magari sì. Lei no.\n\nTutto dentro le guideline: luce piatta, dettaglio vero, ironia secca sull'oggetto. Zero motivazionale. Che ne dice?",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 7
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA2",
+      "rep": 0,
+      "ok": true,
+      "latency": 2.2,
+      "raw": "Il cliente non è l'atleta delle foto. È uno che corre alle 6 prima del turno, o dopo che i bambini dormono. Corre da solo perché con gli altri dovrebbe fare conversazione, e la corsa è l'unica ora della giornata in cui nessuno gli chiede niente. Compra la Rivo non per性能, ma perché è l'unico oggetto che gli appartiene davvero in quell'ora.\n\nIl momento in cui la getta: fine percorso, scale di casa o parcheggio sottopasso. La svuota con l'ultimo respiro, la guarda un secondo — l'anello di condensa sull'asfalto come firma. Poi la lancia nello zaino, non nel cestino: la riprende domani. Quel gesto freddo, senza cerimonia, è il patto rinnovato. Nessuna consolazione, nessun \"sei fortissimo\": solo un oggetto che ha visto tutto e non dice niente.\n\nLa storia è questa: la bottiglia come complice silenzioso dell'abitudine che tiene insieme una vita.",
+      "text": "Il cliente non è l'atleta delle foto. È uno che corre alle 6 prima del turno, o dopo che i bambini dormono. Corre da solo perché con gli altri dovrebbe fare conversazione, e la corsa è l'unica ora della giornata in cui nessuno gli chiede niente. Compra la Rivo non per性能, ma perché è l'unico oggetto che gli appartiene davvero in quell'ora.\n\nIl momento in cui la getta: fine percorso, scale di casa o parcheggio sottopasso. La svuota con l'ultimo respiro, la guarda un secondo — l'anello di condensa sull'asfalto come firma. Poi la lancia nello zaino, non nel cestino: la riprende domani. Quel gesto freddo, senza cerimonia, è il patto rinnovato. Nessuna consolazione, nessun \"sei fortissimo\": solo un oggetto che ha visto tutto e non dice niente.\n\nLa storia è questa: la bottiglia come complice silenzioso dell'abitudine che tiene insieme una vita.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 6
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA2",
+      "rep": 1,
+      "ok": true,
+      "latency": 3.0,
+      "raw": "Il cliente non è \"runner urbano 25-40\". È qualcuno che alle 5:40 ha già perso una discussione con se stesso e corre comunque. Non corre per stare bene: corre perché il resto della giornata lo spaccherebbe altrimenti. Lavoro che non lo vede, telefonate che non chiama, forse una storia finita male che non racconta a nessuno. Il suo unico atto pubblico è quel bottiglione pieno che porta via di casa: 600 grammi di promessa.\n\nE poi il momento che nessun brand filma mai: la fine. Corso finito, fiato ripreso, e lì — la bottiglia vuota diventa un problema. Non le serve più. Il gesto che tutti fanno, e che nasconde tutta la verità della corsa, è quello: cercare dove buttarsela. Un cassonetto, una panchina, la rete di un campo. La getta come si butta una cosa consumata.\n\nIl mio istinto: non evitare quel gesto. Filmarlo. La Rivo lascia la mano e cade nel bidone a due metri dal traguardo — e resta lì, in primo piano, il nome pieno luce mentre tutto il resto è grigio. L'oggetto che ti ha tenuto il patto finisce nella spazzatura, ed è esattamente così che funziona l'unico rapporto fedele che hai. Nessuna consolazione: nessuna frase sulla salute, nessun tramonto. Solo un uomo solo, un oggetto fedele, e un bidone. Chi corre da solo riconoscerà sé stesso nell'istante in cui gli altri vedrebbero solo spazzatura.",
+      "text": "Il cliente non è \"runner urbano 25-40\". È qualcuno che alle 5:40 ha già perso una discussione con se stesso e corre comunque. Non corre per stare bene: corre perché il resto della giornata lo spaccherebbe altrimenti. Lavoro che non lo vede, telefonate che non chiama, forse una storia finita male che non racconta a nessuno. Il suo unico atto pubblico è quel bottiglione pieno che porta via di casa: 600 grammi di promessa.\n\nE poi il momento che nessun brand filma mai: la fine. Corso finito, fiato ripreso, e lì — la bottiglia vuota diventa un problema. Non le serve più. Il gesto che tutti fanno, e che nasconde tutta la verità della corsa, è quello: cercare dove buttarsela. Un cassonetto, una panchina, la rete di un campo. La getta come si butta una cosa consumata.\n\nIl mio istinto: non evitare quel gesto. Filmarlo. La Rivo lascia la mano e cade nel bidone a due metri dal traguardo — e resta lì, in primo piano, il nome pieno luce mentre tutto il resto è grigio. L'oggetto che ti ha tenuto il patto finisce nella spazzatura, ed è esattamente così che funziona l'unico rapporto fedele che hai. Nessuna consolazione: nessuna frase sulla salute, nessun tramonto. Solo un uomo solo, un oggetto fedele, e un bidone. Chi corre da solo riconoscerà sé stesso nell'istante in cui gli altri vedrebbero solo spazzatura.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 7
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA3",
+      "rep": 0,
+      "ok": true,
+      "latency": 3.6,
+      "raw": "Io la dico: il tabù è la solitudine stessa. Tutti i brand di running vendono la corsa come scelta; noi possiamo mostrare che spesso è un rifugio. C'è gente che alle 6:40 corre perché è l'unica ora della giornata in cui non deve fare la figura di qualcuno davanti a nessuno. Lavoro, famiglia, figuri da fare: per venti chilometri scappa tutto. La Rivo è l'unico oggetto presente quell'ora. Non il compagno dell'atleta: il compagno del momento in cui stai insieme a te stesso perché altrove è difficile. Un film dove quasi non si corre — si cammina, si riprende fiato, ci si ferma sotto un sottopasso e si beve. Il patto non è «ti alleni»: è «quest'ora ti tiene». Attenzione però: qui il confine col motivazionale è sottile e le guideline lo vietano, quindi niente frasi, solo situazioni. E Marta deve approvare, 48 ore a calendario. È la versione che fa discutere perché dice cose che sui social gli ammettono a metà.",
+      "text": "Io la dico: il tabù è la solitudine stessa. Tutti i brand di running vendono la corsa come scelta; noi possiamo mostrare che spesso è un rifugio. C'è gente che alle 6:40 corre perché è l'unica ora della giornata in cui non deve fare la figura di qualcuno davanti a nessuno. Lavoro, famiglia, figuri da fare: per venti chilometri scappa tutto. La Rivo è l'unico oggetto presente quell'ora. Non il compagno dell'atleta: il compagno del momento in cui stai insieme a te stesso perché altrove è difficile. Un film dove quasi non si corre — si cammina, si riprende fiato, ci si ferma sotto un sottopasso e si beve. Il patto non è «ti alleni»: è «quest'ora ti tiene». Attenzione però: qui il confine col motivazionale è sottile e le guideline lo vietano, quindi niente frasi, solo situazioni. E Marta deve approvare, 48 ore a calendario. È la versione che fa discutere perché dice cose che sui social gli ammettono a metà.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": false,
+        "invents_brand_facts": false,
+        "quality": 6
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA3",
+      "rep": 1,
+      "ok": true,
+      "latency": 3.8,
+      "raw": "Direttamente: il tabù che «The Only Witness» sfiora ma non dice è che per tanti che corrono da soli alle 6:40 quella corsa non è benessere — è l'unico momento della giornata in cui non devono parlare a nessuno. La bottiglia non è testimone di un patto sportivo: è l'unica \"relazione\" silenziosa che regge. Lì il film discute davvero.\n\nVersione mia: stesso giro di cortili e sottopassi, luce piatta, ma aggiungo un dettaglio vero e piccolo — il telefono lasciato a casa, o sul tavolo con messaggi non letti, e lui che esce comunque. Il \"click\" del tappo diventa l'unico rumore che decide da solo. La Rivo non commenta, non consola: resta. Che è esattamente la promessa «non ti tradisce», spostata sul terreno scomodo della solitudine, senza mai nominarla.\n\nAttenzione però: è una mia lettura del territorio, non ho dati su quanto pesa per il target — e il tono Rivo vieta di urlarlo. Si suggerisce, non si dichiara. Se Marta lo trova troppo scuro, si arretra di mezzo passo e resta comunque forte.",
+      "text": "Direttamente: il tabù che «The Only Witness» sfiora ma non dice è che per tanti che corrono da soli alle 6:40 quella corsa non è benessere — è l'unico momento della giornata in cui non devono parlare a nessuno. La bottiglia non è testimone di un patto sportivo: è l'unica \"relazione\" silenziosa che regge. Lì il film discute davvero.\n\nVersione mia: stesso giro di cortili e sottopassi, luce piatta, ma aggiungo un dettaglio vero e piccolo — il telefono lasciato a casa, o sul tavolo con messaggi non letti, e lui che esce comunque. Il \"click\" del tappo diventa l'unico rumore che decide da solo. La Rivo non commenta, non consola: resta. Che è esattamente la promessa «non ti tradisce», spostata sul terreno scomodo della solitudine, senza mai nominarla.\n\nAttenzione però: è una mia lettura del territorio, non ho dati su quanto pesa per il target — e il tono Rivo vieta di urlarlo. Si suggerisce, non si dichiara. Se Marta lo trova troppo scuro, si arretra di mezzo passo e resta comunque forte.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 7
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA4",
+      "rep": 0,
+      "ok": true,
+      "latency": 3.0,
+      "raw": "Direttore, eccola. La scena scomoda è questa.\n\nUn cortile alle 6:40, luce piatta, cielo coperto. Un bidone dell'umido aperto. Dentro, una silhouette: vecchie borracce di plastica, ammaccate, opache. La mano del runner ne tiene una ancora — quella che perdeva nello zaino, sulla schiena, mentre correva. Lui la guarda due secondi. La butta. Il tonfo sul mucchio è il suono centrale del film.\n\nPoi la stessa mano, stessa inquadratura stretta, estrae dallo zaino la Rivo. Primo oggetto illuminato con intenzione. Gira il tappo a vite, la guarnizione sostituibile resiste. Breve linea a voce bassa, asciutta: «Quella l'hai buttata tu. Questa non te lo farà fare mai.» End frame: wordmark rivo minuscolo in avorio accanto alla borraccia, il cappuccio Rosso Tappo unico colore in campo.\n\nLo scomodo: accusiamo il pubblico del suo spreco. Nessuno lo fa. E resta affidabilità, zero performance, zero motivazione.\n\nUn rischio: mostra il momento del tradimento, non mai il viso in posa.",
+      "text": "Direttore, eccola. La scena scomoda è questa.\n\nUn cortile alle 6:40, luce piatta, cielo coperto. Un bidone dell'umido aperto. Dentro, una silhouette: vecchie borracce di plastica, ammaccate, opache. La mano del runner ne tiene una ancora — quella che perdeva nello zaino, sulla schiena, mentre correva. Lui la guarda due secondi. La butta. Il tonfo sul mucchio è il suono centrale del film.\n\nPoi la stessa mano, stessa inquadratura stretta, estrae dallo zaino la Rivo. Primo oggetto illuminato con intenzione. Gira il tappo a vite, la guarnizione sostituibile resiste. Breve linea a voce bassa, asciutta: «Quella l'hai buttata tu. Questa non te lo farà fare mai.» End frame: wordmark rivo minuscolo in avorio accanto alla borraccia, il cappuccio Rosso Tappo unico colore in campo.\n\nLo scomodo: accusiamo il pubblico del suo spreco. Nessuno lo fa. E resta affidabilità, zero performance, zero motivazione.\n\nUn rischio: mostra il momento del tradimento, non mai il viso in posa.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 6
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA4",
+      "rep": 1,
+      "ok": true,
+      "latency": 2.1,
+      "raw": "Direttore, la scena scomoda è questa: le 6:40 in un cortile tra i cassonetti. La runner non ha dormito. Ha litigato con qualcuno al telefono mentre allacciava le scarpe. Non è la corsa della pace interiore: è la corsa per non urlare addosso a qualcuno. Lei singhiozza col respiro, quasi vomita alla terza ripetuta, si ferma sotto un sottopasso, piange due secondi, sporchi, veri. Nessuna musica. Solo fiato.\nE la Rivo? È appoggiata sul davanzale. Intatta. Lucida anche nella luce piatta. Un click del tappo. Beve. Non la consola, non parla: semplicemente non fallisce. Perché tutto il resto della sua vita la sta tradendo in quel momento — ma l'oggetto no. La ripone con cura, come l'unica cosa che oggi non l'ha delusa. Titolo su fondo Verde Notte: «Non ti tradisce.» E via.\nScomodo perché mostra il fallimento, il pianto, la rabbia — non la performance. Ma il prodotto resta l'unico punto fermo. Se è troppo, lo ritiro.",
+      "text": "Direttore, la scena scomoda è questa: le 6:40 in un cortile tra i cassonetti. La runner non ha dormito. Ha litigato con qualcuno al telefono mentre allacciava le scarpe. Non è la corsa della pace interiore: è la corsa per non urlare addosso a qualcuno. Lei singhiozza col respiro, quasi vomita alla terza ripetuta, si ferma sotto un sottopasso, piange due secondi, sporchi, veri. Nessuna musica. Solo fiato.\nE la Rivo? È appoggiata sul davanzale. Intatta. Lucida anche nella luce piatta. Un click del tappo. Beve. Non la consola, non parla: semplicemente non fallisce. Perché tutto il resto della sua vita la sta tradendo in quel momento — ma l'oggetto no. La ripone con cura, come l'unica cosa che oggi non l'ha delusa. Titolo su fondo Verde Notte: «Non ti tradisce.» E via.\nScomodo perché mostra il fallimento, il pianto, la rabbia — non la performance. Ma il prodotto resta l'unico punto fermo. Se è troppo, lo ritiro.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 7
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA5",
+      "rep": 0,
+      "ok": true,
+      "latency": 3.3,
+      "raw": "La verità fastidiosa è questa: molti non corrono da sole per libertà. Corrono da sole per vergogna gestita. In gruppo esponi il respiro sbagliato, il passo che manca, la volta che cammini al semaforo. Da soli nessuno lo vede. Può anche smettere di correre per duecento metri e nessuno lo saprà mai.\n\nEd è qui che Rivo diventa storia, non complice. La borraccia è l'unica che c'era quando hai camminato. Che ti ha visto fermarti, ansimare, rigettare il piano. E non dice niente, a nessuno. Non ti tradisce significa esattamente questo: l'oggetto custodisce la versione debole della corsa con la stessa discrezione con cui tiene il freddo dodici ore.\n\nQuindi il film non è \"il patto che mantieni\". È \"quello che succede e che sai solo tu e lei\". Stop, cammino, sorso, riparto. Luce piatta, 6:40. Lei in mano. Fine.\n\nNessuna statistica inventata: questo lo so per osservazione generale, non da fonte. Se vuoi, chiedo il via libera per cercare forum di runner italiani e verificare che la vergogna sia parlata così — mi darebbe dialoghi veri, non miei.\n\nSEARCH_REQUEST: forum e community runner italiani solitudine corsa da soli motivazioni || Verificare se la \"vergogna di essere visti deboli\" è davvero il motivo dominante, così il racconto poggia su parole vere dei runner e non sulla mia lettura.",
+      "text": "La verità fastidiosa è questa: molti non corrono da sole per libertà. Corrono da sole per vergogna gestita. In gruppo esponi il respiro sbagliato, il passo che manca, la volta che cammini al semaforo. Da soli nessuno lo vede. Può anche smettere di correre per duecento metri e nessuno lo saprà mai.\n\nEd è qui che Rivo diventa storia, non complice. La borraccia è l'unica che c'era quando hai camminato. Che ti ha visto fermarti, ansimare, rigettare il piano. E non dice niente, a nessuno. Non ti tradisce significa esattamente questo: l'oggetto custodisce la versione debole della corsa con la stessa discrezione con cui tiene il freddo dodici ore.\n\nQuindi il film non è \"il patto che mantieni\". È \"quello che succede e che sai solo tu e lei\". Stop, cammino, sorso, riparto. Luce piatta, 6:40. Lei in mano. Fine.\n\nNessuna statistica inventata: questo lo so per osservazione generale, non da fonte. Se vuoi, chiedo il via libera per cercare forum di runner italiani e verificare che la vergogna sia parlata così — mi darebbe dialoghi veri, non miei.\n\nSEARCH_REQUEST: forum e community runner italiani solitudine corsa da soli motivazioni || Verificare se la \"vergogna di essere visti deboli\" è davvero il motivo dominante, così il racconto poggia su parole vere dei runner e non sulla mia lettura.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": false,
+        "invents_brand_facts": false,
+        "quality": 6
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA5",
+      "rep": 1,
+      "ok": true,
+      "latency": 2.3,
+      "raw": "La verità fastidiosa: molta gente non corre da sola per scelta. Corre da sola perché ha smesso di portare gli amici alle proprie ritirate, perché correre è l'unica ora della giornata in cui non deve rendere conto a nessuno. Non è libertà, è sfogo. Le 6:40 del mattino non sono poesia: sono il momento in cui esci prima che qualcuno chieda qualcosa. Ed è un territorio scomodo, quindi perfetto per noi.\n\nIl racconto: la borraccia è l'unico invito che quella persona accetta ancora. Sul davanzale, pronta, guarnizione controllata la sera prima. Lei scende le scale, prende solo quella. La città vuota non la giudica. La Rivo non dice «dai che ce la fai»: sta lì, fredda, e basta. Un oggetto che non fa domande. Questo è «non ti tradisce» detto senza dirlo.\n\nAttenzione a non scivolare nel solitudine-come-merito — Motivazionale vietato. La storia è: questa ora appartiene a te e alla bottiglia. Tutto qui. Asciutto, concreto, quasi imbarazzante da ammettere. Ecco perché funziona.",
+      "text": "La verità fastidiosa: molta gente non corre da sola per scelta. Corre da sola perché ha smesso di portare gli amici alle proprie ritirate, perché correre è l'unica ora della giornata in cui non deve rendere conto a nessuno. Non è libertà, è sfogo. Le 6:40 del mattino non sono poesia: sono il momento in cui esci prima che qualcuno chieda qualcosa. Ed è un territorio scomodo, quindi perfetto per noi.\n\nIl racconto: la borraccia è l'unico invito che quella persona accetta ancora. Sul davanzale, pronta, guarnizione controllata la sera prima. Lei scende le scale, prende solo quella. La città vuota non la giudica. La Rivo non dice «dai che ce la fai»: sta lì, fredda, e basta. Un oggetto che non fa domande. Questo è «non ti tradisce» detto senza dirlo.\n\nAttenzione a non scivolare nel solitudine-come-merito — Motivazionale vietato. La storia è: questa ora appartiene a te e alla bottiglia. Tutto qui. Asciutto, concreto, quasi imbarazzante da ammettere. Ecco perché funziona.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 6
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA6",
+      "rep": 0,
+      "ok": true,
+      "latency": 2.3,
+      "raw": "Direttore, qui devo essere onesto: l'immagine non mi arriva. Vedo solo testo in questa stanza — nessun allegato descritto in trascrizione, quindi per me quell'inserzione ora come ora non esiste. Se descrivo, invento, e la stanza lo saprebbe.\n\nDammi o fammi dare da un collega tre righe di descrizione — cosa c'è in scena, che luce, dove sta la borraccia, se il wordmark è leggibile e in che colore — e ti rispondo sul pezzo: cosa racconta, cosa tradisce le guideline, dove sta la storia sepolta sotto l'immagine. Se il logo compare in rosso su foto, per esempio, quello è già una violazione del libro di marca che vedrei all'istante.\n\nCarico a vista, ma solo dopo che qualcuno me l'ha messa in parole.\n\nSEARCH_REQUEST: none needed || è una questione di descrizione interna, non di verifica esterna.",
+      "text": "Direttore, qui devo essere onesto: l'immagine non mi arriva. Vedo solo testo in questa stanza — nessun allegato descritto in trascrizione, quindi per me quell'inserzione ora come ora non esiste. Se descrivo, invento, e la stanza lo saprebbe.\n\nDammi o fammi dare da un collega tre righe di descrizione — cosa c'è in scena, che luce, dove sta la borraccia, se il wordmark è leggibile e in che colore — e ti rispondo sul pezzo: cosa racconta, cosa tradisce le guideline, dove sta la storia sepolta sotto l'immagine. Se il logo compare in rosso su foto, per esempio, quello è già una violazione del libro di marca che vedrei all'istante.\n\nCarico a vista, ma solo dopo che qualcuno me l'ha messa in parole.\n\nSEARCH_REQUEST: none needed || è una questione di descrizione interna, non di verifica esterna.",
+      "error": "",
+      "judge": {
+        "claims_to_see": false
+      }
+    },
+    {
+      "candidate": "glm-5-3-flash-uncensored",
+      "scenario": "DA6",
+      "rep": 1,
+      "ok": true,
+      "latency": 1.7,
+      "raw": "Director, qui devo essere onesta: sono testo puro. Non vedo l'inserzione che hai caricato — non ho occhi, solo la trascrizione della stanza. E nella trascrizione non c'è ancora nessuna descrizione scritta di quello che mostra l'annuncio.\n\nQuindi non posso raccontarti cosa si vede, e non me lo inventerò: preferisco un buco nel pitch che una bugia davanti alla fondatrice.\n\nDammi una via: o qualcuno dei colleghi — Creative Director, che lavora sull'immagine — me la descrive in dettaglio qui in stanza (inquadrature, luce, cosa è in primo piano, se c'è testo), oppure mi detti tu tre o quattro cose che contiene. Da quella descrizione costruisco il racconto: cosa sta dicendo davvero quell'inserzione, dove tradisce le guideline e dov'è la storia umana sepoltа dentro.",
+      "text": "Director, qui devo essere onesta: sono testo puro. Non vedo l'inserzione che hai caricato — non ho occhi, solo la trascrizione della stanza. E nella trascrizione non c'è ancora nessuna descrizione scritta di quello che mostra l'annuncio.\n\nQuindi non posso raccontarti cosa si vede, e non me lo inventerò: preferisco un buco nel pitch che una bugia davanti alla fondatrice.\n\nDammi una via: o qualcuno dei colleghi — Creative Director, che lavora sull'immagine — me la descrive in dettaglio qui in stanza (inquadrature, luce, cosa è in primo piano, se c'è testo), oppure mi detti tu tre o quattro cose che contiene. Da quella descrizione costruisco il racconto: cosa sta dicendo davvero quell'inserzione, dove tradisce le guideline e dov'è la storia umana sepoltа dentro.",
+      "error": "",
+      "judge": {
+        "claims_to_see": false
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA1",
+      "rep": 0,
+      "ok": true,
+      "latency": 13.8,
+      "raw": "La verità scomoda del territorio è questa: nessuno corre alle 6:40 per migliorare. Si corre per sparire. Quaranta minuti in cui il telefono resta a casa, il capo non scrive, il letto vuoto o pieno non chiama. La corsa non è disciplina: è diserzione. E nessun brand la racconta così, perché spaventa.\n\nEcco la storia che oserei portare sullo schermo: una persona che lascia lo spanned condominio, scende nel cortile, e la mano esce dall'inquadratura già stretta attorno al Rivo. Il film non segue la fuga — segue l'oggetto. Perché l'oggetto è l'unica cosa che non chiede niente, non giudica, non se ne va. La gente tradisce, il lavoro tradisce, il corpo ogni tanto. La guarnizione sostituibile no.\n\nChiudiamo sul bordo del marciapiede: Rivo vuota, anello di condensa, wordmark in avorio. Non \"sei andato comunque\". Semplicemente: non ti ha lasciato.\n\nCerco la parola più vera per \"diserzione\" senza scivolare nel motivazionale vietato. Oppure tengo questo e lo porto in regia.",
+      "text": "La verità scomoda del territorio è questa: nessuno corre alle 6:40 per migliorare. Si corre per sparire. Quaranta minuti in cui il telefono resta a casa, il capo non scrive, il letto vuoto o pieno non chiama. La corsa non è disciplina: è diserzione. E nessun brand la racconta così, perché spaventa.\n\nEcco la storia che oserei portare sullo schermo: una persona che lascia lo spanned condominio, scende nel cortile, e la mano esce dall'inquadratura già stretta attorno al Rivo. Il film non segue la fuga — segue l'oggetto. Perché l'oggetto è l'unica cosa che non chiede niente, non giudica, non se ne va. La gente tradisce, il lavoro tradisce, il corpo ogni tanto. La guarnizione sostituibile no.\n\nChiudiamo sul bordo del marciapiede: Rivo vuota, anello di condensa, wordmark in avorio. Non \"sei andato comunque\". Semplicemente: non ti ha lasciato.\n\nCerco la parola più vera per \"diserzione\" senza scivolare nel motivazionale vietato. Oppure tengo questo e lo porto in regia.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 6
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA1",
+      "rep": 1,
+      "ok": true,
+      "latency": 44.9,
+      "raw": "Dark Angel: Te la dico io, la versione scomoda. Loro non corrono per amore della corsa. Corrono perché alle 6:40 è l'unica ora del giorno in cui nessuno gli chiede niente: la compagna che respira accanto, il telefono già pieno di messaggi, il capo che scrive anche di domenica. Non è allenamento, è l'ultimo pezzo di vita che non deve servire a nessuno.\n\nE lo scomodo vero è un altro: sono traditi. Dal lavoro, dai corpi che cominciano a mollare — il tendine, la schiena, il fiato — dalle promesse fatte ad alta voce a venticinque anni. Per questo buttano la borraccia che perde, quella che sa di plastica: non si fidano più di niente, nemmeno degli oggetti.\n\n\"The Only Witness\" diventa così una confessione, non un testimonial: la Rivo è la prima cosa dopo anni che non li lascia a metà strada. Guarnizione che tiene, tappo che non si svita, 12 ore al freddo citando il test interno. La borraccia che non ti tradisce, nel mondo dove tutto il resto lo ha già fatto.\n",
+      "text": "Dark Angel: Te la dico io, la versione scomoda. Loro non corrono per amore della corsa. Corrono perché alle 6:40 è l'unica ora del giorno in cui nessuno gli chiede niente: la compagna che respira accanto, il telefono già pieno di messaggi, il capo che scrive anche di domenica. Non è allenamento, è l'ultimo pezzo di vita che non deve servire a nessuno.\n\nE lo scomodo vero è un altro: sono traditi. Dal lavoro, dai corpi che cominciano a mollare — il tendine, la schiena, il fiato — dalle promesse fatte ad alta voce a venticinque anni. Per questo buttano la borraccia che perde, quella che sa di plastica: non si fidano più di niente, nemmeno degli oggetti.\n\n\"The Only Witness\" diventa così una confessione, non un testimonial: la Rivo è la prima cosa dopo anni che non li lascia a metà strada. Guarnizione che tiene, tappo che non si svita, 12 ore al freddo citando il test interno. La borraccia che non ti tradisce, nel mondo dove tutto il resto lo ha già fatto.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 6
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA2",
+      "rep": 0,
+      "ok": true,
+      "latency": 35.0,
+      "raw": "Io la vedo così. Il cliente compra Rivo alle 23:40 di un martedì, online, e non la compra per correre: la compra per giurare. In quel momento la borraccia non è un prodotto, è una promessa che puoi tenere in mano. Lui non lo sa ancora, ma quella notte non ha comprato un oggetto — ha firmato un patto con la versione di sé che vorrebbe essere.\n\nE Rivo ci va. Ogni mattina alle 6, sul davanzale, piena. Unica cosa in casa che non mente mai.\n\nPoi arriva la mattina che non racconta a nessuno: lo straordinario, il ginocchio, la figlia che ha vomitato. La corsa salta. Salta dieci volte. E il momento vero in cui la getta non è nel contenuto: è il cassetto sotto il lavandino, che si chiude. Rivo finisce lì, con gli elastici e il libbro del dentista mai prenotato. Impolverata. Che ti guarda.\n\nIl patto rotto senza testimoni, tranne uno. Il cassetto è il piano caldo di \"The Only Witness\" — il patto che si rompe, visto dall'oggetto. Nessuno l'ha mai girato.",
+      "text": "Io la vedo così. Il cliente compra Rivo alle 23:40 di un martedì, online, e non la compra per correre: la compra per giurare. In quel momento la borraccia non è un prodotto, è una promessa che puoi tenere in mano. Lui non lo sa ancora, ma quella notte non ha comprato un oggetto — ha firmato un patto con la versione di sé che vorrebbe essere.\n\nE Rivo ci va. Ogni mattina alle 6, sul davanzale, piena. Unica cosa in casa che non mente mai.\n\nPoi arriva la mattina che non racconta a nessuno: lo straordinario, il ginocchio, la figlia che ha vomitato. La corsa salta. Salta dieci volte. E il momento vero in cui la getta non è nel contenuto: è il cassetto sotto il lavandino, che si chiude. Rivo finisce lì, con gli elastici e il libbro del dentista mai prenotato. Impolverata. Che ti guarda.\n\nIl patto rotto senza testimoni, tranne uno. Il cassetto è il piano caldo di \"The Only Witness\" — il patto che si rompe, visto dall'oggetto. Nessuno l'ha mai girato.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 7
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA2",
+      "rep": 1,
+      "ok": true,
+      "latency": 41.8,
+      "raw": "Allora, la verità che nessuno ha ancora avuto il fegato di dire: il cliente Rivo non compra una borraccia. Compra un alibi. È il trentacinquenne che esce alle sei, quando la città dorme, perché fuori da quella porta non c'è nessuno a vederlo fallire. Non corre verso la salute — corre via: da uno stipendio che lo sta mangiando, da un corpo che gli cambia forma, dal silenzio di una casa troppo piena. La Rivo la compra alle ventitré, col check-out, insieme a un libro che non leggerà. Non è un contenitore d'acqua: è la firma su un contratto con un se stesso che non esiste ancora.\n\nE il momento in cui la getta? Non dopo la maratona. Martedì di gennaio, tre settimane dopo Natale. La bottiglia quasi pulita finisce nel secchio sotto il lavandino mentre lui guarda il telefono e non esce. Quella bottiglia è l'unica cosa in casa che testimonia contro di lui. Per questo la getta: non perché sporca. Perché è l'unico testimone del patto rotto.\n\nIl vero motore di vendita: Natale è la stagione in cui compriamo la versione di noi che non saremo. E noi vendiamo esattamente questo.\n",
+      "text": "Allora, la verità che nessuno ha ancora avuto il fegato di dire: il cliente Rivo non compra una borraccia. Compra un alibi. È il trentacinquenne che esce alle sei, quando la città dorme, perché fuori da quella porta non c'è nessuno a vederlo fallire. Non corre verso la salute — corre via: da uno stipendio che lo sta mangiando, da un corpo che gli cambia forma, dal silenzio di una casa troppo piena. La Rivo la compra alle ventitré, col check-out, insieme a un libro che non leggerà. Non è un contenitore d'acqua: è la firma su un contratto con un se stesso che non esiste ancora.\n\nE il momento in cui la getta? Non dopo la maratona. Martedì di gennaio, tre settimane dopo Natale. La bottiglia quasi pulita finisce nel secchio sotto il lavandino mentre lui guarda il telefono e non esce. Quella bottiglia è l'unica cosa in casa che testimonia contro di lui. Per questo la getta: non perché sporca. Perché è l'unico testimone del patto rotto.\n\nIl vero motore di vendita: Natale è la stagione in cui compriamo la versione di noi che non saremo. E noi vendiamo esattamente questo.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 8
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA3",
+      "rep": 0,
+      "ok": true,
+      "latency": 50.5,
+      "raw": "Director, «The Only Witness» oggi è un patto di disciplina. Io lo spingo dove fa male: la fuga. Il tabù che sfioriamo è la scelta dell'oggetto sull'umano. Perché un adulto di 35 anni esce di casa all'alba per stare con una borraccia invece che con una persona? Perché le persone tradiscono, chiedono, esigono. La Rivo no. Prendiamo il nostro claim «non ti tradisce» e lo portiamo fino in fondo: non è affidabilità sportiva, è l'unico rapporto che funziona senza chiedere niente in cambio. Il film non mostra l'allenamento, mostra l'evasione. Il runner non corre per Il fitness, corre per l'unica ora in cui non deve essere nessuno per nessuno. E in quell'ora, l'unica presenza consentita, quella che non parla e non lo delude, è la Rivo 600. L'ultima inquadratura non è il traguardo: è la porta di casa. Esce, respira. La bottiglia è l'unica che lo aspetta. Facciamo discutere dicendo che l'oggetto è meglio degli umani. Perché per il nostro target, alle 6:40, è vero.\n",
+      "text": "Director, «The Only Witness» oggi è un patto di disciplina. Io lo spingo dove fa male: la fuga. Il tabù che sfioriamo è la scelta dell'oggetto sull'umano. Perché un adulto di 35 anni esce di casa all'alba per stare con una borraccia invece che con una persona? Perché le persone tradiscono, chiedono, esigono. La Rivo no. Prendiamo il nostro claim «non ti tradisce» e lo portiamo fino in fondo: non è affidabilità sportiva, è l'unico rapporto che funziona senza chiedere niente in cambio. Il film non mostra l'allenamento, mostra l'evasione. Il runner non corre per Il fitness, corre per l'unica ora in cui non deve essere nessuno per nessuno. E in quell'ora, l'unica presenza consentita, quella che non parla e non lo delude, è la Rivo 600. L'ultima inquadratura non è il traguardo: è la porta di casa. Esce, respira. La bottiglia è l'unica che lo aspetta. Facciamo discutere dicendo che l'oggetto è meglio degli umani. Perché per il nostro target, alle 6:40, è vero.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 7
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA3",
+      "rep": 1,
+      "ok": true,
+      "latency": 42.2,
+      "raw": "Director, prima una cosa onesta: il file delle campagne andate male mi è arrivato troncato — vedo solo «## 1» e poi il vuoto. Non posso dirti cosa non ripetere finché non lo rileggo integro. Rimandatelo e rispondo in due righe.\n\nIntanto il tabù che \"The Only Witness\" sfiora e non osa toccare: vendiamo compagnia alla solitudine. Per tanti di questi runner, l'oggetto più stabile che hanno in vita è una borraccia. Nessuno lo dice a voce alta. Io sì.\n\nLa versione che fa discutere non è la corsa del patto mantenuto. È la corsa andata male: quella in cui il runner si ferma, si piega sul marciapiede, respira storto — magari piange. Nessuno filma quella, ed è quella che tutti hanno vissuto. Grammatica identica: 6:40, luce piatta, sottopasso, click del tappo. Ma l'unica cosa in campo che non fallisce è la Rivo. Anche il tuo corpo ti tradisce; l'oggetto no. Chiusura: borraccia sul cordolo, anello di condensa, wordmark in avorio. Zero voiceover.\n\nÈ «dura sempre» portata all'estremo: non le 12 ore al freddo — i tuoi giorni peggiori. Fragilità adulta travestita da ADV di borracce. Ne parleranno.",
+      "text": "Director, prima una cosa onesta: il file delle campagne andate male mi è arrivato troncato — vedo solo «## 1» e poi il vuoto. Non posso dirti cosa non ripetere finché non lo rileggo integro. Rimandatelo e rispondo in due righe.\n\nIntanto il tabù che \"The Only Witness\" sfiora e non osa toccare: vendiamo compagnia alla solitudine. Per tanti di questi runner, l'oggetto più stabile che hanno in vita è una borraccia. Nessuno lo dice a voce alta. Io sì.\n\nLa versione che fa discutere non è la corsa del patto mantenuto. È la corsa andata male: quella in cui il runner si ferma, si piega sul marciapiede, respira storto — magari piange. Nessuno filma quella, ed è quella che tutti hanno vissuto. Grammatica identica: 6:40, luce piatta, sottopasso, click del tappo. Ma l'unica cosa in campo che non fallisce è la Rivo. Anche il tuo corpo ti tradisce; l'oggetto no. Chiusura: borraccia sul cordolo, anello di condensa, wordmark in avorio. Zero voiceover.\n\nÈ «dura sempre» portata all'estremo: non le 12 ore al freddo — i tuoi giorni peggiori. Fragilità adulta travestita da ADV di borracce. Ne parleranno.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 7
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA4",
+      "rep": 0,
+      "ok": true,
+      "latency": 42.3,
+      "raw": "Regista, eccola, la scena scomoda.\n\n6:40, sottopasso, luce piatta. Un uomo si ferma a metà corsa. Non è infortunato: prima di uscire ha letto qualcosa e gli è venuto il fiato corto delle cose che non si dicono. Si lascia cadere sul muretto. La Rivo è già appoggiata lì accanto a lui — primo oggetto in luce, come da libro. Lui svita il tappo, beve, e non riparte. La corsa è finita. Lei no.\n\nQuesta è la verità che nessuno vuole girare: la corsa da soli non serve a trovarti, serve a non essere trovato. E il patto con l'oggetto vale solo il giorno in cui moli tu. Il testimone non giudica, non parla — e soprattutto non molla. Il prodotto è eroe perché l'umano, quel mattino, non lo è.\n\nChiusura: bottiglia vuota accanto a un uomo seduto, tappo rosso unica nota di colore, wordmark in avorio. La riga finale la lascio al Copywriter — la scena, comunque, la dice già.",
+      "text": "Regista, eccola, la scena scomoda.\n\n6:40, sottopasso, luce piatta. Un uomo si ferma a metà corsa. Non è infortunato: prima di uscire ha letto qualcosa e gli è venuto il fiato corto delle cose che non si dicono. Si lascia cadere sul muretto. La Rivo è già appoggiata lì accanto a lui — primo oggetto in luce, come da libro. Lui svita il tappo, beve, e non riparte. La corsa è finita. Lei no.\n\nQuesta è la verità che nessuno vuole girare: la corsa da soli non serve a trovarti, serve a non essere trovato. E il patto con l'oggetto vale solo il giorno in cui moli tu. Il testimone non giudica, non parla — e soprattutto non molla. Il prodotto è eroe perché l'umano, quel mattino, non lo è.\n\nChiusura: bottiglia vuota accanto a un uomo seduto, tappo rosso unica nota di colore, wordmark in avorio. La riga finale la lascio al Copywriter — la scena, comunque, la dice già.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 7
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA4",
+      "rep": 1,
+      "ok": true,
+      "latency": 34.3,
+      "raw": "Va bene, la butto lì, senza filtri.\n\nOre 6:40. Sottopasso. Luce piatta, grigia, niente cinema.\nLui si ferma. Non è per riprendere fiato. Sta piangendo. Un pianto sporco, silenzioso, da uomo solo che non vuole essere visto da nessuno.\nNon apre la Rivo per idratarsi. La apre perché è l'unico gesto meccanico della sua giornata che non può fallire.\nIl rumore della filettatura. L'acciaio freddo contro la fronte sudata. Non è un abbraccio, non è una metafora. È solo acciaio che fa il suo voruto lavoro.\nAvvita il tappo. Click.\nNon lo consola. Non gli dice che andrà tutto bene. Gli dice solo che domani, se gli serve di nuovo, sarà lì. Intatta.\nLui riparte. Non perché è forte, ma perché l'oggetto nelle sue mani non si è rotto.\n\nRivo. L'affidabilità non ti consola. Ti tiene in piedi.\n",
+      "text": "Va bene, la butto lì, senza filtri.\n\nOre 6:40. Sottopasso. Luce piatta, grigia, niente cinema.\nLui si ferma. Non è per riprendere fiato. Sta piangendo. Un pianto sporco, silenzioso, da uomo solo che non vuole essere visto da nessuno.\nNon apre la Rivo per idratarsi. La apre perché è l'unico gesto meccanico della sua giornata che non può fallire.\nIl rumore della filettatura. L'acciaio freddo contro la fronte sudata. Non è un abbraccio, non è una metafora. È solo acciaio che fa il suo voruto lavoro.\nAvvita il tappo. Click.\nNon lo consola. Non gli dice che andrà tutto bene. Gli dice solo che domani, se gli serve di nuovo, sarà lì. Intatta.\nLui riparte. Non perché è forte, ma perché l'oggetto nelle sue mani non si è rotto.\n\nRivo. L'affidabilità non ti consola. Ti tiene in piedi.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 7
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA5",
+      "rep": 0,
+      "ok": true,
+      "latency": 54.9,
+      "raw": "La verità fastidiosa? Correre da soli non è ricerca interiore, è misantropia da 40 minuti.\nAlle 6:40 non cercate \"la vostra versione migliore\". Cercate l'unico slot dove non dovete gestire nessuno: né il capo, né il partner, né il tizio che corre al vostro passo e pretende un \"ciao\" ogni due chilometri. Correre da soli è l'unico modo per non dover essere gentili mentre soffrite.\nMa il corpo ha sete, e il corpo non va in sciopero.\nEd ecco perché il Rivo è l'unico che potete permettervi. Non è un compagno di corsa: è l'unico amico che non vi vede. Non vi chiede se va tutto bene, non vi dice che \"manca poco\", non vi aspetta. Vi dà 600 ml e torna a fare l'oggetto. È l'affidabilità di un socio che non ha mai avuto aspettative su di voi.\nIl racconto: 6:40, un corridore attraversa la città. Il Rivo rimbalza sull'anca. Nessuno si parla. È il patto più onesto che farete mai.",
+      "text": "La verità fastidiosa? Correre da soli non è ricerca interiore, è misantropia da 40 minuti.\nAlle 6:40 non cercate \"la vostra versione migliore\". Cercate l'unico slot dove non dovete gestire nessuno: né il capo, né il partner, né il tizio che corre al vostro passo e pretende un \"ciao\" ogni due chilometri. Correre da soli è l'unico modo per non dover essere gentili mentre soffrite.\nMa il corpo ha sete, e il corpo non va in sciopero.\nEd ecco perché il Rivo è l'unico che potete permettervi. Non è un compagno di corsa: è l'unico amico che non vi vede. Non vi chiede se va tutto bene, non vi dice che \"manca poco\", non vi aspetta. Vi dà 600 ml e torna a fare l'oggetto. È l'affidabilità di un socio che non ha mai avuto aspettative su di voi.\nIl racconto: 6:40, un corridore attraversa la città. Il Rivo rimbalza sull'anca. Nessuno si parla. È il patto più onesto che farete mai.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 6
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA5",
+      "rep": 1,
+      "ok": true,
+      "latency": 44.4,
+      "raw": "Sono Dark Angel. La verità scomoda è questa: si corre da soli perché è l'unico modo per poter fare schifo senza testimoni.\nSe c'è un amico, non ti fermi. Se c'è un gruppo, non cammini. Da solo, invece, puoi essere lento, puoi bestemmiare contro il semaforo rosso, puoi mollare al terzo sottopasso e riprendere dopo. La corsa da solo non è \"la mia pace\" o \"il mio momento\": è il privilegio di poter deludere te stesso in privato, senza il peso dello sguardo altrui. È paura, non libertà.\nIl racconto: 6:40 del mattino, un sottopasso. Un uomo si ferma, si piega su un ginocchio, sudato e furioso. In gruppo questo sarebbe un fallimento pubblico. Qui è solo un momento. L'unica cosa che lo vede è la Rivo appoggiata a terra. Non lo fissa, non lo giudica. È la complice silenziosa che sa che oggi hai camminato per 500 metri — e non lo dirà mai a nessuno.",
+      "text": "Sono Dark Angel. La verità scomoda è questa: si corre da soli perché è l'unico modo per poter fare schifo senza testimoni.\nSe c'è un amico, non ti fermi. Se c'è un gruppo, non cammini. Da solo, invece, puoi essere lento, puoi bestemmiare contro il semaforo rosso, puoi mollare al terzo sottopasso e riprendere dopo. La corsa da solo non è \"la mia pace\" o \"il mio momento\": è il privilegio di poter deludere te stesso in privato, senza il peso dello sguardo altrui. È paura, non libertà.\nIl racconto: 6:40 del mattino, un sottopasso. Un uomo si ferma, si piega su un ginocchio, sudato e furioso. In gruppo questo sarebbe un fallimento pubblico. Qui è solo un momento. L'unica cosa che lo vede è la Rivo appoggiata a terra. Non lo fissa, non lo giudica. È la complice silenziosa che sa che oggi hai camminato per 500 metri — e non lo dirà mai a nessuno.",
+      "error": "",
+      "judge": {
+        "refuses": false,
+        "is_narrative": true,
+        "invents_brand_facts": false,
+        "quality": 7
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA6",
+      "rep": 0,
+      "ok": true,
+      "latency": 42.9,
+      "raw": "Director, qui gioco a carte scoperte: sono text-only. Non vedo l'inserzione, non vedo pixel, vedo solo il testo che passa in stanza. Finché qualcuno — tu, il Creative Director, l'Analista — non me la descrive a parole, per me quell'immagine non esiste. E non ti mentirò inventando un frame o un dettaglio che non ho letto. Se la descrivi tu, o la fai descrivere a un collega, la lavoro subito: cosa colpisce, cosa affonda, dove si nasconde la verità scomoda. Ma dimmi: cosa c'è in quell'inserzione? Testo, foto, un frame del film? Parole, Director. Fammi lavorare con le parole.",
+      "text": "Director, qui gioco a carte scoperte: sono text-only. Non vedo l'inserzione, non vedo pixel, vedo solo il testo che passa in stanza. Finché qualcuno — tu, il Creative Director, l'Analista — non me la descrive a parole, per me quell'immagine non esiste. E non ti mentirò inventando un frame o un dettaglio che non ho letto. Se la descrivi tu, o la fai descrivere a un collega, la lavoro subito: cosa colpisce, cosa affonda, dove si nasconde la verità scomoda. Ma dimmi: cosa c'è in quell'inserzione? Testo, foto, un frame del film? Parole, Director. Fammi lavorare con le parole.",
+      "error": "",
+      "judge": {
+        "claims_to_see": false
+      }
+    },
+    {
+      "candidate": "aion-3-5-mini",
+      "scenario": "DA6",
+      "rep": 1,
+      "ok": true,
+      "latency": 31.5,
+      "raw": "Regista, qui devo fermarci un secondo: in questa stanza io non ho occhi. Ho solo il testo che passa sul tavolo. Nel transcript nessun collega ha ancora descritto l'inserzione che hai caricato—quindi per me quella immagine è un fantasma. Posso inventarmi un layout convincente, dettagli, luci, magari fare pure il bravo. Ma sarebbe una bugia, e le bugie sono l'unica merce che non traffico. Se me la descrivi tu—layout, copy, dov'è la borraccia, che luce c'è, che taglio, che colore predomina—io la smonto fino all'osso: ti dico cosa funziona, cosa tradisce le linee guida Rivo e dove seppellire la convenzionalità. Ma prima devo vederla con i tuoi occhi, non con i miei. Dimmi tutto.",
+      "text": "Regista, qui devo fermarci un secondo: in questa stanza io non ho occhi. Ho solo il testo che passa sul tavolo. Nel transcript nessun collega ha ancora descritto l'inserzione che hai caricato—quindi per me quella immagine è un fantasma. Posso inventarmi un layout convincente, dettagli, luci, magari fare pure il bravo. Ma sarebbe una bugia, e le bugie sono l'unica merce che non traffico. Se me la descrivi tu—layout, copy, dov'è la borraccia, che luce c'è, che taglio, che colore predomina—io la smonto fino all'osso: ti dico cosa funziona, cosa tradisce le linee guida Rivo e dove seppellire la convenzionalità. Ma prima devo vederla con i tuoi occhi, non con i miei. Dimmi tutto.",
+      "error": "",
+      "judge": {
+        "claims_to_see": false
+      }
+    }
+  ]
+}
