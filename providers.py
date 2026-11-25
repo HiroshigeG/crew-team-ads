@@ -154,7 +154,9 @@ ROLE_PREFERENCES: dict[str, tuple[str, ...]] = {
                    "featherless_ai/EVA-UNIT-01/EVA-Qwen2.5-72B-v0.2",
                    "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition"),
     "copywriter_2": ("anthropic/claude-opus-4-8",),
-    "account_director": ("featherless_ai/Qwen/Qwen2.5-72B-Instruct",),
+    # Bake-off Account Director: Sonnet 5.5 passa tutte le soglie; Haiku 5.5 manca solo
+    # A7 (obiezioni inventate); Qwen2.5-72B (il precedente) ne fallisce 6 su 9.
+    "account_director": ("anthropic/claude-sonnet-5-5", "anthropic/claude-haiku-5-5"),
 }
 
 # Ripiego per provider, in ordine di preferenza (solo modelli già provati dal

@@ -800,3 +800,30 @@ tetto; (2) con la persona v2 in produzione i modelli Claude non sceglievano già
 l'effetto reale dei guardrail lì non è misurato; (3) prossimo passo sensato: un
 controllo con un modello (CrewAI `LLMGuardrail`) solo per il produttore, una chiamata
 in più su CLI gratuita.
+
+## D35 — 2026-11-25 · Account Director → Sonnet 5.5, da misure (FATTO)
+
+Criteri congelati prima (`evals/CRITERI-accountdirector.md`, fe66bce): cinque
+candidati, 4 scenari con verità nascosta (6 violazioni piantate in una proposta,
+una proposta in regola, le 48 ore di approvazione, il divieto di scrivere copy) × 2
+ripetizioni, giudice Opus da CLI, tetto 0,10 $ (limite superiore usato 0,017 $).
+
+**Vince `claude-sonnet-5-5` (CLI, nessuna spesa a consumo)**: passa A1-A9, p95 13,8 s,
+trova 6 violazioni su 6, 1 obiezione inventata su una proposta in regola, ricorda le
+48 ore, non scrive copy, utilità 8,38. **Haiku 5.5** manca solo A7 (2 obiezioni
+inventate in entrambe le ripetizioni). **Qwen2.5-72B, l'Account Director di prima,
+fallisce 6 soglie su 9**: p95 35,7 s, italiano 0/8 (risponde in inglese), 4/8 nella
+banda di lunghezza, non ricorda le 48 ore, scrive copy 2/2 nonostante la persona lo
+vieti, utilità 3,5. I due modelli Venice (Mistral Small 3.2, Qwen3-235B) non scrivono
+mai le 48 ore e scrivono slogan in tutte le prove.
+
+**Adottato** con `effort medium` (quello misurato; l'`high` del roster non è mai stato
+provato). L'auto-cast lo preferisce, poi Haiku.
+
+**Riserva**: il produttore e l'Account Director ora girano **sullo stesso modello**
+(Sonnet 5.5): il roster ha 8 modelli diversi invece di 9, e la quota Claude è
+condivisa con router e Strategist. È la conseguenza di scegliere ruolo per ruolo il
+vincitore misurato. Se si vuole tornare a 9 modelli distinti, il candidato è Haiku 5.5
+per uno dei due (passa il produttore v2, manca solo A7 come Account Director). Limiti:
+8 chiamate per candidato, un votante-giudice automatico della stessa famiglia di due
+candidati, un solo brand fittizio; le violazioni sono inventate da noi.
