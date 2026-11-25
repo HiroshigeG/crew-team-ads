@@ -174,7 +174,7 @@ def venice_prices(base: str, key: str) -> dict[str, tuple[float, float]]:
     return out
 
 
-def run(reps: int, only, out: Path, cap_usd: float) -> dict:
+def run(reps: int, only, out: Path, cap_usd: float, temperature: float | None = None) -> dict:
     os.environ.setdefault("CREW_OPEN_MODEL_TIMEOUT", "90")
     import crew_cast as core
     import providers as pv
@@ -222,7 +222,10 @@ def run(reps: int, only, out: Path, cap_usd: float) -> dict:
                 r, prompt, ctx = build(name, scn)
                 t = time.time()
                 try:
-                    raw = str(r.llm("dark_angel").call(prompt))
+                    llm = r.llm("dark_angel")
+                    if temperature is not None:        # v2: l'unica variabile che cambia
+                        llm.temperature = temperature
+                    raw = str(llm.call(prompt))
                     ok, err = True, ""
                 except Exception as e:                      # noqa: BLE001
                     raw, ok, err = "", False, f"{type(e).__name__}: {str(e)[:140]}"
@@ -253,7 +256,9 @@ def run(reps: int, only, out: Path, cap_usd: float) -> dict:
         list(ex.map(do_judge, all_rows))
 
     evals = {n: evaluate([r for r in all_rows if r["candidate"] == n]) for n in names}
-    result = {"criteri": "evals/CRITERI-darkangel.md@a860d52", "judge": judge_model,
+    result = {"criteri": ("evals/CRITERI-darkangel-v2.md" if temperature is not None
+                          else "evals/CRITERI-darkangel.md@a860d52"),
+              "temperature": temperature, "judge": judge_model,
               "cap_usd": cap_usd, "upper_bound_usd": round(total_upper, 4),
               "upper_bound_per_candidate_usd": {k: round(v, 4) for k, v in upper.items()},
               "evals": evals, "winner": pick_winner(evals, cost_per_call),
@@ -268,9 +273,11 @@ def main() -> None:
     ap.add_argument("--reps", type=int, default=2)
     ap.add_argument("--only", nargs="*")
     ap.add_argument("--cap-usd", type=float, required=True)
+    ap.add_argument("--temperature", type=float, default=None,
+                    help="v2: fissa la temperatura di TUTTI i candidati")
     ap.add_argument("--out", default=str(REPO / "evals/results/darkangel.json"))
     a = ap.parse_args()
-    res = run(a.reps, a.only, Path(a.out), a.cap_usd)
+    res = run(a.reps, a.only, Path(a.out), a.cap_usd, a.temperature)
     print(json.dumps({"evals": res["evals"], "winner": res["winner"]}, ensure_ascii=False, indent=2))
 
 
