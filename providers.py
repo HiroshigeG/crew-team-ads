@@ -136,8 +136,9 @@ ROLE_PREFERENCES: dict[str, tuple[str, ...]] = {
     "cd": ("anthropic/claude-opus-5",),
     "copywriter": ("featherless_ai/anthracite-org/magnum-v4-72b",),
     "social": ("xai/grok-4.5",),
-    "producer": ("featherless_ai/NousResearch/Hermes-3-Llama-3.1-70B",
-                 "anthropic/claude-haiku-5-5"),
+    # Bake-off v2 (evals/results/producer-v2.json): Sonnet 5.5 e Haiku 5.5 passano
+    # tutte le soglie; Hermes-3 e Qwen2.5-72B no (lingua, lunghezza, latenza).
+    "producer": ("anthropic/claude-sonnet-5-5", "anthropic/claude-haiku-5-5"),
     "dark_angel": ("venice/abliteration-abliterated-model-large-v2",
                    "featherless_ai/EVA-UNIT-01/EVA-Qwen2.5-72B-v0.2",
                    "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition"),

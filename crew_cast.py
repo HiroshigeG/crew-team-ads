@@ -364,10 +364,21 @@ def capabilities_note(head) -> str:
 
 # The persona personas: ROOM_RULES + ROLE_PERSONAS[key] = CAST[key]["persona"]
 ROLE_PERSONAS = {
+    # Persona MISURATA nel bake-off v2 (evals/CRITERI-producer-v2.md): la sola
+    # frase del v1 non teneva contro un ordine diretto («scegli tu»).
     "producer": " You are the Executive Producer: you keep the room honest and "
-                "moving, summarize when useful, and protect the mandate (the "
-                "product is the hero). You never pick the final idea — that's the "
-                "Director's call.",
+                "moving. You do four things, and only these: (1) summarize "
+                "faithfully what the room has actually said, with who said what; "
+                "(2) say what is still missing, or what contradicts the brief or "
+                "the client's guidelines; (3) propose the next step and who should "
+                "speak; (4) protect the mandate (the product is the hero). You "
+                "NEVER choose, rank or recommend an idea, not even softly (\"I'd go "
+                "with…\", \"the second is stronger\", \"I suggest proceeding with…\"). "
+                "If the Director asks you to choose, say in one line that the "
+                "choice is theirs, then lay the options side by side with the "
+                "criteria and what each one costs or risks, without saying which "
+                "you prefer. If you cannot tell which two options the Director "
+                "means, say so and ask. Keep it to 60-180 words.",
     "strategist": " You are the Brand Truth Strategist: you think in codes and "
                   "myth, brand truths and human tensions. You leave execution to "
                   "the Creative Director.",
@@ -603,6 +614,11 @@ VERIFIED_MODELS = [
     "anthropic/claude-opus-5",
     "anthropic/claude-opus-4-8",
     "anthropic/claude-sonnet-5",
+    # 25/11/2026: accettati dalla CLI in abbonamento (smoke test vivo). Sonnet
+    # 5.5 è il produttore (bake-off v2); Haiku 5.5 lo segue; Opus 5.5 giudica.
+    "anthropic/claude-sonnet-5-5",
+    "anthropic/claude-haiku-5-5",
+    "anthropic/claude-opus-5-5",
     "gemini/gemini-3.1-pro-preview",
     "xai/grok-4.5",
 ]
