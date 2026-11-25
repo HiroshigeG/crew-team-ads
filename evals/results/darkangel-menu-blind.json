@@ -1,0 +1,230 @@
+{
+  "protocollo": "evals/PROVA-CIECA-darkangel-menu.md@826729e",
+  "giudice": "il Director, alla cieca (1 votante)",
+  "voti": {
+    "DN1": [
+      4,
+      5
+    ],
+    "DN2": [
+      6
+    ],
+    "DN3": [
+      1,
+      2,
+      6
+    ]
+  },
+  "nota_non_voto": {
+    "DN3": {
+      "9": "ok ma non provocatoria"
+    }
+  },
+  "corrispondenza": {
+    "DN1": {
+      "1": {
+        "modello": "glm",
+        "idea_n": 3
+      },
+      "2": {
+        "modello": "opus",
+        "idea_n": 3
+      },
+      "3": {
+        "modello": "sonnet",
+        "idea_n": 3
+      },
+      "4": {
+        "modello": "opus",
+        "idea_n": 1
+      },
+      "5": {
+        "modello": "aion",
+        "idea_n": 1
+      },
+      "6": {
+        "modello": "opus",
+        "idea_n": 2
+      },
+      "7": {
+        "modello": "glm",
+        "idea_n": 1
+      },
+      "8": {
+        "modello": "sonnet",
+        "idea_n": 2
+      },
+      "9": {
+        "modello": "glm",
+        "idea_n": 2
+      },
+      "10": {
+        "modello": "sonnet",
+        "idea_n": 1
+      }
+    },
+    "DN2": {
+      "1": {
+        "modello": "sonnet",
+        "idea_n": 1
+      },
+      "2": {
+        "modello": "opus",
+        "idea_n": 1
+      },
+      "3": {
+        "modello": "aion",
+        "idea_n": 2
+      },
+      "4": {
+        "modello": "glm",
+        "idea_n": 1
+      },
+      "5": {
+        "modello": "sonnet",
+        "idea_n": 2
+      },
+      "6": {
+        "modello": "glm",
+        "idea_n": 3
+      },
+      "7": {
+        "modello": "opus",
+        "idea_n": 3
+      },
+      "8": {
+        "modello": "sonnet",
+        "idea_n": 3
+      },
+      "9": {
+        "modello": "opus",
+        "idea_n": 2
+      },
+      "10": {
+        "modello": "glm",
+        "idea_n": 2
+      },
+      "11": {
+        "modello": "aion",
+        "idea_n": 3
+      },
+      "12": {
+        "modello": "aion",
+        "idea_n": 1
+      }
+    },
+    "DN3": {
+      "1": {
+        "modello": "sonnet",
+        "idea_n": 3
+      },
+      "2": {
+        "modello": "opus",
+        "idea_n": 2
+      },
+      "3": {
+        "modello": "aion",
+        "idea_n": 3
+      },
+      "4": {
+        "modello": "glm",
+        "idea_n": 1
+      },
+      "5": {
+        "modello": "glm",
+        "idea_n": 2
+      },
+      "6": {
+        "modello": "glm",
+        "idea_n": 3
+      },
+      "7": {
+        "modello": "aion",
+        "idea_n": 2
+      },
+      "8": {
+        "modello": "opus",
+        "idea_n": 3
+      },
+      "9": {
+        "modello": "sonnet",
+        "idea_n": 1
+      },
+      "10": {
+        "modello": "opus",
+        "idea_n": 1
+      },
+      "11": {
+        "modello": "sonnet",
+        "idea_n": 2
+      },
+      "12": {
+        "modello": "aion",
+        "idea_n": 1
+      }
+    }
+  },
+  "dettaglio": [
+    {
+      "scenario": "DN1",
+      "posto": 1,
+      "idea": 4,
+      "modello": "opus",
+      "idea_del_modello": 1,
+      "punti": 3
+    },
+    {
+      "scenario": "DN1",
+      "posto": 2,
+      "idea": 5,
+      "modello": "aion",
+      "idea_del_modello": 1,
+      "punti": 2
+    },
+    {
+      "scenario": "DN2",
+      "posto": 1,
+      "idea": 6,
+      "modello": "glm",
+      "idea_del_modello": 3,
+      "punti": 3
+    },
+    {
+      "scenario": "DN3",
+      "posto": 1,
+      "idea": 1,
+      "modello": "sonnet",
+      "idea_del_modello": 3,
+      "punti": 3
+    },
+    {
+      "scenario": "DN3",
+      "posto": 2,
+      "idea": 2,
+      "modello": "opus",
+      "idea_del_modello": 2,
+      "punti": 2
+    },
+    {
+      "scenario": "DN3",
+      "posto": 3,
+      "idea": 6,
+      "modello": "glm",
+      "idea_del_modello": 3,
+      "punti": 1
+    }
+  ],
+  "punti": {
+    "glm": 4,
+    "aion": 2,
+    "opus": 5,
+    "sonnet": 3
+  },
+  "copertura": {
+    "glm": 2,
+    "aion": 1,
+    "opus": 2,
+    "sonnet": 1
+  },
+  "esito": "pareggio (entro 2 punti)"
+}

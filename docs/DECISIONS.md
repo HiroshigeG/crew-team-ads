@@ -728,3 +728,25 @@ cambia nulla nel roster. Dati: `evals/results/darkangel-control*.json`.
 **Dark Angel nel complesso (D30+D31)**: tre prove alla cieca non separano
 chiaramente glm, aion e Sonnet. Il guadagno atteso non viene dal modello ma da
 come si chiede: da provare più proposte brevi scelte dal Director.
+
+## D32 — 2026-11-25 · Dark Angel: menù di tre idee, tutto rigenerato (FATTO)
+
+Protocollo congelato prima (`evals/PROVA-CIECA-darkangel-menu.md`): quattro modelli
+(glm, aion, Opus 5.5, Sonnet 5.5) rigenerati da zero su scenari nuovi (DN1-DN3),
+formato «tre idee brevi», elenco unico mescolato, giudice il Director alla cieca.
+Punti (3/2/1): **Opus 5, glm 4, Sonnet 3, aion 2**: pareggio per la regola
+(distacco 1). Copertura (scenari con un'idea nelle prime tre): glm 2, Opus 2,
+Sonnet 1, aion 1. Voti: DN1 Opus + aion; DN2 glm; DN3 Sonnet + Opus + glm.
+
+**Letture, con le riserve**: (1) nessun modello domina, coerente con la ricerca
+(i modelli stanno vicini). (2) **Il menù funziona**: in ogni scenario il Director ha
+trovato almeno un'idea da tenere, da ognuno dei quattro modelli. (3) **Le scelte
+sono poche** (2, 1 e 3 su 10-12 idee): la maggior parte non raggiunge «provocatoria
+e intelligente», e una idea è stata scartata come «ok ma non provocatoria».
+(4) **Una delle due idee di aion è stata un'infrazione del formato** (4 parole,
+«Seppelliamo la vecchia borraccia.») rimasta nel menù come da protocollo: un
+indizio che la brevità secca possa funzionare meglio di 50 parole, da verificare,
+non una conclusione. Un votante, 3 scenari, 1 generazione per cella.
+
+Dati: `evals/results/darkangel-menu.json` e `darkangel-menu-blind.json`. Il roster
+non è stato toccato.
