@@ -520,3 +520,23 @@ teste) più una chiamata di giudizio: caro per costruzione. Lezione diretta
 del pattern Ralph/loop engineering: un obiettivo senza tetto, o un judge
 rotto, non deve poter far girare la stanza (e la spesa) all'infinito — un
 giro col judge indisponibile conta comunque nel tetto.
+
+## 10. Estensione v1.4 — proposta sul tavolo a goal raggiunto
+
+Una aggiunta, nessun cambiamento a ciò che esisteva.
+
+**Server → browser: `proposal_drafted`** — `{ type, ts, seq, source, headline,
+support, body }`. Emesso **una sola volta**, quando il judge certifica un goal
+(`goal_verdict.met: true`), dopo quel verdetto e prima della chiusura
+`collab_round` con `reason: "met"`. `source` vale `"goal"` (il vocabolario si
+allarga se altre vie producono bozze). Il testo è **estratto** dal transcript
+da una chiamata LLM fuori dalla stanza (`core.draft_proposal`, stesso modello
+del judge): copia le parole già scritte, non migliora e non inventa. **Fail
+closed**: se la stanza non ha convergito su una proposta chiara, o la chiamata
+fallisce, **l'evento non viene emesso** — nessuna bozza è meglio di una bozza
+inventata.
+
+**Come lo usa la UI**: la card «Proposta in lavorazione» si riempie con la
+bozza solo se è vuota, e una sola volta per `seq`: un testo scritto dal
+Director (con «Modifica») non viene mai sovrascritto. `RoomState.proposalDraft`
+tiene l'ultima bozza ricevuta.

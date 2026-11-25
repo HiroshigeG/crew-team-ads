@@ -597,3 +597,46 @@ punteggio), banner e aiuto comandi — verificata dal browser con un
 obiettivo vero. Test: 9 nuovi (`tests/test_core_ext.py`: judge + parser;
 `tests/test_server.py`: trigger, obiettivo raggiunto, tetto senza successo,
 judge indisponibile) — 130 verdi in locale, nessuna regressione.
+
+## D28 — 2026-11-25 · Dopo la prova «da cliente»: guardrail, onestà, lingua, proposta (FATTO)
+
+Una prova completa con un brand fittizio (documenti, immagini, ricerca, goal
+mode, export) ha trovato otto difetti. Cause radice **misurate**, non ipotizzate.
+
+**Executive Producer lento (2-5 min) + token `<|im_end|>` nel testo**: stessa
+causa. Hermes-3-70B su Featherless non si ferma dopo la fine-turno: risponde
+«Azzurro<|im_end|>» e **continua inventando un turno dell'utente**, fino al
+limite del contesto. Non era concorrenza (due 70B in parallelo: 4 s). Fix: ogni
+LLM open (`featherless_ai/`, `openrouter/`, `ollama/`) nasce con stop-token,
+tetto di token (`CREW_MAX_REPLY_TOKENS`, 900) e timeout duro
+(`CREW_OPEN_MODEL_TIMEOUT`, 120 s); `strip_special_tokens` taglia alla prima
+fine-turno. Misura prima/dopo: 4 teste Featherless in parallelo 24,6 s → 5,1 s;
+turno vero del produttore con transcript da 14k caratteri 12,2 s.
+
+**«Instradamento ridotto» (router a ondate in fallback)**: il router è
+`ClaudeLLM("claude-sonnet-5", effort="low")`, NON la testa Producer (la prima
+ipotesi era sbagliata). In 20 prove offline con dati reali: 20 piani validi,
+quindi la causa dal vivo **non è ancora nota**. Fatto solo ciò che serve a
+trovarla: ogni piano scartato logga l'output del modello, e il passaggio dalla
+CLI all'API a pagamento non è più silenzioso. Il contratto del parser NON
+cambia (un array piatto resta non valido, come da test esistente).
+
+**Onestà (il modello non mente mai)**: blocco HONESTY in `ROOM_RULES` per tutte
+le teste (niente «ho visto/cercato/verificato» se non è vero; le immagini si
+conoscono solo dalla descrizione di un collega) + riga CAPABILITIES per testa
+(testo solo vs visione).
+
+**Lingua**: le teste rispondono nella lingua del Director (prima: «Speak in
+English» fisso). Il giudice scrive il motivo nella lingua del goal.
+
+**Interfaccia**: `App` montava layout desktop e mobile insieme, nascondendone
+uno col CSS → ogni componente esisteva due volte (brief doppio, «Approva»
+nascosto cliccabile, brief vuoto nell'export). Ora un layout solo
+(`useMediaQuery`) e stato condiviso di campagna (`state/campaign.tsx`).
+Upload: più file per messaggio (max 8), documenti in un solo messaggio,
+immagini a parte. Titolo della proposta derivato anche dal body.
+
+**Proposta a goal raggiunto**: nuovo evento `proposal_drafted` (vedi
+`docs/EVENT-CONTRACT.md` §10), estratto e mai inventato, fail-closed.
+
+**Test**: pytest 131 → 184, vitest 35 → 56, tutto verde.
