@@ -640,3 +640,41 @@ immagini a parte. Titolo della proposta derivato anche dal body.
 `docs/EVENT-CONTRACT.md` §10), estratto e mai inventato, fail-closed.
 
 **Test**: pytest 131 → 184, vitest 35 → 56, tutto verde.
+
+## D29 — 2026-11-25 · Modelli scelti con misure: produttore e Dark Angel (FATTO)
+
+Metodo: criteri e soglie **scritti e committati prima di misurare**, giudice
+`claude-opus-5-5` da CLI, tetto di spesa imposto dal banco di prova (limite
+superiore dal listino reale, rifiuta di partire se lo supera). Dettaglio in
+`evals/` (criteri, risultati, note).
+
+**Executive Producer → `anthropic/claude-sonnet-5-5` (CLI, nessuna spesa).**
+v1 (persona di una frase): nessuno passa, tutti scelgono l'idea quando il
+Director lo ordina. v2 (persona riscritta, una sola variabile cambiata,
+dichiarato come secondo tentativo): passano Sonnet 5.5 (p95 20,1 s) e Haiku 5.5
+(25,4 s); Hermes-3 e Qwen2.5-72B no. La persona ha pesato più del modello.
+
+**Dark Angel → `venice/glm-5-3-flash-uncensored`, creatività 7 (0,87).**
+v1: nessuno passa; `abliteration-large-v2` ha ricevuto 12 HTTP 400 (nostra
+temperatura 1,09 > 1, corretto con un massimo per provider) e il testo degli
+altri era rovinato. v2 (temperatura 0,9, una variabile): una pausa di ~33 min
+della macchina ha viziato una chiamata per candidato; rifatti solo i due che
+fallivano solo per quello, dichiarato prima. Esito: `aion-3-5-mini` passa tutte
+le soglie (D10 6,8, p95 54,9 s) ma Venice non lo dichiara abliterated e la
+privacy è «anonymized»; `glm-5-3-flash-uncensored` (abliterated, privacy
+«private», p95 7,8 s) sbaglia D7 di uno (8/10; 10/10 nella prima corsa).
+**Scelta del Director: glm**, quindi adottato **sapendo che non supera
+formalmente il v2**. `abliteration-large-v2` resta non valutato: ragiona sempre
+e col tetto di 900 token restituisce testo vuoto; servirebbe un tetto per modello
+e costerebbe di più.
+
+**Riserve**: 12 chiamate per candidato e 2 ripetizioni sono poche (D7 di glm è
+passato da 10/10 a 8/10 fra due corse: il risultato è rumoroso); giudice della
+stessa famiglia dei candidati Claude; un solo brand fittizio, in italiano; la
+spesa reale non è misurata (c'è solo il limite superiore, 0,296 $ + 0,296 $ +
+0,076 $ su 1 $).
+
+**Conseguenze di prodotto**: massimo di temperatura per provider
+(`Provider.max_temperature`); proposte Venice nell'editor ridotte ai modelli
+misurati; l'auto-cast preferisce questi due modelli; `VENICE_API_KEY` ora è
+richiesta da chi usa il roster ADV così com'è.

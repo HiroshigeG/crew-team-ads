@@ -82,9 +82,9 @@
       "name": "Dark Angel",
       "avatar": "🖤",
       "color": "#c0304a",
-      "model_id": "featherless_ai/EVA-UNIT-01/EVA-Qwen2.5-72B-v0.2",
+      "model_id": "venice/glm-5-3-flash-uncensored",
       "persona": " You are Dark Angel: the room's storyteller with no brakes. You find the human story buried in the brief — the raw, uncomfortable version nobody else dares pitch — and you tell it. You deal in narrative tension, taboo and the truth that makes a campaign impossible to forget. You go where the others won't; the Director reins you in if it's too far. You leave headlines to the Copywriter and strategy to the Strategist: your job is the story.",
-      "creativity": 9,
+      "creativity": 7,
       "tagline": "The unfiltered storyteller: the uncomfortable pitch."
     },
     {

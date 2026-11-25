@@ -774,11 +774,11 @@ def test_status_lists_providers_and_asks_only_for_the_keys_the_roster_uses(monke
     ids = {p["id"] for p in body["providers"]}
     assert {"anthropic", "gemini", "xai", "featherless_ai", "openrouter",
             "venice", "ollama"} <= ids
-    # il roster ADV usa Gemini, Grok e Featherless; Claude passa dalla CLI,
-    # Venice non è usata da nessuna testa: nessuna delle due viene chiesta
+    # il roster ADV usa Gemini, Grok, Featherless e (Dark Angel) Venice; Claude
+    # passa dalla CLI e non chiede la chiave. Venice c'è, quindi non manca.
     assert body["missing_keys"] == ["FEATHERLESS_AI_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY"]
     venice = next(p for p in body["providers"] if p["id"] == "venice")
-    assert venice["configured"] is True and venice["needed"] is False
+    assert venice["configured"] is True and venice["needed"] is True
     assert any(m.startswith("venice/") for m in body["models"])
     assert "valore-segreto-venice-999" not in r.text      # i valori non escono mai
 
@@ -823,3 +823,13 @@ def test_autocast_endpoint_reports_when_nothing_is_available(monkeypatch):
     with TestClient(app) as client:
         body = client.get("/api/autocast").json()
     assert body["available"] == [] and body["assignments"] == {}
+
+
+def test_status_asks_for_the_venice_key_when_dark_angel_needs_it_and_it_is_missing(monkeypatch):
+    import providers as pv
+    for k in pv.key_names():
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr(core, "CLAUDE_CLI", "claude")
+    with TestClient(app) as client:
+        body = client.get("/api/status").json()
+    assert "VENICE_API_KEY" in body["missing_keys"]

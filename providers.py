@@ -32,9 +32,8 @@ class Provider:
     max_temperature: float | None = None
 
 
-# I modelli suggeriti per Venice vengono dal catalogo letto il 25/11/2026 da
-# una ricerca: gli id vanno ricontrollati con GET /api/v1/models prima di
-# affidarcisi. Servono solo da proposta: l'editor accetta qualunque id digitato.
+# I modelli suggeriti per Venice sono quelli MISURATI (vedi sotto). L'editor
+# accetta comunque qualunque id digitato.
 PROVIDERS: dict[str, Provider] = {p.id: p for p in (
     Provider("anthropic", "Anthropic (Claude) — CLI in abbonamento o API",
              "ANTHROPIC_API_KEY", kind="cli+api"),
@@ -48,10 +47,12 @@ PROVIDERS: dict[str, Provider] = {p.id: p for p in (
     Provider("venice", "Venice — modelli uncensored/abliterated (crediti USD)",
              "VENICE_API_KEY", openai_base="https://api.venice.ai/api/v1",
              base_env="VENICE_API_BASE", open_model=True, max_temperature=1.0,
+             # Solo i modelli che hanno retto il bake-off (evals/results/darkangel*.json):
+             # abliteration-large-v2 ragiona sempre e col tetto di produzione restituisce
+             # testo vuoto; venice-uncensored-1-2 ha italiano debole e finge di vedere
+             # immagini. Si possono comunque digitare a mano.
              suggested=(
-                 "venice/abliteration-abliterated-model-large-v2",
                  "venice/glm-5-3-flash-uncensored",
-                 "venice/venice-uncensored-1-2",
                  "venice/aion-labs-aion-3-5-mini",
              )),
     Provider("ollama", "Ollama — modelli locali", None, kind="local",
@@ -148,7 +149,8 @@ ROLE_PREFERENCES: dict[str, tuple[str, ...]] = {
     # Bake-off v2 (evals/results/producer-v2.json): Sonnet 5.5 e Haiku 5.5 passano
     # tutte le soglie; Hermes-3 e Qwen2.5-72B no (lingua, lunghezza, latenza).
     "producer": ("anthropic/claude-sonnet-5-5", "anthropic/claude-haiku-5-5"),
-    "dark_angel": ("venice/abliteration-abliterated-model-large-v2",
+    # Bake-off Dark Angel v2: glm-5-3-flash-uncensored (abliterated, p95 8 s).
+    "dark_angel": ("venice/glm-5-3-flash-uncensored",
                    "featherless_ai/EVA-UNIT-01/EVA-Qwen2.5-72B-v0.2",
                    "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition"),
     "copywriter_2": ("anthropic/claude-opus-4-8",),
