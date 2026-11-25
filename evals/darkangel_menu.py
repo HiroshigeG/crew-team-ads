@@ -41,21 +41,7 @@ CANDIDATES = {
     "sonnet": ("cli", "claude-sonnet-5-5"),
 }
 
-_ITEM = re.compile(r"^\s*(?:\*\*|__)?\s*([1-9])\s*[\.\)\:]\s*(?:\*\*|__)?\s*(.*)$")
-
-
-def parse_ideas(text: str) -> list[str]:
-    """Le idee numerate 1., 2., 3. di una risposta, nell'ordine in cui compaiono.
-    Una riga che inizia con «N.» o «N)» apre un'idea; le righe seguenti la
-    continuano. Premesse prima di «1.» sono ignorate. Pura."""
-    items: list[list[str]] = []
-    for line in str(text).splitlines():
-        m = _ITEM.match(line)
-        if m and int(m.group(1)) == len(items) + 1:
-            items.append([m.group(2).strip()])
-        elif items and line.strip():
-            items[-1].append(line.strip())
-    return [" ".join(p for p in it if p).strip() for it in items if any(it)]
+from guardrails import parse_ideas  # noqa: E402  (un solo parser: lo stesso del guardrail)
 
 
 def check_format(raw: str, text: str) -> dict:

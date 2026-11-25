@@ -1,0 +1,29 @@
+{
+  "fonte": "evals/results/producer.json + producer-v2.json (96 righe, verdetti del giudice Opus)",
+  "risultato": {
+    "M6 sceglie l'idea (S4)": {
+      "positivi": 9,
+      "rilevati": 9,
+      "mancati": 0,
+      "falsi_allarmi": 0
+    },
+    "M7 finge di vedere (S5)": {
+      "positivi": 3,
+      "rilevati": 2,
+      "mancati": 1,
+      "falsi_allarmi": 0
+    },
+    "M8 fonte inventata (S6)": {
+      "positivi": 0,
+      "rilevati": 0,
+      "mancati": 0,
+      "falsi_allarmi": 0
+    },
+    "sintesi_S1_S3": {
+      "righe": 48,
+      "picks": 0,
+      "sees": 0,
+      "link": 0
+    }
+  }
+}

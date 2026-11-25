@@ -35,6 +35,7 @@ import logging
 log = logging.getLogger("crew_cast")
 
 import providers as pv
+import guardrails as gr
 
 REQUIRED_KEYS = ("ANTHROPIC_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY")
 
@@ -348,6 +349,50 @@ def finish_reply(raw) -> str:
     """Il punto unico dove la risposta grezza di un modello diventa testo di
     stanza: tokens trapelati fuori, spazi tagliati."""
     return strip_special_tokens(str(raw)).strip()
+
+
+def guardrails_enabled() -> bool:
+    return os.getenv("CREW_GUARDRAILS", "1").strip().lower() not in ("0", "false", "no", "off")
+
+
+def _guardrail_retries() -> int:
+    try:
+        return max(0, int(os.getenv("CREW_GUARDRAIL_RETRIES", "2")))
+    except ValueError:
+        return 2
+
+
+def guarded_reply(llm, head, prompt: str, context: str = "") -> str:
+    """Chiama il modello, ripulisce, e IMPONE le regole di ruolo (guardrails.py):
+    se la risposta le viola, la rigenera dicendo al modello perché (fino a
+    `CREW_GUARDRAIL_RETRIES`, default 2). Esaurite le ripetizioni: per bugie e
+    violazioni del ruolo (sceglie l'idea, finge di vedere, link inventato) si
+    consegna una frase veritiera invece della risposta sbagliata; per difetti di
+    stile (lingua, lunghezza, formato) si consegna l'ultima risposta con un
+    warning. Ogni rifiuto lascia una riga nel log. `CREW_GUARDRAILS=0` li spegne."""
+    text = finish_reply(llm.call(prompt))
+    if not guardrails_enabled():
+        return text
+    vision, retries, attempt = vision_capable(head.model_id), _guardrail_retries(), 0
+    while True:
+        res = gr.check_reply(head.key, text, context=context, vision=vision)
+        if res.ok:
+            return text
+        log.warning("guardrail %s (testa %s, tentativo %d/%d): %s",
+                    res.code, head.key, attempt, retries, res.feedback[:90])
+        if attempt >= retries:
+            fb = (gr.fallback_for(res.code, gr.director_is_italian(context))
+                  if res.code in gr.FALLBACK_CODES else None)
+            if fb:
+                log.warning("guardrail %s: ripetizioni esaurite, consegno la risposta veritiera di ripiego", res.code)
+                return fb
+            log.warning("guardrail %s: ripetizioni esaurite, consegno l'ultima risposta", res.code)
+            return text
+        attempt += 1
+        text = finish_reply(llm.call(
+            f"{prompt}\n\nYOUR PREVIOUS REPLY WAS REJECTED: {res.feedback}\n"
+            f"PREVIOUS REPLY (do not repeat its mistake):\n{text}\n"
+            "Write the reply again, fixing only that."))
 
 
 def capabilities_note(head) -> str:
@@ -932,7 +977,7 @@ def head_speak(roster: Roster, key: str, context: str, instruction: str,
                private: bool = False) -> str:
     head = roster.heads[key]
     prompt = build_turn_prompt(head, context, instruction, private)
-    return finish_reply(roster.llm(key).call(prompt))
+    return guarded_reply(roster.llm(key), head, prompt, context)
 
 
 # Visione (D15): in v1.1 SOLO le teste Gemini leggono immagini — la
@@ -978,7 +1023,7 @@ def head_speak_after_search(roster: Roster, key: str, context: str, why: str,
     head = roster.heads[key]
     prompt = build_after_search_prompt(head, context, why, query, results,
                                        private)
-    return finish_reply(roster.llm(key).call(prompt))
+    return guarded_reply(roster.llm(key), head, prompt, context)
 
 
 class RoomSession:
