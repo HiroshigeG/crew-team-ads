@@ -651,6 +651,13 @@ class Room:
                             met=verdict["met"], reason=verdict["reason"])
             if verdict["met"]:
                 reason = "met"
+                # La stanza ha convinto il giudice: la proposta vincente va
+                # sul tavolo (prima restava solo nel transcript). Estratta,
+                # non inventata; senza bozza non si emette niente.
+                draft = await asyncio.to_thread(
+                    core.draft_proposal, goal, self.session.room_context())
+                if draft:
+                    await self.emit("proposal_drafted", source="goal", **draft)
                 break
         await self.emit("collab_round", round=0, total=0, mode="goal",
                         reason=reason)

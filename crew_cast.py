@@ -171,6 +171,10 @@ class ClaudeLLM:
                 # resta leggibile invece di sparire in un `pass`.
                 cli_error = e
                 self.last_cli_error = f"{type(e).__name__}: {str(e)[:200]}"
+                # Il passaggio all'API è l'unico punto in cui una chiamata
+                # Claude può costare soldi: non deve mai essere invisibile.
+                log.warning("Claude CLI fallita (%s): passo all'API a consumo "
+                            "per il modello %s", self.last_cli_error, self.model)
         try:
             out = str(self._api.call(prompt))
         except Exception as api_error:
@@ -267,9 +271,11 @@ llm_grok = LLM(model="xai/grok-4.5", temperature=0.75,
 ROOM_RULES = (
     "You are in a live writers' room brainstorming the executive idea for a "
     "brand's hero film (the current brief is in the room memory). The human "
-    "DIRECTOR leads the room; you work for them. Speak in English, in first "
-    "person, like a sharp colleague at the table: concrete, vivid, 80-180 "
-    "words unless asked otherwise. Build on what was said before. Keep the "
+    "DIRECTOR leads the room; you work for them. Reply in the language the "
+    "Director writes in (if the brief and the Director's messages are in "
+    "Italian, you answer in Italian; brand and product names stay as they are), "
+    "in first person, like a sharp colleague at the table: concrete, vivid, "
+    "80-180 words unless asked otherwise. Build on what was said before. Keep the "
     "brand's hero product the hero. Never invent statistics, campaign names, "
     "dates or numbers you cannot verify. If the Director tells you to consult "
     "a colleague, address them directly with a crisp question."
@@ -282,7 +288,68 @@ ROOM_RULES = (
     "SEARCH_REQUEST: <search query> || <why you need it, one line>\n"
     "The Director approves or denies. Ask only when it matters — at most ONE "
     "request per turn, and never for something you already know."
+    "\n\nHONESTY — never lie to the Director or to the room. Do not claim to "
+    "have seen, read, watched, searched, measured, tested or verified anything "
+    "you did not actually do in this room. What you know is what is written in "
+    "the transcript plus your own general knowledge; label the rest as a guess "
+    "or say you don't know. You cannot see images: you know an image only "
+    "through the description a colleague wrote in the transcript — say "
+    "'according to <name>'s description', never 'looking at the ad'. Never "
+    "invent sources, quotes, figures, past campaigns, or what a colleague said."
 )
+
+
+# Token del template di chat che alcuni modelli open lasciano trapelare in
+# fondo (o all'inizio) alla risposta: `<|im_end|>`, `<|eot_id|>`, `</s>`…
+# Regressione del 25/11/2026 (Hermes-3 su Featherless). Si tolgono SOLO questi:
+# un `<b>`, un `|` o un `||` di SEARCH_REQUEST non sono template e restano.
+_HEADER_RE = re.compile(r"<\|start_header_id\|>.*?<\|end_header_id\|>\s*", re.DOTALL)
+_IM_START_RE = re.compile(r"<\|im_start\|>\s*(?:system|user|assistant)?[ \t]*\n?")
+_SPECIAL_TOKEN_RE = re.compile(
+    r"<\|(?:im_end|im_start|endoftext|end_of_text|begin_of_text|eot_id|eom_id|"
+    r"start_header_id|end_header_id|pad|eos|bos)\|>")
+_TRAILING_EOS_RE = re.compile(r"\s*</s>\s*$")
+_LEADING_BOS_RE = re.compile(r"^\s*<s>\s*")
+
+
+# Fine-turno: ciò che segue è allucinazione. Misurato il 25/11: Hermes-3 dopo
+# `<|im_end|>` inventa un intero turno dell'utente («<|im_start|>user\nQuanto…»).
+_END_OF_TURN_RE = re.compile(
+    r"<\|(?:im_end|endoftext|end_of_text|eot_id|eom_id)\|>")
+
+
+def strip_special_tokens(text: str) -> str:
+    """Taglia alla prima fine-turno (se prima c'è del testo) e toglie i token
+    di template trapelati. Puro, idempotente."""
+    out = str(text)
+    m = _END_OF_TURN_RE.search(out)
+    if m and out[:m.start()].strip():
+        out = out[:m.start()]
+    out = _HEADER_RE.sub("", out)
+    out = _IM_START_RE.sub("", out)
+    out = _SPECIAL_TOKEN_RE.sub("", out)
+    out = _TRAILING_EOS_RE.sub("", out)
+    out = _LEADING_BOS_RE.sub("", out)
+    return out
+
+
+def finish_reply(raw) -> str:
+    """Il punto unico dove la risposta grezza di un modello diventa testo di
+    stanza: tokens trapelati fuori, spazi tagliati."""
+    return strip_special_tokens(str(raw)).strip()
+
+
+def capabilities_note(head) -> str:
+    """Cosa questa testa può davvero fare: serve a non farle dichiarare ciò che
+    non può (es. «guardando l'inserzione» quando il modello è solo testo)."""
+    if vision_capable(head.model_id):
+        return ("CAPABILITIES: text, plus you can see images attached directly "
+                "to your turn. You still cannot browse the web except through "
+                "the SEARCH_REQUEST procedure.")
+    return ("CAPABILITIES: text only — you cannot see any image. You know an "
+            "image only through the description another head wrote in the "
+            "transcript: say 'according to <name>'s description'. Never write "
+            "as if you were looking at it.")
 
 # The persona personas: ROOM_RULES + ROLE_PERSONAS[key] = CAST[key]["persona"]
 ROLE_PERSONAS = {
@@ -452,7 +519,7 @@ def speak(key: str, transcript: str, instruction: str) -> str:
         f"The floor is yours now. Your brief for this turn: {instruction}\n"
         f"Speak as {c['name']}:"
     )
-    return str(c["llm"].call(prompt)).strip()
+    return finish_reply(c["llm"].call(prompt))
 
 
 def parse_search_request(reply: str):
@@ -494,7 +561,7 @@ def speak_after_search(key: str, transcript: str, why: str,
         f"Now give your turn in full, as {c['name']} "
         f"(no SEARCH_REQUEST line this time):"
     )
-    return str(c["llm"].call(prompt)).strip()
+    return finish_reply(c["llm"].call(prompt))
 
 
 def build_brief(brand: str, theme: str, mandate: str, medium: str) -> str:
@@ -631,6 +698,16 @@ _DEFAULT_HEAD_META = {
 # FEATHERLESS_AI_API_KEY) e Ollama locale (`ollama/`). Il percorso generico
 # di make_llm li serve già: qui si decide solo COSA è ammesso nel roster.
 OPEN_MODEL_PREFIXES = ("featherless_ai/", "openrouter/", "ollama/")
+OPEN_MODEL_STOP = ("<|im_end|>", "<|im_start|>", "<|eot_id|>", "<|endoftext|>")
+
+
+def _env_int(name: str, default: int) -> int:
+    """Intero da variabile d'ambiente; vuoto o spazzatura -> il default."""
+    try:
+        v = int(os.getenv(name, "").strip())
+        return v if v > 0 else default
+    except ValueError:
+        return default
 
 
 def model_allowed(model_id: str) -> bool:
@@ -644,6 +721,14 @@ def make_llm(head: Head):
         return ClaudeLLM(head.model_id.split("/", 1)[1], effort=head.effort)
     kwargs = {"model": head.model_id,
               "temperature": temp_for_level(head.creativity)}
+    if head.model_id.startswith(OPEN_MODEL_PREFIXES):
+        # Guardrail dei modelli open (misura 25/11/2026): senza stop-token e
+        # senza tetto un Hermes-3 inventa turni dell'utente e genera fino al
+        # limite del contesto (minuti). Stop = fine-turno dei template ChatML e
+        # Llama; tetto sulle risposte (80-180 parole ≈ 300 token); timeout duro.
+        kwargs["stop"] = list(OPEN_MODEL_STOP)
+        kwargs["max_tokens"] = _env_int("CREW_MAX_REPLY_TOKENS", 900)
+        kwargs["timeout"] = _env_int("CREW_OPEN_MODEL_TIMEOUT", 120)
     if head.model_id.startswith("xai/"):
         kwargs["additional_drop_params"] = ["stop"]   # T5
         # D23-bis (05/08): xAI ha dismesso la Live Search delle chat
@@ -776,6 +861,7 @@ def build_turn_prompt(head: Head, context: str, instruction: str,
     # significava doppio effetto non dichiarato (D6).
     if block and head.model_id.startswith("anthropic/"):
         parts.append(block)
+    parts.append(capabilities_note(head))
     if private:
         parts.append(PRIVATE_PREAMBLE)
     parts.append(f"ROOM TRANSCRIPT (latest last):\n{context[-_context_chars():]}")
@@ -798,7 +884,7 @@ def build_after_search_prompt(head: Head, context: str, why: str,
                    f"Use these results now. Cite only what the results "
                    f"actually say; if they don't answer the question, say so "
                    f"plainly.")
-    parts = [ROOM_RULES + head.persona]
+    parts = [ROOM_RULES + head.persona, capabilities_note(head)]
     if private:
         parts.append(PRIVATE_PREAMBLE)
     parts.append(f"ROOM TRANSCRIPT (latest last):\n{context[-_context_chars():]}")
@@ -812,7 +898,7 @@ def head_speak(roster: Roster, key: str, context: str, instruction: str,
                private: bool = False) -> str:
     head = roster.heads[key]
     prompt = build_turn_prompt(head, context, instruction, private)
-    return str(roster.llm(key).call(prompt)).strip()
+    return finish_reply(roster.llm(key).call(prompt))
 
 
 # Visione (D15): in v1.1 SOLO le teste Gemini leggono immagini — la
@@ -839,7 +925,7 @@ def head_study_image(roster: Roster, key: str, context: str, instruction: str,
     resp = litellm.completion(model=head.model_id,
                              temperature=temp_for_level(head.creativity),
                              messages=messages)
-    return str(resp.choices[0].message.content).strip()
+    return finish_reply(resp.choices[0].message.content)
 
 
 def vision_head(roster: Roster) -> "str | None":
@@ -857,7 +943,7 @@ def head_speak_after_search(roster: Roster, key: str, context: str, why: str,
     head = roster.heads[key]
     prompt = build_after_search_prompt(head, context, why, query, results,
                                        private)
-    return str(roster.llm(key).call(prompt)).strip()
+    return finish_reply(roster.llm(key).call(prompt))
 
 
 class RoomSession:
@@ -942,15 +1028,34 @@ DIRECTOR'S MESSAGE: {msg}
 JSON:"""
 
 
+def _first_json_value(raw: str):
+    """Il primo valore JSON (lista o oggetto) che si legge in `raw`, ignorando
+    prosa, code fence e parentesi quadre di commento prima o dopo. Il vecchio
+    regex goloso `\\[\\s*\\[.*\\]\\s*\\]` si rompeva appena il modello aggiungeva
+    una nota con una `]` dopo il piano."""
+    dec = json.JSONDecoder()
+    for i, ch in enumerate(raw):
+        if ch not in "[{":
+            continue
+        try:
+            value, _ = dec.raw_decode(raw[i:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(value, (list, dict)) and value:
+            return value
+    return None
+
+
 def parse_wave_plan(raw: str, valid_keys) -> list:
     """Estrae e valida le ondate dall'output del router. Puro e paranoico:
-    qualunque cosa non torni -> [] (il chiamante ha il fallback)."""
-    m = re.search(r"\[\s*\[.*\]\s*\]", str(raw), re.DOTALL)
-    if not m:
-        return []
-    try:
-        data = json.loads(m.group(0))
-    except json.JSONDecodeError:
+    qualunque cosa non torni -> [] (il chiamante ha il fallback).
+
+    Il contratto non cambia: serve una LISTA DI ONDATE (lista di liste). Un
+    array piatto di passi resta non valido (test_parse_wave_plan_garbage…):
+    allargarlo senza una causa misurata sarebbe una congettura. Cambia solo
+    il modo di leggere: prosa o parentesi prima e dopo il JSON non lo rompono."""
+    data = _first_json_value(str(raw))
+    if not isinstance(data, list) or not all(isinstance(w, list) for w in data):
         return []
     waves, total = [], 0
     for wave in data:
@@ -993,6 +1098,10 @@ def route_plan(roster: Roster, transcript: str, msg: str) -> list:
         if waves:
             _plan_route_log.append("waves")
             return waves
+        # Fino al 25/11 questo scarto era muto: nessuno sapeva cosa avesse
+        # risposto il modello. Ora l'output (accorciato) resta nel log.
+        log.warning("router a ondate: piano non valido; output del modello: %r",
+                    str(raw)[:400])
     except Exception as e:
         log.warning("router a ondate fallito (%s): fallback sequenziale", e)
     # Fallback: il router v1 (o keyword/producer) in ondate da un passo l'una.
@@ -1026,6 +1135,7 @@ score at 4 regardless of how good the rest is.
 
 Output ONLY a JSON object, no prose, no markdown fence:
 {{"score": <integer 0-10>, "met": <true or false>, "reason": "<one line: what's missing, or why it passes>"}}
+Write the reason in the language of the goal.
 """
 
 
@@ -1061,6 +1171,57 @@ def judge_goal(goal: str, transcript: str):
         log.warning("judge_goal fallito (%s)", e)
         return None
     return parse_goal_verdict(raw)
+
+
+# ── proposta sul tavolo a goal raggiunto ────────────────────────────────────
+# Prima (25/11/2026): il goal chiudeva con «Obiettivo raggiunto» ma la card
+# «Proposta in lavorazione» restava vuota. Lo stesso modello-giudice (fuori
+# dalla stanza) ESTRAE ciò che la stanza ha già scritto — non migliora, non
+# inventa. Fail-closed: nessuna bozza è meglio di una bozza inventata.
+PROPOSAL_PROMPT = """You extract the proposal a creative room has converged on.
+You do not participate in the room and you add nothing of your own.
+
+GOAL (set by the Director): {goal}
+
+TRANSCRIPT:
+{transcript}
+
+Take only what the room has already written: copy the wording of the winning
+claim from the transcript. Do not improve, rewrite or invent anything. If the
+room has not converged on one concrete proposal, return empty strings.
+
+Output ONLY a JSON object, no prose, no markdown fence:
+{{"headline": "<the headline or claim, verbatim>", "support": "<the supporting line, verbatim, or empty>", "body": "<1-3 sentences on the idea and execution, as the room described it>"}}
+Write in the language of the goal.
+"""
+
+_PROPOSAL_CAPS = {"headline": 160, "support": 240, "body": 1500}
+
+
+def parse_proposal_draft(raw: str):
+    """{headline, support, body} dall'output dell'estrattore, o None. Paranoico
+    come parse_goal_verdict: valori non-stringa -> vuoti; tutto vuoto -> None."""
+    data = _first_json_value(str(raw))
+    if not isinstance(data, dict):
+        return None
+    out = {}
+    for field, cap in _PROPOSAL_CAPS.items():
+        v = data.get(field, "")
+        out[field] = v.strip()[:cap] if isinstance(v, str) else ""
+    return out if any(out.values()) else None
+
+
+def draft_proposal(goal: str, transcript: str):
+    """La bozza di proposta per un goal raggiunto. None = nessuna (chiamata
+    fallita, output illeggibile o stanza non convergente): il chiamante non
+    inventa niente al suo posto."""
+    try:
+        raw = llm_claude_judge.call(PROPOSAL_PROMPT.format(
+            goal=goal, transcript=transcript[-ROUTER_CONTEXT_CHARS:]))
+    except Exception as e:
+        log.warning("draft_proposal fallito (%s)", e)
+        return None
+    return parse_proposal_draft(raw)
 
 
 # ── collab mode (R6): trigger in linguaggio naturale ───────────────────────

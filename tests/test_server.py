@@ -328,6 +328,64 @@ def test_goal_run_stops_when_judge_says_met(tmp_path, monkeypatch):
         assert close is not None and close["reason"] == "met"
 
 
+def test_goal_met_puts_a_drafted_proposal_on_the_table(tmp_path, monkeypatch):
+    monkeypatch.setenv("CREW_TRANSCRIPTS_DIR", str(tmp_path))
+    monkeypatch.setattr(core, "route_plan", lambda r, t, m: [[
+        {"speaker": "producer", "instruction": m, "to": "director"}]])
+    monkeypatch.setattr(core, "last_plan_route", lambda: "waves")
+    monkeypatch.setattr(
+        core, "head_speak",
+        lambda roster, key, ctx, instr, private=False: "claim: Non perde.")
+    monkeypatch.setattr(core, "judge_goal", lambda goal, transcript:
+                        {"score": 9, "met": True, "reason": "ok"})
+    asked = {}
+
+    def fake_draft(goal, transcript):
+        asked["goal"] = goal
+        return {"headline": "Non ti incita. Non perde.", "support": "S", "body": "B"}
+
+    monkeypatch.setattr(core, "draft_proposal", fake_draft)
+    with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "director_message", "text": "/goal un claim per Rivo"})
+        events = []
+        for _ in range(120):
+            e = ws.receive_json()
+            events.append(e)
+            if e["type"] == "collab_round" and e["round"] == 0:
+                break
+        types = [e["type"] for e in events]
+        assert "proposal_drafted" in types
+        draft = next(e for e in events if e["type"] == "proposal_drafted")
+        assert draft["headline"] == "Non ti incita. Non perde."
+        assert draft["support"] == "S" and draft["body"] == "B"
+        assert draft["source"] == "goal"
+        # arriva DOPO il verdetto che ha chiuso il goal, PRIMA della chiusura
+        assert types.index("goal_verdict") < types.index("proposal_drafted")
+        assert asked["goal"] == "un claim per Rivo"
+
+
+def test_goal_met_with_no_draft_emits_no_proposal(tmp_path, monkeypatch):
+    monkeypatch.setenv("CREW_TRANSCRIPTS_DIR", str(tmp_path))
+    monkeypatch.setattr(core, "route_plan", lambda r, t, m: [[
+        {"speaker": "producer", "instruction": m, "to": "director"}]])
+    monkeypatch.setattr(core, "last_plan_route", lambda: "waves")
+    monkeypatch.setattr(
+        core, "head_speak",
+        lambda roster, key, ctx, instr, private=False: "x")
+    monkeypatch.setattr(core, "judge_goal", lambda goal, transcript:
+                        {"score": 9, "met": True, "reason": "ok"})
+    monkeypatch.setattr(core, "draft_proposal", lambda goal, transcript: None)
+    with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "director_message", "text": "/goal qualcosa"})
+        events = []
+        for _ in range(120):
+            e = ws.receive_json()
+            events.append(e)
+            if e["type"] == "collab_round" and e["round"] == 0:
+                break
+        assert all(e["type"] != "proposal_drafted" for e in events)
+
+
 def test_goal_run_stops_at_cap_when_never_met(tmp_path, monkeypatch):
     from server.main import Room
     monkeypatch.setattr(Room, "WEB_GOAL_CAP", 2)   # tetto piccolo per un test veloce
