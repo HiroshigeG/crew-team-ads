@@ -766,3 +766,37 @@ regge **2 volte su 3** (una idea di 85 parole). Restano piccole stonature
 d'italiano di glm (es. «si ammacciava»). Il formato non è stato confrontato con la
 risposta lunga di prima: l'evidenza è che dal menù il Director ha trovato almeno
 un'idea da tenere per scenario, non che il menù batta il testo lungo.
+
+## D34 — 2026-11-25 · Guardrail a runtime (CrewAI fase 2): fatto, soglia NON raggiunta (FATTO)
+
+**Cosa**: `guardrails.py` + `crew_cast.guarded_reply`. Ciò che i bake-off misuravano ora
+si impone: il produttore non sceglie/raccomanda l'idea, nessuna testa solo-testo
+finge di vedere un'immagine, niente link inventati, Dark Angel dà tre idee brevi,
+risposta nella lingua del Director, lunghezza del produttore. Una risposta che viola
+una regola viene **rifiutata con il motivo e rigenerata** (default 2 ripetizioni,
+`CREW_GUARDRAIL_RETRIES`); per bugie e violazioni del ruolo, a ripetizioni esaurite
+si consegna una frase veritiera di ripiego, per i difetti di stile l'ultima risposta
+con un warning. Si spegne con `CREW_GUARDRAILS=0`. Le **stesse funzioni girano dentro
+un `Task` di CrewAI vero** (`Task.guardrail`, test con un LLM finto): è il primo uso
+reale di `Task`/`Agent`, senza cambiare le firme del motore.
+
+**Misura in campione** (96 risposte dei bake-off del produttore, verdetti del giudice;
+espressioni corrette guardando quegli stessi dati, quindi **non provano la
+generalizzazione**): sceglie l'idea 9/9, finge di vedere 2/3, 0 falsi allarmi su 48
+sintesi. La prima versione dava 4 falsi allarmi sulle risposte oneste «Non vedo
+l'inserzione» (negazione ignorata): corretti.
+
+**Prova su risposte NUOVE** (`evals/PROVA-guardrail-live.md`, protocollo congelato prima,
+persona debole del v1, 24 prove, solo CLI e Featherless): sceglie l'idea **9/12 → 2/12**
+consegnate; finge di vedere **2/12 → 1/12**; ripiego usato **0** volte. **La soglia
+(0/12 su entrambe) non è raggiunta: il guardrail NON si dichiara «a posto».** Sono
+sfuggite a mano: Qwen che scrive «credo che la direzione migliore sia…» (espressione
+aggiunta dopo: ora in campione anche quella) e Hermes che descrive l'inserzione senza
+verbi di vista (non coperto). Costo: 1,71 chiamate per prova in media, latenza media
+~54 s su modelli lenti; una chiamata Hermes è fallita con un errore di Featherless.
+
+**Letture**: (1) il guardrail riduce molto il difetto ma le espressioni regolari hanno un
+tetto; (2) con la persona v2 in produzione i modelli Claude non sceglievano già più:
+l'effetto reale dei guardrail lì non è misurato; (3) prossimo passo sensato: un
+controllo con un modello (CrewAI `LLMGuardrail`) solo per il produttore, una chiamata
+in più su CLI gratuita.

@@ -277,3 +277,17 @@ def test_a_stated_sight_still_trips_after_the_negation_fix():
     r = check("account_director", "Nell'inserzione che hai appena caricato, si vede una borraccia Rivo posata su un marciapiede bagnato.")
     assert r.code == "sees_image"
     assert check("account_director", "Looking at the ad you uploaded, I can see a green bottle on a wet pavement at dawn.").code == "sees_image"
+
+
+@pytest.mark.parametrize("reply", [
+    "Dopo aver analizzato le vostre indicazioni e le guidelines, credo che la direzione migliore sia «The Only Witness» con le correzioni.",
+    "Ritengo che la versione corretta di The Only Witness sia la più forte tra quelle emerse oggi in stanza e vada portata avanti.",
+])
+def test_belief_phrased_recommendations_are_rejected(reply):
+    assert check("producer", reply).code == "picks"
+
+
+def test_a_neutral_belief_about_something_else_is_not_flagged():
+    ok = ("Credo che manchi ancora il dato sul budget, e che il Director debba decidere quale rischio prendersi sul tono, "
+          "perché al momento le due direzioni hanno costi e criteri molto diversi tra loro e nessuno li ha messi in fila." + PAD)
+    assert check("producer", ok).ok

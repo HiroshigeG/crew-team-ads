@@ -41,3 +41,10 @@ la stanza.
   Director il comando della stanza, che è la promessa del prodotto.
 - Non si riscrive la UI né il contratto degli eventi.
 - Niente fase senza una prova di «fatto» scritta qui prima di iniziare.
+
+## Stato (25/11/2026)
+- **Fase 2 (guardrail a runtime): fatta, soglia non raggiunta.** `guardrails.py` e
+  `crew_cast.guarded_reply`, compatibili con `Task.guardrail` (test con un `Task` vero).
+  Sulle risposte nuove la scelta dell'idea scende da 9/12 a 2/12 e «finge di vedere» da
+  2/12 a 1/12; la prova di «fatto» (0/12) **non** è raggiunta. Dettaglio e riserve in D34.
+- Fasi 3-8: non iniziate.

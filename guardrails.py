@@ -110,6 +110,8 @@ _PICK = re.compile(r"""(?ix)
       la\s+mia\s+(?:raccomandazione|scelta|preferenza)\s+è |
       (?:sembra|appare)\s+(?:essere\s+)?la\s+direzione\s+più\s+(?:forte|giusta|efficace|originale) |
       (?:è|e')\s+la\s+scelta\s+che\s+meglio |
+      (?:credo|penso|ritengo)\s+che\b[^.\n]{0,70}\b(?:migliore|giusta|più\s+forte)\b |
+      (?:la|il|l')\s+(?:direzione|scelta|idea|versione|strada)\s+(?:migliore|giusta)\s+(?:è|sia)\b |
       propongo\s+di\s+(?:procedere|andare|scegliere) |
       (?:è|e')\s+la\s+(?:migliore|più\s+forte|direzione\s+giusta|scelta\s+(?:giusta|migliore)) |
       (?:la\s+scelta\s+(?:migliore|giusta)\s+è) |
