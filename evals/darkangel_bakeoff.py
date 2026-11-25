@@ -174,7 +174,8 @@ def venice_prices(base: str, key: str) -> dict[str, tuple[float, float]]:
     return out
 
 
-def run(reps: int, only, out: Path, cap_usd: float, temperature: float | None = None) -> dict:
+def run(reps: int, only, out: Path, cap_usd: float, temperature: float | None = None,
+        persona_file: str | None = None, scenarios=None) -> dict:
     os.environ.setdefault("CREW_OPEN_MODEL_TIMEOUT", "90")
     import crew_cast as core
     import providers as pv
@@ -183,6 +184,8 @@ def run(reps: int, only, out: Path, cap_usd: float, temperature: float | None = 
     head_base = "BRIEF:\nSessione ADV (web)\n\n"
     roster_path = str(REPO / "roster.adv.json")
     names = [n for n in CANDIDATES if not only or n in only]
+    scen = {k: v for k, v in SCENARIOS.items() if not scenarios or k in scenarios}
+    persona_override = Path(persona_file).read_text(encoding="utf-8") if persona_file else None
 
     base = os.getenv("VENICE_API_BASE") or pv.PROVIDERS["venice"].openai_base
     key = os.getenv("VENICE_API_KEY", "")
@@ -192,6 +195,8 @@ def run(reps: int, only, out: Path, cap_usd: float, temperature: float | None = 
         cut, instruction = SCENARIOS[scn]
         r = core.Roster.load(roster_path)
         r.update_head("dark_angel", model_id=CANDIDATES[name])
+        if persona_override is not None:           # prova alla cieca: l'unica variabile
+            r.update_head("dark_angel", persona=persona_override)
         ctx = head_base + fixture[:cut]
         return r, core.build_turn_prompt(r.heads["dark_angel"], ctx, instruction), ctx
 
@@ -208,7 +213,7 @@ def run(reps: int, only, out: Path, cap_usd: float, temperature: float | None = 
             raise SystemExit(f"prezzo Venice non trovato per {vid}: non parto (tetto non verificabile)")
         inp, outp = prices[vid]
         costs = [estimate_cost_usd(len(build(name, s)[1]), inp, outp)
-                 for s in SCENARIOS for _ in range(reps)]
+                 for s in scen for _ in range(reps)]
         upper[name] = sum(costs)
         cost_per_call[name] = max(costs)
     total_upper = check_cap(upper, cap_usd)
@@ -217,7 +222,7 @@ def run(reps: int, only, out: Path, cap_usd: float, temperature: float | None = 
 
     def one(name: str) -> list[dict]:
         rows = []
-        for scn in SCENARIOS:
+        for scn in scen:
             for rep in range(reps):
                 r, prompt, ctx = build(name, scn)
                 t = time.time()
@@ -258,7 +263,8 @@ def run(reps: int, only, out: Path, cap_usd: float, temperature: float | None = 
     evals = {n: evaluate([r for r in all_rows if r["candidate"] == n]) for n in names}
     result = {"criteri": ("evals/CRITERI-darkangel-v2.md" if temperature is not None
                           else "evals/CRITERI-darkangel.md@a860d52"),
-              "temperature": temperature, "judge": judge_model,
+              "temperature": temperature, "persona_file": persona_file,
+              "scenarios": list(scen), "judge": judge_model,
               "cap_usd": cap_usd, "upper_bound_usd": round(total_upper, 4),
               "upper_bound_per_candidate_usd": {k: round(v, 4) for k, v in upper.items()},
               "evals": evals, "winner": pick_winner(evals, cost_per_call),
@@ -273,11 +279,13 @@ def main() -> None:
     ap.add_argument("--reps", type=int, default=2)
     ap.add_argument("--only", nargs="*")
     ap.add_argument("--cap-usd", type=float, required=True)
+    ap.add_argument("--persona-file", default=None, help="sostituisce la persona di Dark Angel")
+    ap.add_argument("--scenarios", nargs="*", default=None, help="solo questi scenari (es. DA1 DA3)")
     ap.add_argument("--temperature", type=float, default=None,
                     help="v2: fissa la temperatura di TUTTI i candidati")
     ap.add_argument("--out", default=str(REPO / "evals/results/darkangel.json"))
     a = ap.parse_args()
-    res = run(a.reps, a.only, Path(a.out), a.cap_usd, a.temperature)
+    res = run(a.reps, a.only, Path(a.out), a.cap_usd, a.temperature, a.persona_file, a.scenarios)
     print(json.dumps({"evals": res["evals"], "winner": res["winner"]}, ensure_ascii=False, indent=2))
 
 
