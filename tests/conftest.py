@@ -10,3 +10,5 @@ import pytest
 @pytest.fixture(autouse=True)
 def _no_llm_guardrail_by_default(monkeypatch):
     monkeypatch.setenv("CREW_LLM_GUARDRAIL", "0")
+    # D39: il passaggio a Claude sulle immagini chiamerebbe la CLI vera.
+    monkeypatch.setenv("CREW_IMAGE_HANDOFF", "0")

@@ -446,6 +446,46 @@ def check_reply_full(head, text: str, context: str, vision: bool) -> "gr.GuardRe
     return res
 
 
+def image_handoff_enabled() -> bool:
+    return os.getenv("CREW_IMAGE_HANDOFF", "1").strip().lower() not in ("0", "false", "no", "off")
+
+
+class CliOnlyLLM:
+    """Claude SOLO dalla CLI in abbonamento (D39): `call` non passa mai
+    dall'API a consumo. CLI sparita per un aggiornamento: attesa e nuovo
+    tentativo dentro `_via_cli` (D37); ogni altro guasto si propaga."""
+
+    def __init__(self, model: str, effort: str = ""):
+        self.model = model
+        self._claude = ClaudeLLM(model, effort=effort)
+
+    def call(self, prompt: str) -> str:
+        return self._claude._via_cli(prompt)
+
+
+def _image_llm(model: str) -> CliOnlyLLM:
+    return CliOnlyLLM(model, effort=os.getenv("CREW_IMAGE_EFFORT", "low"))
+
+
+def _image_handoff(llm, head, prompt: str, text: str, vision: bool):
+    """D39: una testa senza visione con `image_model` che parla di un'immagine
+    passa la mano a quel modello Claude, che riscrive la risposta dallo stesso
+    prompt (e fa anche le eventuali ripetizioni). Se la CLI non risponde resta
+    la risposta della testa, che passa comunque dai controlli: mai l'API."""
+    if (vision or not head.image_model or not image_handoff_enabled()
+            or not gr.mentions_image(text)):
+        return llm, text
+    alt = _image_llm(head.image_model)
+    try:
+        new = finish_reply(alt.call(prompt))
+    except Exception as e:                                      # noqa: BLE001
+        log.warning("immagini: %s non disponibile da CLI (%s): resta la risposta "
+                    "di %s, con i controlli", head.image_model, str(e)[:160], head.key)
+        return llm, text
+    log.info("immagini: la risposta di %s la riscrive %s (D39)", head.key, head.image_model)
+    return alt, new
+
+
 def _guardrail_retries() -> int:
     try:
         return max(0, int(os.getenv("CREW_GUARDRAIL_RETRIES", "2")))
@@ -460,11 +500,15 @@ def guarded_reply(llm, head, prompt: str, context: str = "") -> str:
     violazioni del ruolo (sceglie l'idea, finge di vedere, link inventato) si
     consegna una frase veritiera invece della risposta sbagliata; per difetti di
     stile (lingua, lunghezza, formato) si consegna l'ultima risposta con un
-    warning. Ogni rifiuto lascia una riga nel log. `CREW_GUARDRAILS=0` li spegne."""
+    warning. Ogni rifiuto lascia una riga nel log. `CREW_GUARDRAILS=0` li spegne.
+    Prima dei controlli (D39): una testa senza visione con `image_model` che
+    parla di un'immagine passa la mano a quel modello Claude, solo da CLI."""
     text = finish_reply(llm.call(prompt))
+    vision = vision_capable(head.model_id)
+    llm, text = _image_handoff(llm, head, prompt, text, vision)
     if not guardrails_enabled():
         return text
-    vision, retries, attempt = vision_capable(head.model_id), _guardrail_retries(), 0
+    retries, attempt = _guardrail_retries(), 0
     while True:
         res = check_reply_full(head, text, context, vision)
         if res.ok:
@@ -824,6 +868,10 @@ class Head:
     # anthropic/* (flag --effort della CLI); per gemini/xai è un no-op
     # dichiarato finché il passaggio API non è smoke-testato. "" = default.
     effort: str = ""
+    # D39: modello Claude (nome nudo, es. "claude-sonnet-5-5") che riscrive la
+    # risposta quando questa testa, senza visione, parla di un'immagine. Solo
+    # CLI in abbonamento. "" = nessun passaggio (i roster vecchi restano validi).
+    image_model: str = ""
 
     def mechanism_label(self) -> str:
         """Il badge onesto: con che meccanismo lo slider agisce QUI (T1)."""
