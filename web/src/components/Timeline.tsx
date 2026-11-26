@@ -173,7 +173,8 @@ const MAX_ATTACHMENTS = 8
 
 export function Timeline({ state }: { state: RoomState }) {
   const [draft, setDraft] = useState('')
-  const [degradedSeen, setDegradedSeen] = useState(false)
+  // D37: chiudere vale per QUEL degrado (il suo seq), non per tutti i futuri.
+  const [dismissedSeq, setDismissedSeq] = useState<number | null>(null)
   const [stopSent, setStopSent] = useState(false)
   const [attached, setAttached] = useState<Attachment[]>([])
   const [uploadErr, setUploadErr] = useState('')
@@ -285,7 +286,7 @@ export function Timeline({ state }: { state: RoomState }) {
 
   return (
     <div className="flex h-full min-w-0 flex-col">
-      {state.degraded && !degradedSeen && (
+      {state.degraded && state.degraded.seq !== dismissedSeq && (
         <div className="flex items-center gap-2 border-b border-warn/30 bg-warn/10 px-4 py-2 text-[13px] text-warn">
           <TriangleAlert className="size-4 shrink-0" aria-hidden />
           <span className="min-w-0 flex-1">
@@ -293,7 +294,7 @@ export function Timeline({ state }: { state: RoomState }) {
             (es. <span className="font-mono">@cd</span>) per scegliere chi parla.
           </span>
           <button
-            onClick={() => setDegradedSeen(true)}
+            onClick={() => setDismissedSeq(state.degraded?.seq ?? null)}
             className="rounded p-1 hover:bg-warn/15"
             aria-label="Chiudi avviso"
           >

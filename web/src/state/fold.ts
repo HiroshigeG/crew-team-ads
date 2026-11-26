@@ -104,7 +104,7 @@ export interface RoomState {
    *  (Fase 4) — il primo è l'attivo, gli altri sono in coda. */
   pendingGates: SearchPending[]
   pendingGate: SearchPending | null
-  degraded: { planId: string; reason: string } | null
+  degraded: { planId: string; reason: string; seq: number } | null
   lastSaved: { stamp: string; file: string } | null
   lastPlan: WaveStep[][] | null
   /** v1.1: thread privati per testa — STAGNI, mai negli items di stanza. */
@@ -175,6 +175,9 @@ export function foldEvents(entries: FeedEntry[]): RoomState {
       }
       case 'wave_planned': {
         lastPlan = e.waves
+        // D37: il banner descrive il piano CORRENTE. Arriva prima del piano
+        // degradato (stesso plan_id); un piano successivo lo spegne.
+        if (degraded && degraded.planId !== e.plan_id) degraded = null
         // Trasparenza del routing (recon C §1.3): il Director vede in
         // anticipo chi prenderà la parola, con nomi leggibili.
         items.push({
@@ -268,7 +271,7 @@ export function foldEvents(entries: FeedEntry[]): RoomState {
         break
       }
       case 'router_degraded': {
-        degraded = { planId: e.plan_id, reason: e.reason }
+        degraded = { planId: e.plan_id, reason: e.reason, seq: e.seq }
         items.push({
           kind: 'system',
           id: `deg-${e.seq}`,

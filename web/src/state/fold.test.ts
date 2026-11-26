@@ -93,6 +93,21 @@ describe('foldEvents: degrado, collab, rotte', () => {
     expect(sys && 'text' in sys && sys.text).toContain('@menzione')
   })
 
+  it('il banner resta sul piano degradato e si spegne al piano valido dopo (D37)', () => {
+    const degradedPlan: FeedEntry[] = [
+      { type: 'router_degraded', seq: seq(), ts, plan_id: 'p-01', reason: 'x' },
+      { type: 'wave_planned', seq: seq(), ts, plan_id: 'p-01', waves: [] },
+    ]
+    expect(foldEvents(degradedPlan).degraded?.planId).toBe('p-01')
+    const room = foldEvents([
+      ...degradedPlan,
+      { type: 'wave_planned', seq: seq(), ts, plan_id: 'p-02', waves: [] },
+    ])
+    expect(room.degraded).toBeNull()
+    // la riga nella timeline resta: è storia, non stato
+    expect(room.items.some((i) => 'text' in i && i.text.includes('Instradamento ridotto'))).toBe(true)
+  })
+
   it('collab_round tiene il contatore e round 0 chiude la corsa', () => {
     const feed: FeedEntry[] = [
       { type: 'collab_round', seq: seq(), ts, round: 1, total: 3 },

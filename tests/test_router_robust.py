@@ -134,3 +134,40 @@ def test_claude_cli_failure_falling_back_to_api_is_logged(monkeypatch, caplog):
     joined = " ".join(m.getMessage() for m in caplog.records)
     assert "API" in joined and "rate limited" in joined
     assert llm.last_route == "api"
+
+
+# ── D37: l'esito del router è della chiamata, non del processo ─────────────
+
+def test_plan_route_is_per_thread_not_global(monkeypatch):
+    """Due stanze instradano in parallelo: A ottiene un piano, B ripiega. A
+    deve leggere «waves» anche se B ha finito dopo (prima leggeva «fallback»
+    e mostrava il banner per il guasto dell'altra stanza)."""
+    import threading
+
+    class _Router:
+        def call(self, prompt):
+            if "STANZA-A" in prompt:
+                return '[[{"speaker":"cd","instruction":"x"}]]'
+            return "niente piano"
+
+    monkeypatch.setattr(core, "llm_claude_router", _Router())
+    monkeypatch.setattr(core, "route", lambda t, m: [{"speaker": "cd", "instruction": m}])
+    r = core.Roster.default()
+    a_routed, b_routed = threading.Event(), threading.Event()
+    seen = {}
+
+    def room_a():
+        core.route_plan(r, "T", "STANZA-A")
+        a_routed.set()
+        b_routed.wait(5)                     # B finisce DOPO A
+        seen["a"] = core.last_plan_route()
+
+    def room_b():
+        a_routed.wait(5)
+        core.route_plan(r, "T", "STANZA-B")
+        seen["b"] = core.last_plan_route()
+        b_routed.set()
+
+    ta, tb = threading.Thread(target=room_a), threading.Thread(target=room_b)
+    ta.start(); tb.start(); ta.join(10); tb.join(10)
+    assert seen == {"a": "waves", "b": "fallback"}

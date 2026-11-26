@@ -656,6 +656,29 @@ def test_router_degraded_is_emitted(tmp_path, monkeypatch):
         assert kinds.index("router_degraded") < kinds.index("wave_planned")
 
 
+def test_no_banner_for_another_rooms_fallback(tmp_path, monkeypatch):
+    """D37: questa stanza ha un piano valido; nel frattempo un'altra stanza,
+    in un altro thread, ripiega. Il banner non deve comparire qui."""
+    import threading
+    monkeypatch.setenv("CREW_TRANSCRIPTS_DIR", str(tmp_path))
+
+    def route_plan(r, t, m):
+        core._record_plan_route("waves")
+        other = threading.Thread(target=core._record_plan_route, args=("fallback",))
+        other.start(); other.join()          # l'altra stanza finisce dopo
+        return [[{"speaker": "producer", "instruction": m, "to": "director"}]]
+
+    monkeypatch.setattr(core, "route_plan", route_plan)
+    monkeypatch.setattr(
+        core, "head_speak",
+        lambda roster, key, ctx, instr, private=False: "ok")
+
+    with TestClient(app) as client, client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "director_message", "text": "senza menzioni"})
+        seen = _drain_until(ws, "wave_planned")
+        assert "router_degraded" not in [e["type"] for e in seen]
+
+
 def test_stop_mid_wave_lets_flight_finish_and_kills_queue(tmp_path, monkeypatch):
     """Stop con l'ondata 1 in volo: il turno in volo si completa, l'ondata 2
     non parte mai, la parola torna al Director."""

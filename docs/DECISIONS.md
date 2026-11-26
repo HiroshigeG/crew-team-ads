@@ -868,3 +868,22 @@ campione come casi.
   WebSocket).
 - Nell'interfaccia il banner, una volta acceso, non si spegne più (`degraded` non
   torna a `null` dopo un piano valido).
+
+## D37 — 2026-11-26 · I tre difetti trovati col D36, corretti (FATTO)
+
+**CLI che si aggiorna da sola.** Quando il percorso della CLI sparisce
+(`FileNotFoundError`), `ClaudeLLM._via_cli` aspetta che torni, controllando ogni 2 s
+fino a `CREW_CLI_MISSING_WAIT` (90 s), e riprova **una** volta. Prima quel buco mandava
+la chiamata sull'API a pagamento. Se la CLI non torna entro il tetto, vale il
+fallback di prima (D5-bis, ora con un warning nel log). Gli altri errori della CLI non
+si riprovano. Test: `tests/test_cli_update_window.py`.
+
+**Esito del router per stanza.** `last_plan_route()` legge prima l'esito registrato
+nel thread corrente (`threading.local`), poi il globale; il server lo legge **nello
+stesso thread** che ha instradato (`Room._route_plan`), non dopo dal ciclo eventi. Due
+stanze in parallelo non si scambiano più il banner. Test che cade col server di
+prima: `test_no_banner_for_another_rooms_fallback`.
+
+**Banner nell'interfaccia.** Il banner descrive il piano corrente: un `wave_planned`
+con un altro `plan_id` lo spegne (la riga nella timeline resta: è storia). Chiuderlo
+vale per quel degrado (il suo `seq`), non per tutti i futuri.

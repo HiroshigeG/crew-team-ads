@@ -349,6 +349,13 @@ class Room:
         view._llms = self.roster._llms   # stessa cache: i turni girano sul reale
         return view
 
+    def _route_plan(self, transcript: str, msg: str) -> tuple[list, str]:
+        """Piano ed esito del router letti nello STESSO thread (D37): letto
+        dopo, dal ciclo eventi, l'esito poteva essere quello di un'altra
+        stanza che instradava in parallelo."""
+        plan = core.route_plan(self._routing_roster(), transcript, msg)
+        return plan, core.last_plan_route()
+
     # ── un turno ────────────────────────────────────────────────────────
     async def run_turn(self, step: dict, plan_id: str, wave_index: int,
                        frozen_ctx: str) -> dict | None:
@@ -491,10 +498,9 @@ class Room:
                 plan = [[{"speaker": k, "instruction": text, "to": "director"}
                          for k in mentions]]
             else:
-                plan = await asyncio.to_thread(
-                    core.route_plan, self._routing_roster(),
-                    self.session.room_context(), text)
-                if core.last_plan_route() == "fallback":
+                plan, route = await asyncio.to_thread(
+                    self._route_plan, self.session.room_context(), text)
+                if route == "fallback":
                     await self.emit("router_degraded", plan_id=plan_id,
                                     reason="il router a ondate non ha prodotto un piano valido")
             await self._run_plan(plan, plan_id, text)
@@ -605,11 +611,10 @@ class Room:
                     f"AUTO MODE round {k}: continue the discussion among "
                     f"yourselves. React to what {last_speaker} just said — "
                     "agree, attack or build. Do not address the Director.")
-            plan = await asyncio.to_thread(
-                core.route_plan, self._routing_roster(),
-                self.session.room_context(), prompt)
+            plan, route = await asyncio.to_thread(
+                self._route_plan, self.session.room_context(), prompt)
             plan_id = f"p-{next(self._plan):02d}"
-            if core.last_plan_route() == "fallback":
+            if route == "fallback":
                 await self.emit("router_degraded", plan_id=plan_id,
                                 reason="il router a ondate non ha prodotto un piano valido")
             collector: list | None = [] if organic else None
@@ -649,11 +654,10 @@ class Room:
                 f"Director — \"{goal}\". React to what {last_speaker} just "
                 "said; push the work closer to the goal. Do not address the "
                 "Director.")
-            plan = await asyncio.to_thread(
-                core.route_plan, self._routing_roster(),
-                self.session.room_context(), prompt)
+            plan, route = await asyncio.to_thread(
+                self._route_plan, self.session.room_context(), prompt)
             plan_id = f"p-{next(self._plan):02d}"
-            if core.last_plan_route() == "fallback":
+            if route == "fallback":
                 await self.emit("router_degraded", plan_id=plan_id,
                                 reason="il router a ondate non ha prodotto un piano valido")
             spoke = await self._run_plan(plan, plan_id, prompt)

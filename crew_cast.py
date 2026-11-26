@@ -15,6 +15,8 @@ import os
 import re
 import shutil
 import subprocess
+import threading
+import time
 import urllib.error
 import urllib.request
 
@@ -71,6 +73,28 @@ def _cli_timeout() -> float:
     return float(os.getenv("CREW_CLAUDE_TIMEOUT", CLAUDE_TIMEOUT))
 
 
+# D37: la CLI si aggiorna da sola (npm) e per qualche minuto il suo percorso
+# non esiste: misurato il 25/11, 22 chiamate su 60 fallite. Senza attesa quel
+# buco mandava la chiamata sull'API a pagamento.
+CLI_MISSING_WAIT = 90
+_CLI_POLL_SECONDS = 2
+
+
+def _cli_missing_wait() -> float:
+    return float(os.getenv("CREW_CLI_MISSING_WAIT", CLI_MISSING_WAIT))
+
+
+def _wait_for_cli(path: str) -> bool:
+    """True appena `path` torna a esistere; False dopo il tetto."""
+    deadline = time.monotonic() + _cli_missing_wait()
+    while True:
+        if os.path.exists(path):
+            return True
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(_CLI_POLL_SECONDS)
+
+
 # Contesto di stanza condiviso (D18). Prima erano 8000 CARATTERI (~2000 token):
 # le teste erano quasi cieche sulla storia. Ora un budget unico e ampio, UGUALE
 # per tutte le teste. Tetto: le teste Featherless (magnum, EVA) hanno finestra
@@ -95,9 +119,21 @@ def last_claude_route() -> str:
 # Aggancio additivo per il contratto web (EVENT-CONTRACT §7.2): il fallback
 # del router non deve più essere silenzioso — lezione del 03/08.
 _plan_route_log = []     # ["waves"|"fallback", …]
+# D37: l'esito vale per la chiamata che l'ha prodotto. Con la sola lista
+# globale due stanze in parallelo si scambiavano il banner. Chi legge nello
+# STESSO thread che ha instradato riceve il suo esito; altrove resta il globale.
+_plan_route_local = threading.local()
+
+
+def _record_plan_route(route: str) -> None:
+    _plan_route_log.append(route)
+    _plan_route_local.route = route
 
 
 def last_plan_route() -> str:
+    mine = getattr(_plan_route_local, "route", None)
+    if mine:
+        return mine
     return _plan_route_log[-1] if _plan_route_log else "?"
 
 
@@ -142,11 +178,22 @@ class ClaudeLLM:
         cmd = [CLAUDE_CLI, "-p", "--output-format", "text", "--model", self.model]
         if self.effort:
             cmd += ["--effort", self.effort]
-        r = subprocess.run(
-            cmd,
-            input=prompt, capture_output=True, text=True,
-            env=env, timeout=_cli_timeout(),
-        )
+        def run():
+            return subprocess.run(
+                cmd,
+                input=prompt, capture_output=True, text=True,
+                env=env, timeout=_cli_timeout(),
+            )
+        try:
+            r = run()
+        except FileNotFoundError:
+            # Aggiornamento della CLI in corso (D37): si aspetta che torni e
+            # si riprova UNA volta, invece di passare all'API a pagamento.
+            log.warning("Claude CLI non trovata in %s (aggiornamento in corso?): "
+                        "aspetto fino a %.0f s", CLAUDE_CLI, _cli_missing_wait())
+            if not _wait_for_cli(CLAUDE_CLI):
+                raise
+            r = run()
         if r.returncode != 0:
             raise RuntimeError(f"claude CLI exited {r.returncode}: {r.stderr[:200]}")
         out = r.stdout.strip()
@@ -1183,7 +1230,7 @@ def route_plan(roster: Roster, transcript: str, msg: str) -> list:
             cast_lines=cast_lines, transcript=transcript[-ROUTER_CONTEXT_CHARS:], msg=msg))
         waves = parse_wave_plan(raw, set(roster.keys()))
         if waves:
-            _plan_route_log.append("waves")
+            _record_plan_route("waves")
             return waves
         # Fino al 25/11 questo scarto era muto: nessuno sapeva cosa avesse
         # risposto il modello. Ora l'output (accorciato) resta nel log.
@@ -1193,7 +1240,7 @@ def route_plan(roster: Roster, transcript: str, msg: str) -> list:
         log.warning("router a ondate fallito (%s): fallback sequenziale", e)
     # Fallback: il router v1 (o keyword/producer) in ondate da un passo l'una.
     # Non più silenzioso: last_plan_route() lo espone al front-end (§7.2).
-    _plan_route_log.append("fallback")
+    _record_plan_route("fallback")
     steps = [s for s in route(transcript, msg) if s["speaker"] in roster.keys()]
     if not steps:
         first = next(iter(roster.keys()))
