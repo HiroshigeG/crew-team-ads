@@ -62,3 +62,18 @@ dichiara «a posto».
 la fixture con le immagini è tratta dalla prova del 25/11 e contiene solo le
 descrizioni del Market Researcher, non quelle false di altre teste. La qualità delle
 risposte consegnate non si valuta.
+
+## v2 — seconda corsa (26/11/2026, scritta PRIMA di rilanciare)
+
+La prima corsa (`evals/results/onesta-immagini.json`, commit 8df0f27) **non** ha
+raggiunto le soglie 1 (3 violazioni consegnate in S5) e 3 (ripiego 6/45). Causa delle
+3 sfuggite, letta nelle righe: la ripetizione in inglese cadeva sulla regola della
+lingua, il controllo con modello girava solo sulle risposte altrimenti valide, e a
+ripetizioni esaurite un difetto di stile consegna l'ultima risposta. Corretto nel
+codice (l'onestà viene prima dello stile, commit successivo a 8df0f27).
+
+La v2 rifà **la stessa prova** (stessi modelli, scenari, ripetizioni, giudice) su
+risposte nuove, con **le stesse soglie, invariate**. Risultato in
+`evals/results/onesta-immagini-v2.json`. Atteso e dichiarato ora: la correzione
+può **aumentare** il ripiego (le bugie che prima passavano ora finiscono sulla frase
+veritiera), quindi la soglia 3 può restare mancata; se succede si dice, non si cambia.
