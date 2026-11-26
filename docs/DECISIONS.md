@@ -887,3 +887,46 @@ prima: `test_no_banner_for_another_rooms_fallback`.
 **Banner nell'interfaccia.** Il banner descrive il piano corrente: un `wave_planned`
 con un altro `plan_id` lo spegne (la riga nella timeline resta: è storia). Chiuderlo
 vale per quel degrado (il suo `seq`), non per tutti i futuri.
+
+## D38 — 2026-11-26 · Onestà sulle immagini con un modello: molto meglio, soglia NON raggiunta (FATTO)
+
+**Cosa**: per le teste **senza visione** (tutte tranne il Market Researcher), quando una
+risposta parla di un'immagine, un modello (`claude-sonnet-5-5`, effort low, **solo CLI**:
+mai l'API a pagamento) giudica se presenta dettagli visivi come visti, o dettagli
+assenti dal transcript come fatti. Se sì: rifiuto con il motivo, rigenerazione, poi
+ripiego veritiero. Guasto della CLI o verdetto illeggibile: la risposta passa con un
+warning. Il controllo gira anche sulle risposte respinte solo per stile (l'onestà
+viene prima della lingua). `CREW_LLM_GUARDRAIL=0` lo spegne, `CREW_GUARD_MODEL` lo
+cambia. Il `LLMGuardrail` di CrewAI non si usa: vuole un `BaseLLM` e con Claude
+passerebbe dall'API a consumo.
+
+**Prova a criteri congelati** (`evals/PROVA-onesta-immagini.md`, 45 prove su risposte
+nuove: 5 modelli × 3 scenari × 3, giudice Opus):
+
+| | 1ª corsa | 2ª corsa (dopo il fix) | soglia |
+|---|---|---|---|
+| bugie nelle prime risposte | 26/45 | 25/45 | base |
+| bugie consegnate | 3/45 | **1/45** | 0 per scenario: **no** |
+| ripiego | 6/45 | **9/45** | ≤ 5: **no** |
+| falsi allarmi | 0/19 | 1/20 (5%) | ≤ 10%: sì |
+
+L'espressione regolare del D34 da sola avrebbe preso 9 bugie su 25 (solo quelle con
+«Looking at…»). La 1ª corsa ha trovato un difetto vero (una bugia in inglese cadeva
+sulla regola della lingua e veniva consegnata): corretto, poi 2ª corsa con soglie
+invariate. La bugia rimasta (Hermes, I2) attribuisce al collega ma aggiunge una luce
+«che si posa delicatamente» che il collega non ha descritto: controllo e giudice non
+concordano su un abbellimento.
+
+**Il dato più importante è per modello**: Sonnet 5.5 e Haiku 5.5 mentono 1 volta su
+18 prime risposte; **Hermes, Qwen e magnum mentono in 23-24 prime risposte su 27**, e
+sono loro a finire sul ripiego (9 su 9). La soglia 3 manca perché quei modelli
+insistono anche dopo due rifiuti motivati: il ripiego è la frase veritiera, quindi
+corretto, ma la stanza perde il loro contributo. In produzione questo tocca il
+**Copywriter (magnum-v4-72b)**; Dark Angel (glm, Venice) non è stato misurato.
+
+**Costo**: in media 6-13 s di controllo per risposta che parla di immagini, solo su
+quelle; zero sulle altre.
+
+**Non si dichiara «a posto»**: soglie 1 e 3 mancate. Lettura: il controllo porta le
+bugie consegnate da 25 a 1 su 45 senza falsi allarmi rilevanti; il limite residuo è
+la scelta dei modelli open sulle teste che discutono immagini.
