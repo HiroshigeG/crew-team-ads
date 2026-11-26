@@ -22,7 +22,7 @@ Ogni fase che lo tocca rifà le misure del bake-off prima di essere adottata.
 | # | Cosa | Leva CrewAI (esiste nella 1.15.8) | Perché | Prova di «fatto» |
 |---|---|---|---|---|
 | 2 | **Guardrail a runtime** per ruolo | `Task.guardrail` / `LLMGuardrail`, retry con feedback | Oggi M6/M7/M8 del bake-off si *misurano*; così si *impongono*: il produttore che sceglie l'idea viene rifiutato e rigenerato. Anche lingua, lunghezza, token trapelati. | Bake-off v3: M1-M8 passano per il candidato scelto, con retry contati. |
-| 3 | **Output strutturato** per piano, verdetto, bozza di proposta | `Task.output_pydantic` | Sostituisce `parse_wave_plan`, `parse_goal_verdict`, `parse_proposal_draft` (JSON a mano, fonte del «Instradamento ridotto» non spiegato). | 0 piani scartati su 50 chiamate reali; i test dei parser diventano test dei modelli. |
+| 3 | **Output strutturato** per piano, verdetto, bozza di proposta | `Task.output_pydantic` | Sostituisce `parse_wave_plan`, `parse_goal_verdict`, `parse_proposal_draft` (JSON a mano: l'«Instradamento ridotto» veniva da qui, array piatti scartati, vedi D36). | 0 piani scartati su 50 chiamate reali; i test dei parser diventano test dei modelli. |
 | 4 | **Router e goal come `Flow`** | `Flow` (`@start/@listen/@router`), stato tipizzato | Il ciclo goal (giro → giudice → proposta) è già una macchina a stati scritta a mano in `Room._run_goal`. | Stessa sequenza di eventi del contratto (test_server invariati). |
 | 5 | **Documenti del cliente come `Knowledge`** | `Knowledge`, `embedder` | Oggi ogni testa riceve 12-16k caratteri di transcript+documenti a ogni turno. Il retrieval porta solo ciò che serve. | Stessa fedeltà (M9) con prompt ≥50% più corti. Richiede un provider di embedding: opzionale e agnostico (anche Ollama locale). |
 | 6 | **Memoria di cliente** tra sessioni | `memory` | Un brand non si ridice a ogni sessione. | Un fatto detto in una sessione è recuperato nella successiva, e si può cancellare. |
@@ -47,4 +47,4 @@ la stanza.
   `crew_cast.guarded_reply`, compatibili con `Task.guardrail` (test con un `Task` vero).
   Sulle risposte nuove la scelta dell'idea scende da 9/12 a 2/12 e «finge di vedere» da
   2/12 a 1/12; la prova di «fatto» (0/12) **non** è raggiunta. Dettaglio e riserve in D34.
-- Fasi 3-8: non iniziate.
+- Fasi 3-8: non iniziate. La causa del router in fallback, che la fase 3 doveva attaccare, è già trovata e corretta nel parser (D36).

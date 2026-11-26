@@ -1,0 +1,602 @@
+[
+ {
+  "scen": "brief",
+  "i": 0,
+  "s": 9.4,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa i runner urbani 25-40 che corrono da soli: bisogni, abitudini d'acquisto online, competitor borracce 600ml\",\"to\":\"director\"},{\"speaker\":\"creative_strategist\",\"instruction\":\"Individua la tensione umana nel correre da soli e come la borraccia Rivo 600ml si inserisce\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta realismo commerciale: +20% vendite online entro Natale con 50.000€ e KPI di ricerche del marchio\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 0,
+  "s": 8.8,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"producer\",\"instruction\":\"Read the failed-campaigns doc, state in two lines what Rivo must not repeat, and flag whether 'The Only Witness' risks repeating it\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "auto",
+  "i": 0,
+  "s": 9.6,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\": \"social\", \"instruction\": \"React to the Executive Producer's read of the three winning campaigns — agree, attack, or build on how 'The Only Witness' holds up.\", \"to\": \"director\"}, {\"speaker\": \"creative_strategist\", \"instruction\": \"React to the Executive Producer's read of the three winning campaigns — agree, attack, or build.\", \"to\": \"director\"}]]"
+ },
+ {
+  "scen": "goal",
+  "i": 0,
+  "s": 11.0,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"copywriter\",\"instruction\":\"Draft a claim for the Rivo bottle that fits guidelines and speaks to the solo runner, building on the gasket/12h-6h approved claims and 'the thing that didn't fail' reframe\",\"to\":\"director\"},{\"speaker\":\"copywriter_2\",\"instruction\":\"Draft an alternative claim option in the same direction, concrete and dry, no superlatives or hydration promise\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "brief",
+  "i": 1,
+  "s": 8.2,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa il target runner urbani 25-40 anni che corrono da soli e il contesto competitivo per Rivo 600ml\",\"to\":\"director\"},{\"speaker\":\"creative_strategist\",\"instruction\":\"Proponi l'angolo/tensione umana per spingere le vendite online entro Natale con 50k budget\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta realismo commerciale: +20% vendite online in questo lasso con questo budget, e i rischi\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 1,
+  "s": 9.3,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "```json\n[\n  [\n    {\"speaker\": \"account_director\", \"instruction\": \"Dire in due righe cosa non ripetere dalle campagne andate male e se la direzione attuale rischia di ripeterlo\", \"to\": \"director\"},\n    {\"speaker\": \"cd\", \"instruction\": \"Dire in due righe cosa non ripetere dalle campagne andate male e se la direzione attuale rischia di ripeterlo\", \"to\": \"director\"}\n  ]\n]\n```"
+ },
+ {
+  "scen": "auto",
+  "i": 1,
+  "s": 8.2,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"creative_strategist\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision: confirm or challenge whether dropping TikTok lead and killing Strava still protects the creative angle\",\"to\":\"director\"},{\"speaker\":\"cd\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision: flag any photography/tone/claim risk in the proposed IG Reels + YouTube Shorts + Stories run-log cuts\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "goal",
+  "i": 1,
+  "s": 7.7,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"account_director\", \"instruction\": \"Propose a claim for Rivo's bottle that fits the allowed-claims list and speaks to the solo runner, tying it to the guardrails already flagged (flat light, witness not proof, no hydration claim)\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "brief",
+  "i": 2,
+  "s": 7.1,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[[\"market_researcher\",\"creative_strategist\",\"account_director\"].map(s=>({\"speaker\":s,\"instruction\":\"Reagisci al brief con la tua prospettiva\",\"to\":\"director\"})) ]\n\n[{\"speaker\":\"market_researcher\",\"instruction\":\"Reagisci al brief: mappa target e competitor\",\"to\":\"director\"},{\"speaker\":\"creative_strategist\",\"instruction\":\"Reagisci al brief: trova la tensione umana nell'angolo\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Reagisci al brief: fattibilità commerciale su budget e KPI\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "domanda",
+  "i": 2,
+  "s": 9.4,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"producer\",\"instruction\":\"Riassumi in due righe cosa non ripetere dalle campagne andate male e se la direzione attuale rischia di ripeterlo\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 2,
+  "s": 7.9,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "```json\n[\n  [\n    {\"speaker\": \"account_director\", \"instruction\": \"React to Social & Precedent Analyst's channel-priority correction — agree/build on the IG/YouTube lock and TikTok demotion\", \"to\": \"director\"},\n    {\"speaker\": \"cd\", \"instruction\": \"React to Social & Precedent Analyst's revised channel plan — confirm it still serves the witness grammar and visual direction\", \"to\": \"director\"}\n  ]\n]\n```"
+ },
+ {
+  "scen": "goal",
+  "i": 2,
+  "s": 8.4,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"copywriter\", \"instruction\": \"Propose a claim option for Rivo that fits the guidelines (gasket, 12 cold/6 hot, internal test) and speaks to the solo urban runner, no superlatives/health claims\", \"to\": \"director\"}, {\"speaker\": \"account_director\", \"instruction\": \"React to the copywriter's claim: flag any guideline risk and confirm it's client-safe\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "brief",
+  "i": 3,
+  "s": 6.0,
+  "ok": false,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[\"market_researcher\",\"creative_strategist\"],[\"cd\"]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 3,
+  "s": 6.6,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"producer\",\"instruction\":\"Say what not to repeat from the failed campaigns and whether 'The Only Witness' risks it\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Say what not to repeat from the failed campaigns and whether 'The Only Witness' risks it\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 3,
+  "s": 9.9,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"social\", \"instruction\": \"React to Executive Producer's read on the pattern match — agree/attack/build re: how 'The Only Witness' maps to the three winning campaigns\", \"to\": \"director\"}, {\"speaker\": \"cd\", \"instruction\": \"React to Executive Producer's read — build on which winning-pattern elements the current direction still needs to sharpen\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "goal",
+  "i": 3,
+  "s": 8.4,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"account_director\",\"instruction\":\"Propose a Rivo claim for the 600ml bottle that respects the guidelines (allowed claims only, no superlatives/health claims) and speaks to the solo urban runner\",\"to\":\"director\"},{\"speaker\":\"cd\",\"instruction\":\"React to the Account Director's claim proposal, sharpen it against the witness/flat-light tone and photography fixes already agreed\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "brief",
+  "i": 4,
+  "s": 7.5,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa il target runner urbani 25-40 anni che corrono da soli e il contesto competitivo per Rivo 600ml\",\"to\":\"director\"},{\"speaker\":\"creative_strategist\",\"instruction\":\"Individua la tensione umana dietro 'corro da solo' da cui partire per l'angle\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta realismo commerciale: +20% vendite online entro Natale con 50.000€\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 4,
+  "s": 7.8,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"producer\",\"instruction\":\"Riassumi cosa NON ripetere dalle campagne andate male e valuta se 'The Only Witness' rischia di ripeterlo\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta dal punto di vista client/commerciale se la direzione attuale rischia di ripetere gli errori delle campagne andate male\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 4,
+  "s": 7.2,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "```json\n[\n  [\n    {\"speaker\": \"account_director\", \"instruction\": \"React to Social & Precedent Analyst's channel-priority correction — agree or push back on commercial grounds\", \"to\": \"director\"},\n    {\"speaker\": \"cd\", \"instruction\": \"React to Social & Precedent Analyst's channel-priority correction — build on it from the executional/photography side\", \"to\": \"director\"}\n  ]\n]\n```"
+ },
+ {
+  "scen": "goal",
+  "i": 4,
+  "s": 9.2,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\": \"account_director\", \"instruction\": \"Propose a claim for Rivo's bottle that fits the allowed claims list and speaks to the solitary urban runner, building on the brand/tone/past-campaign work so far\", \"to\": \"director\"}, {\"speaker\": \"cd\", \"instruction\": \"Propose a claim option in the same vein, checking it against the photography/tone/logo fixes already made\", \"to\": \"director\"}]]"
+ },
+ {
+  "scen": "brief",
+  "i": 5,
+  "s": 8.2,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa il target runner urbani 25-40 anni che corrono da soli e il contesto competitivo per Rivo 600ml\",\"to\":\"director\"},{\"speaker\":\"creative_strategist\",\"instruction\":\"Individua l'angle/tensione umana per spingere vendite online del 20% entro Natale\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta realismo commerciale del brief: budget 50k, KPI, obiettivo 20% entro Natale\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 5,
+  "s": 6.6,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"producer\", \"instruction\": \"Riassumi in due righe cosa NON ripetere dalle campagne andate male e se la direzione attuale rischia di ripeterlo\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 5,
+  "s": 6.8,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"cd\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision — agree or push back on the TikTok demotion and the photography/tone fixes\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision from a client/commercial-approval angle\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "goal",
+  "i": 5,
+  "s": 7.8,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\": \"copywriter\", \"instruction\": \"Propose a claim for the Rivo bottle respecting the guidelines (allowed claims only: gasket, 12h cold/6h hot, 18/8 steel/no BPA) that speaks to the solo urban runner, in the flat asciutto tone\", \"to\": \"director\"}, {\"speaker\": \"account_director\", \"instruction\": \"React to the claim with a commercial/compliance check against Marta's approval and the claim rules\", \"to\": \"director\"}]]"
+ },
+ {
+  "scen": "brief",
+  "i": 6,
+  "s": 7.2,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa il target runner urbani 25-40 anni che corrono da soli: comportamenti, canali, concorrenti\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta realismo commerciale: 50.000€ per +20% vendite online entro Natale, tempi stretti\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 6,
+  "s": 7.4,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"producer\", \"instruction\": \"Spiega in due righe cosa NON ripetere dalle campagne andate male e se la direzione attuale rischia di ripeterlo\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 6,
+  "s": 7.4,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"producer\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision — confirm it holds against the brand guidelines and budget ceiling, or flag gaps\",\"to\":\"director\"},{\"speaker\":\"creative_strategist\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision — does dropping TikTok's lead role weaken or strengthen the human tension the angle relies on\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "goal",
+  "i": 6,
+  "s": 7.4,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "```json\n[\n  [\n    {\"speaker\": \"account_director\", \"instruction\": \"Propose a claim per Rivo brand book (allowed list: gasket, 12h cold/6h hot internal test, steel 18/8 no BPA) that speaks to the solo urban runner, reacting to the just-discussed failed-campaigns lesson\", \"to\": \"director\"},\n    {\"speaker\": \"cd\", \"instruction\": \"Propose the same claim from the executional/visual-fit side, keeping it inside the allowed-claims list and the witness-object grammar\", \"to\": \"director\"}\n  ]\n]\n```"
+ },
+ {
+  "scen": "brief",
+  "i": 7,
+  "s": 7.1,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa il target runner urbani 25-40 anni che corrono da soli e il contesto competitivo\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta realismo commerciale: +20% vendite online entro Natale con 50.000€\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 7,
+  "s": 7.0,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"producer\",\"instruction\":\"Say what not to repeat from the failed campaigns and whether the current direction risks it\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Say what not to repeat from the failed campaigns and whether the current direction risks it\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "auto",
+  "i": 7,
+  "s": 6.9,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"producer\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision — flag budget/approval risks (Strava off-menu, TikTok secondary) against the 50k ceiling and 48h approval rule\",\"to\":\"director\"},{\"speaker\":\"creative_strategist\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision from the angle/tension side — does IG/YouTube-first still carry the witness angle\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "goal",
+  "i": 7,
+  "s": 7.3,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"account_director\", \"instruction\": \"Propose a Rivo bottle claim that respects the guidelines (allowed claims only: gasket, 12h/6h internal test, 18/8 steel/no BPA) and speaks to the solo urban runner, building on the Only Witness direction\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "brief",
+  "i": 8,
+  "s": 7.1,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa il target runner urbani solitari 25-40 e il quadro competitivo per Rivo 600ml\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta realismo commerciale: budget 50k€, +20% vendite online entro Natale\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 8,
+  "s": 7.3,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"producer\", \"instruction\": \"Dire in due righe cosa non ripetere dalle campagne andate male e se la direzione attuale rischia di ripeterlo\", \"to\": \"director\"}, {\"speaker\": \"account_director\", \"instruction\": \"Dire in due righe cosa non ripetere dalle campagne andate male e se la direzione attuale rischia di ripeterlo\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 8,
+  "s": 7.9,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"cd\", \"instruction\": \"React to Social & Precedent Analyst's channel-priority correction — agree/build on fixing TikTok/Strava against the locked channels\", \"to\": \"director\"}, {\"speaker\": \"account_director\", \"instruction\": \"React to Social & Precedent Analyst's point, weighing commercial/client risk of the channel pivot\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "goal",
+  "i": 8,
+  "s": 7.1,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "```json\n[\n  [\n    {\"speaker\": \"account_director\", \"instruction\": \"Propose a claim for the 600 ml Rivo bottle that respects the allowed claims list and speaks to the solo urban runner, building on the failed-campaign lesson.\", \"to\": \"director\"},\n    {\"speaker\": \"copywriter\", \"instruction\": \"Draft the actual claim line/copy option for the Rivo bottle, grounded in an allowed claim and the solo-runner tone.\", \"to\": \"director\"}\n  ]\n]\n```"
+ },
+ {
+  "scen": "brief",
+  "i": 9,
+  "s": 8.0,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa il target runner urbani 25-40 anni che corrono da soli e il contesto competitivo\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta realismo commerciale: +20% vendite online entro Natale con 50.000€ di budget\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 9,
+  "s": 6.8,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"producer\",\"instruction\":\"Riassumi in due righe cosa NON ripetere dalle campagne andate male e se 'The Only Witness' rischia di ripeterlo\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Riassumi in due righe cosa NON ripetere dalle campagne andate male e se la direzione attuale rischia di ripeterlo\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 9,
+  "s": 6.5,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"social\", \"instruction\": \"React to the Market Researcher's point about solitary runners and small true details — build on it with channel/content implications\", \"to\": \"director\"}, {\"speaker\": \"account_director\", \"instruction\": \"React to the same point — agree or attack from the commercial/claim-safety angle\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "goal",
+  "i": 9,
+  "s": 7.0,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "```json\n[\n  [\n    {\"speaker\": \"account_director\", \"instruction\": \"Propose a claim option that fits allowed claims and speaks to the solo runner, checking it against failed-campaign patterns\", \"to\": \"director\"},\n    {\"speaker\": \"cd\", \"instruction\": \"Propose a claim option (wording/visual pairing) that speaks to the solo runner using only allowed claims\", \"to\": \"director\"}\n  ]\n]\n```"
+ },
+ {
+  "scen": "brief",
+  "i": 10,
+  "s": 7.8,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa target runner urbani solitari 25-40 e contesto competitivo borracce premium\",\"to\":\"director\"},{\"speaker\":\"creative_strategist\",\"instruction\":\"Trova la tensione umana nel correre da solo e l'angle per Rivo 600ml\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta fattibilità commerciale: 50.000€ per +20% vendite online entro Natale\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 10,
+  "s": 7.4,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"account_director\",\"instruction\":\"Say what not to repeat from the failed campaigns and whether 'The Only Witness' direction risks repeating it.\",\"to\":\"director\"},{\"speaker\":\"producer\",\"instruction\":\"Say what not to repeat from the failed campaigns and whether the current direction risks repeating it.\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 10,
+  "s": 7.5,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"producer\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision — confirm or flag any remaining risk in the social plan\",\"to\":\"director\"},{\"speaker\":\"cd\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision from a craft/photography standpoint\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "goal",
+  "i": 10,
+  "s": 7.7,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"copywriter\",\"instruction\":\"Draft the claim for Rivo: solitary urban runner, allowed claims only (gasket/12h-6h/steel 18-8), tone asciutto, no performance promise\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Check the drafted claim against the guideline's allowed-claims list and client approval/budget constraints\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "brief",
+  "i": 11,
+  "s": 7.4,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa target e competitive field per Rivo 600ml e runner urbani solitari\",\"to\":\"director\"},{\"speaker\":\"creative_strategist\",\"instruction\":\"Proponi l'angle/tensione umana per il brief\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta fattibilità commerciale: +20% vendite online con 50k entro Natale\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 11,
+  "s": 10.4,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"producer\",\"instruction\":\"Riassumi cosa NON ripetere dalle campagne andate male e valuta se 'The Only Witness' rischia di ripeterlo\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Riassumi cosa NON ripetere dalle campagne andate male e valuta se la direzione attuale rischia di ripeterlo\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "auto",
+  "i": 11,
+  "s": 6.3,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"social\",\"instruction\":\"React to the Market Researcher's audience/channel point, building or pushing back on it\",\"to\":\"director\"},{\"speaker\":\"cd\",\"instruction\":\"React to the Market Researcher's point from a creative-direction angle\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "goal",
+  "i": 11,
+  "s": 6.9,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"account_director\",\"instruction\":\"Propose a Rivo bottle claim respecting the guidelines (allowed claims only, no superlatives/health claims) that speaks to the solo urban runner\",\"to\":\"director\"},{\"speaker\":\"cd\",\"instruction\":\"Propose a claim direction in the same tone (asciutto, concrete detail, witness/reliability framing) for the solo runner\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "brief",
+  "i": 12,
+  "s": 6.9,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa il target runner urbani 25-40 anni solitari e il contesto competitivo per Rivo 600ml\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta realismo commerciale: budget 50k vs obiettivo +20% vendite entro Natale\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 12,
+  "s": 6.1,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"producer\", \"instruction\": \"Dire in due righe cosa NON ripetere dalle campagne andate male e se la direzione attuale rischia di ripeterlo\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 12,
+  "s": 6.7,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"producer\",\"instruction\":\"React to the Social & Precedent Analyst's channel-priority correction — confirm or push back on the IG/YouTube-first lock\",\"to\":\"director\"},{\"speaker\":\"cd\",\"instruction\":\"React to the Social & Precedent Analyst's revised channel lock — check it against the flat-light, no-faces-as-hero direction already set\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "goal",
+  "i": 12,
+  "s": 6.3,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"copywriter\",\"instruction\":\"Propose a claim for the Rivo bottle that respects the guidelines (gasket, 12 cold/6 hot, internal test, no superlatives/health claims) and speaks to the solo urban runner\",\"to\":\"director\"},{\"speaker\":\"copywriter_2\",\"instruction\":\"Propose an alternative claim for the Rivo bottle within the same guideline constraints, speaking to the solo runner\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "brief",
+  "i": 13,
+  "s": 7.0,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa target runner urbani 25-40 anni solitari e il campo competitivo borracce sport\",\"to\":\"director\"},{\"speaker\":\"creative_strategist\",\"instruction\":\"Trova la tensione umana nel correre da solo e l'angolo per Rivo 600ml\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 13,
+  "s": 8.3,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"producer\", \"instruction\": \"Dire in due righe cosa NON ripetere dalle campagne andate male e se 'The Only Witness' rischia di ripeterlo\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 13,
+  "s": 6.4,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"producer\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision — confirm or challenge the TikTok/Strava cuts against budget and approval timeline\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"React to the Social & Precedent Analyst's channel revision — confirm it holds against the client's locked channel priority\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "goal",
+  "i": 13,
+  "s": 6.7,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "```json\n[\n  [\n    {\"speaker\": \"account_director\", \"instruction\": \"Propose a claim option for the Rivo bottle respecting guidelines, speaking to the solo runner\", \"to\": \"director\"},\n    {\"speaker\": \"cd\", \"instruction\": \"Propose a claim option for the Rivo bottle respecting guidelines, speaking to the solo runner\", \"to\": \"director\"}\n  ]\n]\n```"
+ },
+ {
+  "scen": "brief",
+  "i": 14,
+  "s": 6.6,
+  "ok": true,
+  "err": "",
+  "shape": "nested",
+  "dropped": [],
+  "raw": "[[{\"speaker\":\"market_researcher\",\"instruction\":\"Mappa il target runner urbani 25-40 anni che corrono da soli e il contesto competitivo per Rivo 600ml\",\"to\":\"director\"},{\"speaker\":\"account_director\",\"instruction\":\"Valuta realismo commerciale di +20% vendite online entro Natale con 50.000€ di budget\",\"to\":\"director\"}]]"
+ },
+ {
+  "scen": "domanda",
+  "i": 14,
+  "s": 5.9,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"producer\",\"instruction\":\"Say in two lines what not to repeat from the failed campaigns and whether the current direction risks repeating it\",\"to\":\"director\"}]"
+ },
+ {
+  "scen": "auto",
+  "i": 14,
+  "s": 6.8,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\": \"cd\", \"instruction\": \"React to the Social & Precedent Analyst's channel-priority correction (IG/YouTube over TikTok) — agree, attack, or build from a creative-direction angle\", \"to\": \"director\"}, {\"speaker\": \"account_director\", \"instruction\": \"React to the Social & Precedent Analyst's revised channel lock — agree, attack, or build from a commercial/client angle\", \"to\": \"director\"}]"
+ },
+ {
+  "scen": "goal",
+  "i": 14,
+  "s": 7.6,
+  "ok": false,
+  "err": "",
+  "shape": "flat",
+  "dropped": [],
+  "raw": "[{\"speaker\":\"copywriter\",\"instruction\":\"Propose a claim for the Rivo bottle that respects the guidelines (no superlatives, no hydration/performance claims — use gasket/12-6/steel facts) and speaks to the solo urban runner, building on the Creative Director's fixes.\",\"to\":\"director\"},{\"speaker\":\"copywriter_2\",\"instruction\":\"Propose an alternative claim option in the same constraints, sharpening craft and tone against the brand's asciutto/ironico voice.\",\"to\":\"director\"}]"
+ }
+]

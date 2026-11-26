@@ -827,3 +827,44 @@ vincitore misurato. Se si vuole tornare a 9 modelli distinti, il candidato è Ha
 per uno dei due (passa il produttore v2, manca solo A7 come Account Director). Limiti:
 8 chiamate per candidato, un votante-giudice automatico della stessa famiglia di due
 candidati, un solo brand fittizio; le violazioni sono inventate da noi.
+
+## D36 — 2026-11-25 · «Instradamento ridotto»: causa trovata e corretta (FATTO)
+
+Il D28 lasciava aperta la causa del router a ondate in fallback dal vivo: 20
+prove offline davano 20 piani validi. Misurata ora con un campione più largo.
+
+**Esclusi con prove**: guasto della CLI (alle 10:40 il router v1, che usa la stessa
+CLI, ha funzionato: ha scelto `cd`, che il ripiego senza CLI non sceglie; e il log
+del server non ha il warning del ramo d'eccezione); differenze fra la `Room` vera e
+la riproduzione (stesso esito con `Room.handle_director`, roster e parser di allora:
+0 banner su 5).
+
+**Causa**: il modello del router risponde spesso con un **array piatto** di passi
+(`[{…},{…}]`) invece che con le ondate (`[[{…}]]`). Su 60 chiamate reali (4
+situazioni della stanza × 15, solo CLI): 28 scartate, 27 piatte con speaker tutti
+validi, 1 con ondate di chiavi nude. Il tasso cambia molto per situazione: brief 1/15,
+domanda del Director 11/15, goal 9/15, auto 6/15. Per questo le prove offline (solo
+brief e auto) lo avevano mancato.
+
+**Fix** (`parse_wave_plan`): un array piatto si legge come passi **in sequenza**, una
+ondata per passo (la lettura prudente: un consulto non diventa parallelo); un passo
+scritto come chiave nuda prende l'istruzione vuota, che `_run_plan` riempie col
+messaggio del Director. Il contratto del D28 («un array piatto resta non valido») era
+condizionato alla mancanza di una causa misurata: la causa c'è, e i due test che lo
+fissavano sono stati riscritti sul comportamento nuovo, con le risposte vere del
+campione come casi.
+
+**Verifica su risposte nuove** (`evals/router_sample.py`, `evals/results/router-sample-dopo.json`):
+**60/60 piani validi**, 0 errori, 5 risposte piatte accettate. Prima:
+`evals/results/router-sample-prima.json`.
+
+**Trovato strada facendo, non corretto qui**:
+- **La CLI che si aggiorna da sola** (npm) sparisce per qualche minuto da
+  `/opt/homebrew/bin/claude`: in una corsa 22 chiamate su 60 sono fallite con
+  `FileNotFoundError`. Dal vivo questo manda il router (e ogni testa Claude) sull'API
+  a consumo, o in fallback se l'API non risponde. È ambientale; ora è almeno nel log.
+- **`last_plan_route()` è globale di processo**: con due stanze aperte insieme, una
+  può mostrare il banner per il fallback dell'altra. Non spiega il 25/11 (un solo
+  WebSocket).
+- Nell'interfaccia il banner, una volta acceso, non si spegne più (`degraded` non
+  torna a `null` dopo un piano valido).
