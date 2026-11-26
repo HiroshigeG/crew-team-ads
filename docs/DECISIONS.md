@@ -930,3 +930,40 @@ quelle; zero sulle altre.
 **Non si dichiara «a posto»**: soglie 1 e 3 mancate. Lettura: il controllo porta le
 bugie consegnate da 25 a 1 su 45 senza falsi allarmi rilevanti; il limite residuo è
 la scelta dei modelli open sulle teste che discutono immagini.
+
+## D39 — 2026-11-26 · Le immagini le riscrive Claude: soglie raggiunte (FATTO)
+
+**Cosa**: scelta del Director dopo il D38 (riferita da un'altra sessione). Il
+Copywriter resta su magnum-v4-72b per i testi. Quando una sua risposta parla di
+un'immagine, la riscrive `claude-sonnet-5-5` (effort low) partendo dallo stesso prompt,
+e se servono ripetizioni le fa sempre Sonnet. Sonnet gira **solo dalla CLI in
+abbonamento** (`CliOnlyLLM`, mai l'API a pagamento). Se la CLI sparisce perché si sta
+aggiornando, il sistema aspetta e riprova come nel D37. Se la CLI è giù per qualunque
+altro motivo, resta la risposta della testa, sotto i controlli del D38. Il passaggio si
+decide nel campo `image_model` della testa nel roster (oggi c'è solo sul Copywriter) e
+si spegne con `CREW_IMAGE_HANDOFF=0`. Vale solo per le teste senza visione.
+
+**Prova** (`evals/PROVA-onesta-immagini.md` v3, scritta e committata prima in 7505470;
+stessa prova del D38, soglie invariate, le tre teste open con `--handoff
+claude-sonnet-5-5`; risultato in `evals/results/onesta-immagini-v3.json`):
+
+| | v2 (D38) | v3 (D39) | soglia |
+|---|---|---|---|
+| bugie nelle prime risposte | 25/45 | 22/45 | base |
+| bugie consegnate | 1/45 | **0/45** (0 in ogni scenario) | 0: **sì** |
+| ripiego | 9/45 | **0/45** | ≤ 5: **sì** |
+| falsi allarmi del controllo | 1/20 | 0/23 | ≤ 10%: **sì** |
+
+- Tutte le 27 prove dei modelli open sono passate a Sonnet. Sonnet e Haiku hanno
+  scritto da soli, con 0 bugie nelle prime risposte.
+- **Il prezzo della scelta**: 5 prime risposte open erano oneste e sono state riscritte
+  comunque. Sui turni che parlano di immagini, la voce di magnum si perde anche quando
+  non mentiva.
+- **Latenza** delle prove open: in media 35,5 s, contro i 51,3 s della v2. Il ripiego
+  dopo due rifiuti costava più del passaggio.
+- **Nessuna chiamata all'API a consumo** nella corsa.
+
+**Limiti**: 45 prove, un solo brand fittizio, controllo e giudice sono entrambi Claude.
+Nella stanza la riscrittura compare sotto il nome del Copywriter, e il modello che l'ha
+scritta si vede solo nel log. Dark Angel (glm su Venice) e Social (Grok) non hanno
+`image_model`: non sono stati misurati.
