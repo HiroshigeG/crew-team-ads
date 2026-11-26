@@ -323,6 +323,9 @@ llm_claude_router = ClaudeLLM("claude-sonnet-5", effort="low")
 # Giudica un /goal contro il transcript (v1.3): non è un partecipante della
 # stanza, quindi stesso modello/effort economico del router gli basta.
 llm_claude_judge = ClaudeLLM("claude-sonnet-5", effort="low")
+# Controllo di onestà sulle immagini (D38): un modello diverso dal giudice delle
+# prove (Opus), usato SOLO via CLI. CREW_GUARD_MODEL lo cambia.
+llm_claude_guard = ClaudeLLM(os.getenv("CREW_GUARD_MODEL", "claude-sonnet-5-5"), effort="low")
 llm_gemini = LLM(model="gemini/gemini-3.1-pro-preview", temperature=0.6)
 llm_grok = LLM(model="xai/grok-4.5", temperature=0.75,
                additional_drop_params=["stop"])
@@ -402,6 +405,43 @@ def guardrails_enabled() -> bool:
     return os.getenv("CREW_GUARDRAILS", "1").strip().lower() not in ("0", "false", "no", "off")
 
 
+def llm_guardrail_enabled() -> bool:
+    return os.getenv("CREW_LLM_GUARDRAIL", "1").strip().lower() not in ("0", "false", "no", "off")
+
+
+def llm_sees_image(reply: str, context: str) -> tuple[bool | None, str]:
+    """D38: un modello giudica se una testa SENZA visione presenta dettagli
+    visivi come visti, o dettagli assenti dal transcript come fatti. Solo CLI in
+    abbonamento (`_via_cli`, mai `call`: un controllo non deve costare soldi).
+    Guasto o risposta illeggibile -> (None, ""): la risposta passa, con un
+    warning. Il controllo è una rete, non un blocco della stanza."""
+    try:
+        raw = llm_claude_guard._via_cli(
+            gr.image_check_prompt(reply, context[-ROUTER_CONTEXT_CHARS:]))
+    except Exception as e:                                      # noqa: BLE001
+        log.warning("controllo immagini non disponibile (%s): la risposta passa",
+                    str(e)[:160])
+        return None, ""
+    verdict, why = gr.parse_image_verdict(raw)
+    if verdict is None:
+        log.warning("controllo immagini: verdetto illeggibile (%r): la risposta passa",
+                    str(raw)[:160])
+    return verdict, why
+
+
+def check_reply_full(head, text: str, context: str, vision: bool) -> "gr.GuardResult":
+    """Le regole a espressioni regolari, poi (D38) il controllo con un modello
+    sulle immagini, solo per chi non vede e solo se la risposta ne parla."""
+    res = gr.check_reply(head.key, text, context=context, vision=vision)
+    if (res.ok and not vision and llm_guardrail_enabled()
+            and gr.mentions_image(text)):
+        lied, why = llm_sees_image(text, context)
+        if lied:
+            return gr.GuardResult(False, "sees_image",
+                                  gr.SEES_IMAGE_FEEDBACK + (f" (Checker: {why})" if why else ""))
+    return res
+
+
 def _guardrail_retries() -> int:
     try:
         return max(0, int(os.getenv("CREW_GUARDRAIL_RETRIES", "2")))
@@ -422,7 +462,7 @@ def guarded_reply(llm, head, prompt: str, context: str = "") -> str:
         return text
     vision, retries, attempt = vision_capable(head.model_id), _guardrail_retries(), 0
     while True:
-        res = gr.check_reply(head.key, text, context=context, vision=vision)
+        res = check_reply_full(head, text, context, vision)
         if res.ok:
             return text
         log.warning("guardrail %s (testa %s, tentativo %d/%d): %s",

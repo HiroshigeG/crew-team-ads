@@ -14,6 +14,7 @@ verdetti del giudice dei bake-off (vedi D34): non sono un giudice, sono una rete
 """
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 
@@ -157,6 +158,73 @@ def _sees_image(text: str) -> bool:
     return False
 
 
+SEES_IMAGE_FEEDBACK = (
+    "You wrote as if you could see an image. You cannot see images: you only know what a "
+    "colleague described in the transcript. Say 'according to <name>'s description' or say you "
+    "cannot see it.")
+
+
+# ── onestà sulle immagini con un modello (D38) ──────────────────────────────
+# L'espressione regolare non vede la bugia senza verbi di vista («The ad opens
+# with a close-up of a kitchen drawer…»). Per le teste senza visione, quando la
+# risposta parla di un'immagine, giudica un modello (in crew_cast, via CLI).
+# Qui solo le parti pure: quando chiamarlo, cosa chiedergli, come leggerlo.
+
+_IMAGE_WORDS = re.compile(r"""(?ix)
+    \b(?:immagin[ei]|inserzion[ei]|fot[oa]|fotografi[ae]|visual[ei]?|visivamente|
+        annunc[io]|manifest[oi]|banner|mock-?up|inquadratur[ae]|fotogramm[ai]|
+        image|images|photo|photos|picture|poster|frame|shot|visuals?)\b
+  | \bads?\b(?!\s+esempio)
+""")
+
+
+def mentions_image(text: str) -> bool:
+    """La risposta parla di un'immagine? Solo il grilletto del controllo: un
+    falso positivo costa una chiamata, non un rifiuto."""
+    return bool(_IMAGE_WORDS.search(str(text)))
+
+
+IMAGE_CHECK_PROMPT = """You check ONE rule in a creative room. The author of the REPLY cannot see
+images: it only knows what is written in the TRANSCRIPT, where colleagues who can
+see may have described an image.
+
+The rule is VIOLATED if the REPLY:
+(a) presents visual details of an image as observed by its author (e.g. "the ad
+    opens on…", "I notice the red logo", "looking at it…"), without attributing them
+    to a colleague's description; or
+(b) states as fact visual details of an image that the TRANSCRIPT does not contain.
+NOT a violation: repeating details while attributing them to a colleague
+("according to the Market Researcher's description"), saying it cannot see the
+image, asking for a description, or discussing an image only in general terms.
+
+TRANSCRIPT (latest last):
+{transcript}
+
+REPLY:
+{reply}
+
+Answer ONLY with JSON: {{"violation": true or false, "why": "<one short line>"}}"""
+
+
+def image_check_prompt(reply: str, transcript: str) -> str:
+    return IMAGE_CHECK_PROMPT.format(transcript=transcript, reply=reply)
+
+
+def parse_image_verdict(raw: str) -> tuple[bool | None, str]:
+    """(True|False, motivo) dal JSON del modello; (None, "") se illeggibile."""
+    m = re.search(r"\{.*\}", str(raw), re.DOTALL)
+    if not m:
+        return None, ""
+    try:
+        data = json.loads(m.group(0))
+    except ValueError:
+        return None, ""
+    v = data.get("violation") if isinstance(data, dict) else None
+    if not isinstance(v, bool):
+        return None, ""
+    return v, str(data.get("why", ""))[:200]
+
+
 _URL = re.compile(r"https?://[^\s)\]>\"']+|www\.[^\s)\]>\"']+")
 
 
@@ -185,10 +253,7 @@ def check_reply(head_key: str, reply: str, *, context: str = "", vision: bool = 
                            "not even softly. Say in one line that the choice is the Director's, then lay the options "
                            "side by side with the criteria and what each one costs or risks, without saying which you prefer.")
     if not vision and _sees_image(text):
-        return GuardResult(False, "sees_image",
-                           "You wrote as if you could see an image. You cannot see images: you only know what a "
-                           "colleague described in the transcript. Say 'according to <name>'s description' or say you "
-                           "cannot see it.")
+        return GuardResult(False, "sees_image", SEES_IMAGE_FEEDBACK)
     bad = _invented_links(text, context)
     if bad:
         return GuardResult(False, "invented_link",
