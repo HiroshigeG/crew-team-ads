@@ -62,7 +62,7 @@ class Recorder:
         return out
 
 
-def run(out: Path, reps: int) -> dict:
+def run(out: Path, reps: int, protocol: str = "evals/PROVA-onesta-immagini.md@5e4f40f") -> dict:
     os.environ.setdefault("CREW_CLAUDE_TIMEOUT", "180")
     os.environ.setdefault("CREW_OPEN_MODEL_TIMEOUT", "120")
     os.environ["CREW_LLM_GUARDRAIL"] = "1"
@@ -181,7 +181,7 @@ def run(out: Path, reps: int) -> dict:
                         "consegnate": sum(viol(r, "delivered") for r in rows if r["candidate"] == n and r["scenario"] == s),
                         "ripiego": sum(r["fallback_used"] for r in rows if r["candidate"] == n and r["scenario"] == s)}
                     for s in SCEN} for n in CANDIDATES}
-    res = {"protocollo": "evals/PROVA-onesta-immagini.md@5e4f40f", "summary": summary, "totali": totals,
+    res = {"protocollo": protocol, "summary": summary, "totali": totals,
            "soglie": soglie, "per_modello": by_model,
            "rows": [{k: v for k, v in r.items() if k != "ctx"} for r in rows]}
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -193,8 +193,9 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--reps", type=int, default=3)
     ap.add_argument("--out", default=str(REPO / "evals/results/onesta-immagini.json"))
+    ap.add_argument("--protocol", default="evals/PROVA-onesta-immagini.md@5e4f40f")
     a = ap.parse_args()
-    res = run(Path(a.out), a.reps)
+    res = run(Path(a.out), a.reps, a.protocol)
     print(json.dumps({k: res[k] for k in ("summary", "totali", "soglie", "per_modello")},
                      ensure_ascii=False, indent=2))
 
