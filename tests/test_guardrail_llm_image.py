@@ -145,3 +145,28 @@ def test_the_model_check_can_be_switched_off_alone(monkeypatch):
 def test_the_suite_default_keeps_the_model_check_off():
     import os
     assert os.environ.get("CREW_LLM_GUARDRAIL") == "0"   # conftest: nessuna CLI vera nei test
+
+
+# ── trovato dalla prova del 26/11 (D38): lo stile non deve coprire la bugia ──
+
+EN_LIE = ("According to the Director's description, the ad shows a close-up of a Rivo bottle on wet "
+          "concrete with a small puddle beneath it and the logo in green and ivory on the side.")
+
+
+def test_a_lie_in_the_wrong_language_is_still_an_image_lie(guard):
+    guard.bad = {EN_LIE}
+    res = core.check_reply_full(head(), EN_LIE, CTX, vision=False)
+    assert res.code == "sees_image"           # l'onestà viene prima dello stile
+
+
+def test_a_persistent_lie_in_the_wrong_language_ends_on_the_honest_fallback(guard):
+    guard.bad = {EN_LIE}
+    out = core.guarded_reply(Seq(EN_LIE), head(), "P", CTX)
+    assert EN_LIE not in out and "non vedo l'immagine" in out.lower()
+
+
+def test_an_honest_reply_in_the_wrong_language_keeps_the_language_rejection(guard):
+    en_honest = ("I can't see the ad: I only have what the Market Researcher wrote about it, so I "
+                 "would rather ask for a description before judging the visual choices in it.")
+    res = core.check_reply_full(head(), en_honest, CTX, vision=False)
+    assert res.code == "lang"

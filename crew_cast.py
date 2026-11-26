@@ -433,8 +433,12 @@ def check_reply_full(head, text: str, context: str, vision: bool) -> "gr.GuardRe
     """Le regole a espressioni regolari, poi (D38) il controllo con un modello
     sulle immagini, solo per chi non vede e solo se la risposta ne parla."""
     res = gr.check_reply(head.key, text, context=context, vision=vision)
-    if (res.ok and not vision and llm_guardrail_enabled()
-            and gr.mentions_image(text)):
+    # Il controllo gira anche quando la risposta cade solo per STILE (lingua,
+    # lunghezza, formato): l'onestà viene prima. Prova del 26/11: una bugia in
+    # inglese cadeva sulla lingua, a ripetizioni esaurite lo stile consegna
+    # l'ultima risposta così com'è, e la bugia passava.
+    if ((res.ok or res.code not in gr.FALLBACK_CODES) and not vision
+            and llm_guardrail_enabled() and gr.mentions_image(text)):
         lied, why = llm_sees_image(text, context)
         if lied:
             return gr.GuardResult(False, "sees_image",
