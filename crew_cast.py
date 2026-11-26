@@ -1130,19 +1130,26 @@ def parse_wave_plan(raw: str, valid_keys) -> list:
     """Estrae e valida le ondate dall'output del router. Puro e paranoico:
     qualunque cosa non torni -> [] (il chiamante ha il fallback).
 
-    Il contratto non cambia: serve una LISTA DI ONDATE (lista di liste). Un
-    array piatto di passi resta non valido (test_parse_wave_plan_garbage…):
-    allargarlo senza una causa misurata sarebbe una congettura. Cambia solo
-    il modo di leggere: prosa o parentesi prima e dopo il JSON non lo rompono."""
+    Forma attesa: una LISTA DI ONDATE (lista di liste di passi). Due forme
+    in più si leggono, perché misurate (D36: 28 scarti su 60 chiamate reali):
+    - un array PIATTO di passi -> un'ondata per passo, nell'ordine dato (la
+      forma più prudente: un consulto resta in sequenza);
+    - passi scritti come chiave nuda («"cd"») -> istruzione vuota, che
+      _run_plan riempie con il messaggio del Director.
+    Prosa o parentesi prima e dopo il JSON non rompono la lettura."""
     data = _first_json_value(str(raw))
-    if not isinstance(data, list) or not all(isinstance(w, list) for w in data):
+    if not isinstance(data, list):
+        return []
+    if all(isinstance(s, (dict, str)) for s in data):
+        data = [[s] for s in data]          # array piatto: passi in sequenza
+    if not all(isinstance(w, list) for w in data):
         return []
     waves, total = [], 0
     for wave in data:
-        if not isinstance(wave, list):
-            return []
         steps = []
         for s in wave:
+            if isinstance(s, str):
+                s = {"speaker": s}
             if not (isinstance(s, dict) and s.get("speaker") in valid_keys):
                 continue
             if total >= 4:

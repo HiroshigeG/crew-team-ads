@@ -304,7 +304,10 @@ def test_parse_wave_plan_drops_unknown_and_defaults_to():
 
 def test_parse_wave_plan_garbage_is_empty():
     assert core.parse_wave_plan("no json here", {"cd"}) == []
-    assert core.parse_wave_plan('[{"speaker":"cd"}]', {"cd"}) == []  # non a ondate
+    # Un array piatto di passi validi ora è un piano in sequenza (D36):
+    # il vecchio «non a ondate» scartava 27 risposte vere su 60.
+    assert core.parse_wave_plan('[{"speaker":"cd"}]', {"cd"}) == [
+        [{"speaker": "cd", "instruction": "", "to": "director"}]]
 
 
 def test_route_plan_falls_back_to_sequential(monkeypatch):
