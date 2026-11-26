@@ -918,7 +918,7 @@ invariate. La bugia rimasta (Hermes, I2) attribuisce al collega ma aggiunge una 
 concordano su un abbellimento.
 
 **Il dato più importante è per modello**: Sonnet 5.5 e Haiku 5.5 mentono 1 volta su
-18 prime risposte; **Hermes, Qwen e magnum mentono in 23-24 prime risposte su 27**, e
+18 prime risposte; **Hermes, Qwen e magnum mentono in 24 prime risposte su 27, in entrambe le corse**, e
 sono loro a finire sul ripiego (9 su 9). La soglia 3 manca perché quei modelli
 insistono anche dopo due rifiuti motivati: il ripiego è la frase veritiera, quindi
 corretto, ma la stanza perde il loro contributo. In produzione questo tocca il
